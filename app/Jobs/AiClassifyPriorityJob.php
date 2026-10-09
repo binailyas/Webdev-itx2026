@@ -34,7 +34,13 @@ class AiClassifyPriorityJob implements ShouldQueue
         if ($result['version']) {
             $version = AiModelVersion::firstOrCreate(
                 ['versi' => $result['version']],
-                ['deployed_at' => now(), 'catatan' => 'Terdaftar otomatis dari respons endpoint.']
+                [
+                    'deployed_at' => now(),
+                    'f1_score' => $result['meta']['f1_score'] ?? null,
+                    'precision_score' => $result['meta']['precision_score'] ?? null,
+                    'recall_score' => $result['meta']['recall_score'] ?? null,
+                    'catatan' => $result['meta']['catatan'] ?? 'Terdaftar otomatis dari respons endpoint.',
+                ]
             );
         }
 

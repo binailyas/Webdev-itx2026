@@ -1,0 +1,342 @@
+erDiagram
+    ai_model_versions {
+        bigint id PK
+        string versi
+        timestamp deployed_at
+        double f1_score
+        double precision_score
+        double recall_score
+        text catatan
+        timestamp created_at
+        timestamp updated_at
+    }
+    ai_overrides {
+        bigint id PK
+        bigint report_id FK
+        bigint user_id FK
+        enum ai_suggestion
+        enum priority_set
+        text alasan
+        timestamp created_at
+        timestamp updated_at
+    }
+    announcements {
+        bigint id PK
+        bigint user_id FK
+        string judul
+        string slug UK
+        string kategori
+        text isi
+        enum status
+        timestamp published_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    anonymous_accounts {
+        bigint id PK
+        string alias UK
+        string password_hash
+        string remember_token
+        timestamp expires_at
+        timestamp last_activity_at
+        timestamp created_at
+    }
+    app_settings {
+        string key
+        text value
+        timestamp created_at
+        timestamp updated_at
+    }
+    audit_logs {
+        bigint id PK
+        bigint user_id FK
+        string action
+        string entity_type
+        bigint entity_id
+        text data
+        timestamp created_at
+    }
+    chat_messages {
+        bigint id PK
+        bigint chat_room_id FK
+        bigint sender_user_id FK
+        bigint sender_anon_id FK
+        text isi
+        tinyint is_read
+        timestamp created_at
+        timestamp updated_at
+    }
+    chat_participants {
+        bigint id PK
+        bigint chat_room_id FK
+        bigint user_id FK
+        bigint anon_id FK
+        string role
+        tinyint can_write
+        timestamp created_at
+        timestamp updated_at
+    }
+    chat_rooms {
+        bigint id PK
+        enum type
+        bigint report_id FK
+        bigint career_user_id FK
+        string topik
+        enum status
+        text ringkasan
+        bigint created_by FK
+        tinyint is_readonly
+        tinyint wk_diizinkan
+        timestamp closed_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    classrooms {
+        bigint id PK
+        string nama_kelas
+        string tingkat
+        string tahun_ajaran
+        timestamp created_at
+        timestamp updated_at
+    }
+    credit_categories {
+        bigint id PK
+        string name
+        int poin_pengurangan_default
+        tinyint is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+    credit_records {
+        bigint id PK
+        bigint student_id FK
+        bigint user_id_pencatat FK
+        bigint report_id FK
+        bigint category_id FK
+        int poin_dikurangi
+        text alasan
+        date tanggal
+        string tahun_ajaran
+        timestamp voided_at
+        bigint voided_by FK
+        text void_reason
+        timestamp created_at
+        timestamp updated_at
+    }
+    incident_categories {
+        bigint id PK
+        string name
+        text description
+        tinyint is_active
+        int urutan
+        timestamp created_at
+        timestamp updated_at
+    }
+    incident_reports {
+        bigint id PK
+        string ticket_code UK
+        string pin_hash
+        bigint category_id FK
+        bigint reporter_user_id FK
+        bigint reporter_anon_id FK
+        string judul
+        text kronologi
+        date tanggal_kejadian
+        string lokasi
+        text pihak_terlibat
+        enum prioritas
+        enum status
+        bigint assigned_to FK
+        enum ai_priority_suggestion
+        double ai_priority_confidence
+        tinyint ai_flagged
+        bigint ai_model_version_id FK
+        timestamp opened_at
+        timestamp archived_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    keyword_aliases {
+        bigint id PK
+        string alias
+        string canonical
+        bigint student_user_id FK
+        bigint dibuat_oleh FK
+        timestamp created_at
+        timestamp updated_at
+    }
+    keyword_daily_stats {
+        bigint id PK
+        string keyword
+        date tanggal
+        bigint category_id FK
+        int frekuensi
+        timestamp created_at
+        timestamp updated_at
+    }
+    keyword_stopwords {
+        bigint id PK
+        string word UK
+        enum scope
+        timestamp created_at
+        timestamp updated_at
+    }
+    notifications {
+        bigint id PK
+        bigint user_id FK
+        bigint anon_id FK
+        string type
+        text data
+        timestamp read_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    report_attachments {
+        bigint id PK
+        bigint report_id FK
+        string file_path
+        string file_name
+        string mime_type
+        int file_size
+        timestamp created_at
+        timestamp updated_at
+    }
+    report_entities {
+        bigint id PK
+        bigint report_id FK
+        string nama_entitas
+        text konteks
+        enum jenis_entitas
+        bigint user_id_terkait FK
+        bigint kandidat_user_id FK
+        enum status
+        tinyint dikonfirmasi
+        bigint confirmed_by FK
+        timestamp confirmed_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    report_keywords {
+        bigint id PK
+        bigint report_id FK
+        string keyword
+        tinyint n
+        int frekuensi
+        enum source
+        timestamp created_at
+        timestamp updated_at
+    }
+    report_notes {
+        bigint id PK
+        bigint report_id FK
+        bigint user_id FK
+        text isi
+        tinyint penting
+        timestamp created_at
+        timestamp updated_at
+    }
+    report_status_histories {
+        bigint id PK
+        bigint report_id FK
+        bigint user_id FK
+        string status_from
+        string status_to
+        text alasan
+        timestamp created_at
+        timestamp updated_at
+    }
+    roles {
+        bigint id PK
+        string name UK
+        string label
+        string guard_name
+        timestamp created_at
+        timestamp updated_at
+    }
+    student_profiles {
+        bigint id PK
+        bigint user_id FK
+        string nis UK
+        bigint classroom_id FK
+        string angkatan
+        string tahun_ajaran
+        int skor_awal
+        timestamp created_at
+        timestamp updated_at
+    }
+    users {
+        bigint id PK
+        bigint role_id FK
+        string name
+        string email UK
+        timestamp email_verified_at
+        string password
+        tinyint is_active
+        tinyint two_factor_enabled
+        timestamp last_login_at
+        string remember_token
+        timestamp created_at
+        timestamp updated_at
+    }
+    wali_kelas_assignments {
+        bigint id PK
+        bigint user_id FK
+        bigint classroom_id FK
+        string tahun_ajaran
+        timestamp created_at
+    }
+    watchlist_terms {
+        bigint id PK
+        string term
+        text catatan
+        bigint user_id FK
+        int ambang
+        tinyint notifikasi
+        timestamp last_alerted_at
+        timestamp created_at
+        timestamp updated_at
+    }
+    incident_reports ||--o{ ai_overrides : "report_id"
+    users ||--o{ ai_overrides : "user_id"
+    users ||--o{ announcements : "user_id"
+    users |o--o{ audit_logs : "user_id"
+    chat_rooms ||--o{ chat_messages : "chat_room_id"
+    anonymous_accounts |o--o{ chat_messages : "sender_anon_id"
+    users |o--o{ chat_messages : "sender_user_id"
+    anonymous_accounts |o--o{ chat_participants : "anon_id"
+    chat_rooms ||--o{ chat_participants : "chat_room_id"
+    users |o--o{ chat_participants : "user_id"
+    users |o--o{ chat_rooms : "career_user_id"
+    users |o--o{ chat_rooms : "created_by"
+    incident_reports |o--o{ chat_rooms : "report_id"
+    credit_categories ||--o{ credit_records : "category_id"
+    incident_reports |o--o{ credit_records : "report_id"
+    users ||--o{ credit_records : "student_id"
+    users ||--o{ credit_records : "user_id_pencatat"
+    users |o--o{ credit_records : "voided_by"
+    ai_model_versions |o--o{ incident_reports : "ai_model_version_id"
+    users |o--o{ incident_reports : "assigned_to"
+    incident_categories ||--o{ incident_reports : "category_id"
+    anonymous_accounts |o--o{ incident_reports : "reporter_anon_id"
+    users |o--o{ incident_reports : "reporter_user_id"
+    users |o--o{ keyword_aliases : "dibuat_oleh"
+    users |o--o{ keyword_aliases : "student_user_id"
+    incident_categories |o--o{ keyword_daily_stats : "category_id"
+    anonymous_accounts |o--o{ notifications : "anon_id"
+    users |o--o{ notifications : "user_id"
+    incident_reports ||--o{ report_attachments : "report_id"
+    users |o--o{ report_entities : "confirmed_by"
+    users |o--o{ report_entities : "kandidat_user_id"
+    incident_reports ||--o{ report_entities : "report_id"
+    users |o--o{ report_entities : "user_id_terkait"
+    incident_reports ||--o{ report_keywords : "report_id"
+    incident_reports ||--o{ report_notes : "report_id"
+    users ||--o{ report_notes : "user_id"
+    incident_reports ||--o{ report_status_histories : "report_id"
+    users |o--o{ report_status_histories : "user_id"
+    classrooms |o--o{ student_profiles : "classroom_id"
+    users ||--o{ student_profiles : "user_id"
+    roles |o--o{ users : "role_id"
+    classrooms ||--o{ wali_kelas_assignments : "classroom_id"
+    users ||--o{ wali_kelas_assignments : "user_id"
+    users ||--o{ watchlist_terms : "user_id"

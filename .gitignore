@@ -23,3 +23,5 @@ yarn-error.log
 /ai-service/models/*.pkl
 /ai-service/__pycache__/
 /database/database.sqlite
+
+/ai-service/models/meta.json

@@ -1,0 +1,7 @@
+{
+  "versi": "v1.0.0",
+  "f1_score": 0.87,
+  "precision_score": 0.88,
+  "recall_score": 0.86,
+  "catatan": "Salin file ini menjadi meta.json (opsional). Nilai dipakai untuk halaman Pengaturan > AI Model."
+}

@@ -1,0 +1,8 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+joblib>=1.3
+numpy
+# PENTING: versi scikit-learn HARUS sama dengan versi yang dipakai saat melatih model .pkl.
+# Cek di lingkungan training:  python -c "import sklearn; print(sklearn.__version__)"
+# lalu pin di sini, mis.:  scikit-learn==1.5.2
+scikit-learn

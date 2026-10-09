@@ -1,66 +1,62 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# BK Sahabat — Sistem Layanan Terpadu BK Sekolah
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel 12 · Blade · Tailwind CSS v4 · MySQL/MariaDB · sidecar AI (FastAPI + model `.pkl`).
+Lima peran: **Siswa**, **Anonim**, **Admin**, **Guru BK**, **Wali Kelas** (tanpa TPPK). Desain mengikuti brief UI "Tactile Counseling Companion" (Palet C ungu lembut).
 
-## About Laravel
+> Catatan versi: rancangan menyebut Laravel 11, tetapi semua rilis 11.x diblokir Composer karena advisory keamanan (EOL), jadi proyek memakai **Laravel 12** (kode kompatibel).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Jalankan lokal (Laragon, port bawaan)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Port bawaan Laragon: web **80**, MySQL **3306** (user `root`, tanpa sandi). `.env` sudah disetel demikian.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Letakkan folder proyek di `C:\laragon\www\bk-sahabat` → Laragon otomatis membuat **http://bk-sahabat.test** (ubah `APP_URL` bila perlu).
+   Tanpa Laragon: `.\serve-local.ps1` menjalankan `php artisan serve` di **http://127.0.0.1:80**.
+2. Start All di Laragon (Apache/Nginx + MySQL), lalu:
 
-## Learning Laravel
+```powershell
+composer install
+copy .env.example .env          # lewati bila .env sudah ada
+php artisan key:generate
+# buat database kosong "bk_sahabat" (HeidiSQL/phpMyAdmin Laragon), lalu:
+php artisan migrate --seed      # skema 28 tabel + data demo (hanya env local)
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. CSS Tailwind v4 sudah dibangun di `public/css/app.css`. Tanpa Node, pakai binary standalone
+   (unduh `tailwindcss-windows-x64.exe` v4.1 ke `tools/tailwindcss.exe`):
+   `composer css` (sekali) atau `composer css:watch`.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Akun demo (kata sandi: `password`)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Peran | Login |
+|---|---|
+| Admin | `admin@sekolah.sch.id` di `/admin/masuk` |
+| Guru BK | `bk1@sekolah.sch.id` |
+| Wali Kelas | `wk1@sekolah.sch.id` (X-3, XI-1) · `wk2@…` · `wk3@…` |
+| Siswa | NIS `2024001` (Rani Putri, X-3) |
+| Anonim | tombol "Lapor tanpa nama" |
 
-## Laravel Sponsors
+Staf memakai **2FA**; di mode lokal kode OTP ditampilkan di halaman verifikasi (produksi: kirim via email/SMS).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Deploy model AI (`.pkl`)
 
-### Premium Partners
+Lihat [ai-service/README.md](ai-service/README.md). Ringkas: salin model ke `ai-service/models/model.pkl`,
+samakan versi scikit-learn, jalankan `ai-service\run.ps1` (port 8001). Laravel memanggil `POST /classify`;
+bila mati, laporan tetap berjalan dan kolom saran AI kosong. Status/versi terlihat di Admin → Pengaturan → AI Model.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## ERD
 
-## Contributing
+`docs/ERD.md` (Mermaid per domain + kamus tabel) dan `docs/erd.html` (diagram penuh). Dihasilkan dari skema nyata:
+`php artisan docs:erd`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Uji
 
-## Code of Conduct
+`php artisan test` — smoke test semua halaman per peran + aturan akses (admin tak bisa buka laporan, Wali Kelas baca-saja & terbatas kelas,
+saran AI tak bocor ke siswa, 2FA, akun anonim).
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Batasan yang perlu diketahui
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* Impor massal: **CSV** saja (XLSX butuh PhpSpreadsheet + ekstensi gd).
+* Unduhan ringkasan/analitik: **CSV** (bukan PDF/XLSX).
+* Matriks Role & Akses: sel dikunci sistem; hanya 3 kebijakan sekolah (Wali Kelas: ubah status, baca chat, catat skor) yang dapat diubah dan benar-benar dipakai.
+* Chat memakai polling 8 detik (belum WebSocket/Reverb). Email/SMS (OTP, undangan) belum terhubung.
+* Pengecekan visual dilakukan lewat render headless; uji di perangkat/browser nyata sebelum rilis.
