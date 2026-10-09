@@ -56,6 +56,12 @@ class IncidentReport extends Model
             : $q->where('reporter_user_id', $actor->id);
     }
 
+    /** Urut prioritas: darurat, tinggi, sedang, rendah (portabel MySQL/SQLite). */
+    public function scopeByPriority(Builder $q): Builder
+    {
+        return $q->orderByRaw("CASE prioritas WHEN 'darurat' THEN 0 WHEN 'tinggi' THEN 1 WHEN 'sedang' THEN 2 ELSE 3 END");
+    }
+
     /** Laporan yang melibatkan siswa pada kelas tertentu (entitas saran/terkonfirmasi). */
     public function scopeInvolvingClassrooms(Builder $q, array $classroomIds): Builder
     {

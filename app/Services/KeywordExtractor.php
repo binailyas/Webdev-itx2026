@@ -21,11 +21,45 @@ class KeywordExtractor
 {
     public function process(IncidentReport $report, ?string $extraText = null, string $source = 'laporan'): void
     {
-        $text = trim($report->judul . '. ' . $report->kronologi . ' ' . $extraText);
+        // Teks laporan diproses penuh; chat hanya memproses pesan baru (sumber terpisah).
+        $text = $source === 'laporan' ? trim($report->judul . '. ' . $report->kronologi . ' ' . $extraText) : trim((string) $extraText);
+
+        if ($source === 'chat') {
+            $this->appendChat($report, $text);
+            return;
+        }
 
         $this->keywords($report, $text, $source);
-        if ($source === 'laporan') {
-            $this->entities($report, $text);
+        $this->entities($report, $text);
+        $this->checkWatchlist();
+    }
+
+    /** Kata dari chat ditambahkan ke tabel kata kunci (sumber "chat"); tidak menyentuh statistik harian. */
+    private function appendChat(IncidentReport $report, string $text): void
+    {
+        $stop = KeywordStopword::pluck('word')->flip();
+        $freq = [];
+        foreach (preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($text), -1, PREG_SPLIT_NO_EMPTY) as $t) {
+            if (mb_strlen($t) >= 3 && ! isset($stop[$t]) && ! is_numeric($t)) {
+                $freq[$t] = ($freq[$t] ?? 0) + 1;
+            }
+        }
+        foreach ($freq as $kw => $n) {
+            ReportKeyword::create(['report_id' => $report->id, 'keyword' => $kw, 'n' => 1, 'frekuensi' => $n, 'source' => 'chat']);
+        }
+    }
+
+    /** Notifikasi bila jumlah laporan 30 hari terakhir untuk kata pantauan melewati ambang (maks. 1x/hari). */
+    private function checkWatchlist(): void
+    {
+        foreach (\App\Models\WatchlistTerm::where('notifikasi', true)->get() as $w) {
+            if ($w->last_alerted_at && $w->last_alerted_at->gt(now()->subDay())) continue;
+            $n = ReportKeyword::where('keyword', 'like', '%' . mb_strtolower($w->term) . '%')
+                ->whereHas('report', fn ($q) => $q->where('created_at', '>=', now()->subDays(30)))->distinct()->count('report_id');
+            if ($n >= $w->ambang) {
+                \App\Services\Notifier::to($w->user_id, 'watchlist', ['pesan' => "Kata pantauan \"{$w->term}\" muncul di {$n} laporan (ambang {$w->ambang})."]);
+                $w->update(['last_alerted_at' => now()]);
+            }
         }
     }
 

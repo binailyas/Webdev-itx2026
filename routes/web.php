@@ -93,6 +93,7 @@ $staffRoutes = function () {
     Route::get('/analitik', [Staff\AnalyticsController::class, 'keywords'])->name('analitik.kata');
     Route::get('/analitik/orang', [Staff\AnalyticsController::class, 'people'])->name('analitik.orang');
     Route::get('/analitik/orang/{name}', [Staff\AnalyticsController::class, 'profile'])->name('analitik.profil');
+    Route::post('/analitik/orang/{name}/unduh', [Staff\AnalyticsController::class, 'download'])->name('analitik.profil.unduh');
     Route::get('/analitik/lokasi', [Staff\AnalyticsController::class, 'locations'])->name('analitik.lokasi');
     Route::get('/analitik/tren', [Staff\AnalyticsController::class, 'trends'])->name('analitik.tren');
     Route::get('/analitik/watchlist', [Staff\AnalyticsController::class, 'watchlist'])->name('analitik.watchlist');
