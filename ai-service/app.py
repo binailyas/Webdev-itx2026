@@ -76,7 +76,18 @@ def _load() -> None:
         vec = None
         model = obj
         classes = None
-        if isinstance(obj, dict):
+        if isinstance(obj, dict) and {"tfidf_word", "tfidf_char", "classifier"} <= obj.keys():
+            # Format model_bk.pkl: TF-IDF kata + karakter (hstack) -> LogisticRegression, ambang khusus kelas Tinggi.
+            model = obj["classifier"]
+            vec = ("bk", obj["tfidf_word"], obj["tfidf_char"], float(obj.get("tinggi_threshold", 0.5)))
+            classes = [str(c) for c in obj["label_classes"]]
+            m = obj.get("meta") or {}
+            meta = {**{
+                "f1_score": m.get("macro_f1"), "recall_score": m.get("macro_recall"),
+                "catatan": f"Train {m.get('train_n')} / val {m.get('val_n')}; {m.get('split', '')}",
+            }, **meta}
+            meta = {k: (float(v) if hasattr(v, "item") or isinstance(v, float) else v) for k, v in meta.items() if v is not None}
+        elif isinstance(obj, dict):
             model = obj.get("model") or obj.get("clf") or obj.get("pipeline")
             vec = obj.get("vectorizer") or obj.get("tfidf")
             classes = obj.get("labels") or obj.get("classes")
@@ -118,6 +129,18 @@ def _mock(text: str) -> tuple[str, float]:
 
 def _predict(text: str) -> tuple[str, float]:
     model, vec, classes = _state["model"], _state["vectorizer"], _state["classes"]
+    if isinstance(vec, tuple) and vec[0] == "bk":
+        from scipy.sparse import hstack
+
+        _, w, c, thr = vec
+        x = hstack([w.transform([text]), c.transform([text])]).tocsr()
+        proba = model.predict_proba(x)[0]
+        names = [_norm(k) for k in classes]
+        i_high = names.index("tinggi")
+        # Aturan model: bila peluang Tinggi >= ambang terlatih, hasilnya Tinggi (utamakan recall kasus berat).
+        idx = i_high if proba[i_high] >= thr else int(proba.argmax())
+        return names[idx], float(proba[idx])
+
     x = [text]
     if vec is not None:
         x = vec.transform(x)

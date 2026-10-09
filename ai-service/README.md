@@ -36,6 +36,14 @@ Laravel (AiClassifyPriorityJob) ──POST /classify {"text": "judul. kronologi"
 * `confidence ≥ 0.90` **dan** label `tinggi` ⇒ Laravel menandai `ai_flagged` dan memberi notifikasi BK (ambang di `AI_FLAG_THRESHOLD`).
 * Label **Darurat** tidak dihasilkan model; itu hanya ditetapkan manusia atau deteksi kata berisiko di Laravel.
 
+## Model yang terpasang: `model_bk.pkl`
+
+Dict berisi `tfidf_word` (1–3 gram) + `tfidf_char` (char_wb 2–5) → `LogisticRegression`, kelas `Rendah/Sedang/Tinggi`,
+dan `tinggi_threshold` (0,23). Aturan prediksi (sudah diimplementasi di `app.py`): fitur = hstack(word, char);
+bila peluang **Tinggi ≥ 0,23** maka hasil = Tinggi, selain itu kelas dengan peluang tertinggi.
+`confidence` = peluang kelas yang dipilih, jadi untuk Tinggi hasil ambang bisa rendah (mis. 25%) dan
+tidak memicu `ai_flagged` (butuh ≥ 90%). Dilatih dengan **scikit-learn 1.6.1** (sudah di-pin di `requirements.txt`).
+
 ## Format `.pkl` yang didukung
 
 Otomatis terdeteksi di `app.py`:
