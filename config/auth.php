@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'anon' => [
+            'driver' => 'session',
+            'provider' => 'anons',
+        ],
     ],
 
     /*
@@ -63,6 +67,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'anons' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AnonymousAccount::class,
         ],
 
         // 'users' => [

@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@source "../views";
+@source "../../app/Support";
+
+/*
+ * Tactile Counseling Companion — Palet C (ungu lembut).
+ * Sumber: Bagian 1 brief UI tiap peran. Tanpa gradien, tanpa bayangan;
+ * kedalaman hanya dari garis tebal.
+ */
+@theme {
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+    --color-primary: #6A5AE0;
+    --color-primary-dark: #4A3EB0;
+    --color-soft: #ECE9FD;
+    --color-accent: #1FA88A;
+    --color-accent-text: #0F6B57;
+    --color-mint: #E3F5EF;
+    --color-bg: #FAF9FF;
+    --color-surface: #FFFFFF;
+    --color-ink: #26214A;
+    --color-ink-dark: #0F0C2B;
+    --color-muted: #625E85;
+    --color-line: #DAD6F2;
+    --color-gray-soft: #ECEBF3;
+    --color-danger: #B5533A;
+    --color-danger-dark: #8A3A26;
+    --color-danger-soft: #FBE9E3;
+    --color-warning: #E0A23A;
+    --color-warning-dark: #B97F1A;
+}
+
+@layer base {
+    html { font-family: var(--font-sans); -webkit-text-size-adjust: 100%; }
+    body { background: var(--color-bg); color: var(--color-ink); font-weight: 500; line-height: 1.5; }
+    h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; }
+    :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    [x-cloak] { display: none !important; }
+    ::selection { background: var(--color-soft); }
+}
+
+@layer components {
+    /* ---------- Tombol (tactile: garis bawah tebal) ---------- */
+    .btn {
+        @apply inline-flex h-12 cursor-pointer select-none items-center justify-center gap-2 rounded-xl border-2 border-b-4 px-5 text-sm font-bold whitespace-nowrap transition-[transform,border-width] duration-75;
+    }
+    .btn:active:not(:disabled) { @apply translate-y-0.5 border-b-2; }
+    .btn:disabled, .btn[aria-disabled="true"] { @apply cursor-not-allowed opacity-50; }
+    .btn-sm { @apply h-9 px-3 text-xs; }
+    .btn-lg { @apply h-14 px-6 text-base; }
+    .btn-block { @apply w-full; }
+    .btn-primary { @apply border-primary border-b-primary-dark bg-primary text-white hover:bg-primary-dark; }
+    .btn-secondary { @apply border-gray-soft border-b-line bg-gray-soft text-ink hover:bg-line/60; }
+    .btn-inverted { @apply border-ink border-b-ink-dark bg-ink text-white; }
+    .btn-outline { @apply border-primary border-b-primary bg-white text-primary-dark hover:bg-soft; }
+    .btn-danger { @apply border-danger border-b-danger-dark bg-danger text-white hover:bg-danger-dark; }
+    .btn-ghost { @apply border-transparent bg-transparent text-primary-dark hover:bg-soft; border-bottom-width: 2px; }
+    .btn-icon { @apply inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-white; }
+
+    /* ---------- Kartu & panel ---------- */
+    .card { @apply rounded-xl border-2 border-b-4 border-line bg-surface; }
+    .card-pad { @apply p-5 md:p-6; }
+    .card-flat { @apply rounded-xl border-2 border-line bg-surface; }
+    .card-select { @apply border-primary bg-soft; }
+
+    /* ---------- Form ---------- */
+    .label { @apply mb-1.5 block text-[13px] font-bold text-ink; }
+    .input, .select, .textarea {
+        @apply w-full rounded-xl border-2 border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-muted/70 focus:border-primary focus:outline-none;
+    }
+    .input, .select { @apply h-12; }
+    .textarea { @apply min-h-28 py-3 leading-relaxed; }
+    .select { @apply cursor-pointer appearance-none bg-no-repeat pr-10; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23625E85' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-position: right 14px center; }
+    .input-error { @apply border-danger; }
+    .help { @apply mt-1.5 text-xs font-medium text-muted; }
+    .error-text { @apply mt-1.5 text-xs font-semibold text-danger-dark; }
+    .check { @apply size-5 cursor-pointer rounded-md border-2 border-line accent-primary; }
+
+    /* ---------- Chip & badge ---------- */
+    .chip { @apply inline-flex h-7 items-center gap-1.5 rounded-xl border-2 px-2.5 text-xs font-bold whitespace-nowrap; }
+    .chip-soft { @apply border-line bg-soft text-primary-dark; }
+    .chip-mint { @apply border-accent/40 bg-mint text-accent-text; }
+    .chip-gray { @apply border-line bg-gray-soft text-muted; }
+    .chip-warn { @apply border-warning bg-warning/25 text-ink; }
+    .chip-danger { @apply border-danger/50 bg-danger-soft text-danger-dark; }
+    .num-badge { @apply inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs leading-5 font-bold text-white; }
+    .num-badge-danger { @apply bg-danger; }
+
+    /* ---------- Navigasi ---------- */
+    .nav-item { @apply flex h-11 items-center gap-3 rounded-xl border-2 border-transparent px-3 text-sm font-semibold text-ink transition-colors hover:bg-soft; }
+    .nav-item[aria-current="page"] { @apply border-primary border-b-4 border-b-primary-dark bg-primary text-white; }
+
+    /* ---------- Tabel ---------- */
+    .tbl { @apply w-full text-left text-sm; }
+    .tbl thead th { @apply border-b-2 border-line bg-gray-soft/60 px-4 py-3 text-[11px] font-bold tracking-wider text-muted uppercase; }
+    .tbl tbody td { @apply border-b-2 border-line/60 px-4 py-3 align-middle; }
+    .tbl tbody tr:hover { @apply bg-bg; }
+    .tbl tbody tr:last-child td { @apply border-b-0; }
+
+    /* ---------- Progres ---------- */
+    .bar { @apply h-2 w-full overflow-hidden rounded-full bg-soft; }
+    .bar > span { @apply block h-full rounded-full bg-primary; }
+
+    /* ---------- Tab ---------- */
+    .tabs { @apply inline-flex gap-1 rounded-xl border-2 border-b-4 border-line bg-white p-1; }
+    .tab { @apply inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-bold text-muted hover:text-ink; }
+    .tab[aria-current="page"], .tab.is-active { @apply bg-primary text-white; }
+
+    /* ---------- Gelembung chat ---------- */
+    .bubble { @apply max-w-[82%] rounded-xl px-4 py-2.5 text-sm leading-relaxed; }
+    .bubble-me { @apply ml-auto rounded-br-sm bg-primary text-white; }
+    .bubble-them { @apply mr-auto rounded-bl-sm bg-soft text-ink; }
+
+    /* ---------- Bottom nav pil (siswa) ---------- */
+    .pill-nav { @apply fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-[420px] items-center justify-around rounded-full border-2 border-b-4 border-line bg-white p-1.5; }
+    .pill-item { @apply flex size-12 flex-col items-center justify-center rounded-full text-muted; }
+    .pill-item[aria-current="page"] { @apply bg-primary text-white; }
+}
+
+/* Gambar/ikon tidak ikut menyusut di flex */
+svg.icon { flex-shrink: 0; }
