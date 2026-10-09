@@ -1,5 +1,5 @@
 """
-BK Sahabat — sidecar klasifikasi prioritas laporan (M10).
+RuangDengar — sidecar klasifikasi prioritas laporan (M10).
 
 Memuat model NLP berformat .pkl dan membuka dua endpoint untuk Laravel:
 
@@ -173,7 +173,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="BK Sahabat AI Service", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="RuangDengar AI Service", version="1.0.0", lifespan=lifespan)
 
 
 class ClassifyIn(BaseModel):

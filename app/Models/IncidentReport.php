@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class IncidentReport extends Model
 {
     public const STATUSES = ['baru', 'ditinjau', 'diproses', 'selesai', 'ditolak', 'diarsipkan'];
-    public const PRIORITIES = ['rendah', 'sedang', 'tinggi', 'darurat'];
+    public const PRIORITIES = ['rendah', 'sedang', 'tinggi'];
 
     protected $guarded = [];
     protected $hidden = ['pin_hash'];
@@ -21,6 +21,7 @@ class IncidentReport extends Model
         return [
             'tanggal_kejadian' => 'date',
             'ai_flagged' => 'boolean',
+            'risk_flagged' => 'boolean',
             'ai_priority_confidence' => 'float',
             'opened_at' => 'datetime',
             'archived_at' => 'datetime',
@@ -56,10 +57,21 @@ class IncidentReport extends Model
             : $q->where('reporter_user_id', $actor->id);
     }
 
-    /** Urut prioritas: darurat, tinggi, sedang, rendah (portabel MySQL/SQLite). */
+    /** B2: BK hanya melihat laporan yang sudah ditinjau Wali Kelas (kecuali ditandai berisiko / AI berisiko tinggi). */
+    public function scopeVisibleToBk(Builder $q): Builder
+    {
+        return $q->where(fn ($w) => $w->where('status', '!=', 'baru')->orWhere('risk_flagged', true)->orWhere('ai_flagged', true));
+    }
+
+    public function isVisibleToBk(): bool
+    {
+        return $this->status !== 'baru' || $this->risk_flagged || $this->ai_flagged;
+    }
+
+    /** Urut prioritas: tinggi, sedang, rendah (portabel MySQL/SQLite). */
     public function scopeByPriority(Builder $q): Builder
     {
-        return $q->orderByRaw("CASE prioritas WHEN 'darurat' THEN 0 WHEN 'tinggi' THEN 1 WHEN 'sedang' THEN 2 ELSE 3 END");
+        return $q->orderByRaw("CASE prioritas WHEN 'tinggi' THEN 0 WHEN 'sedang' THEN 1 ELSE 2 END");
     }
 
     /** Laporan yang melibatkan siswa pada kelas tertentu (entitas saran/terkonfirmasi). */

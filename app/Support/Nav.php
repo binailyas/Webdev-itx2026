@@ -51,9 +51,14 @@ class Nav
         if (! $u->hasRole('bk', 'wali_kelas')) {
             return [];
         }
+        // Wali Kelas: laporan Baru (perlu ditinjau). BK: laporan yang sudah ditinjau dan menunggu diproses (+ yang berisiko).
+        $q = IncidentReport::query();
+        $u->hasRole('bk')
+            ? $q->where(fn ($w) => $w->where('status', 'ditinjau')->orWhere(fn ($x) => $x->where('status', 'baru')->where(fn ($y) => $y->where('risk_flagged', true)->orWhere('ai_flagged', true))))
+            : $q->where('status', 'baru');
         $b = [
-            'laporan' => IncidentReport::where('status', 'baru')->count(),
-            'laporan_darurat' => IncidentReport::where('status', 'baru')->where('prioritas', 'darurat')->count(),
+            'laporan' => $q->count(),
+            'laporan_darurat' => (clone $q)->where(fn ($w) => $w->where('risk_flagged', true)->orWhere('ai_flagged', true))->count(),
         ];
         if ($u->hasRole('bk')) {
             $b['karir'] = ChatRoom::where('type', 'karir')->where('status', 'menunggu')->count();

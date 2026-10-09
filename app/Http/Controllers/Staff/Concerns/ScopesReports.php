@@ -53,6 +53,9 @@ trait ScopesReports
     protected function filteredReports(\Illuminate\Http\Request $r): Builder
     {
         $q = $this->scopeQuery(IncidentReport::query());
+        if (! $this->isWk()) {
+            $q->visibleToBk();   // B2
+        }
         $days = (int) $r->query('periode', 30);
         if ($days > 0) {
             $q->where('created_at', '>=', now()->subDays($days)->startOfDay());

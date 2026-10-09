@@ -45,7 +45,7 @@ class ReportController extends Controller
             'tanggal_kejadian' => 'nullable|date|before_or_equal:today',
             'lokasi' => 'nullable|string|max:80',
             'pihak_terlibat' => 'nullable|string|max:300',
-            'prioritas' => 'required|in:rendah,sedang,tinggi,darurat',
+            'prioritas' => 'required|in:rendah,sedang,tinggi',
             'lampiran' => 'nullable|array|max:5',
             'lampiran.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
         ], [
@@ -59,6 +59,28 @@ class ReportController extends Controller
         $request->session()->put('report_sent', ['ticket' => $report->ticket_code, 'pin' => $pin]);
 
         return redirect()->route('siswa.laporan.sent');
+    }
+
+    /** G5: cek status dengan kode tiket + PIN, hanya di dalam akun siswa / anonim. */
+    public function checkForm()
+    {
+        return view('siswa.cek-status', ['report' => null]);
+    }
+
+    public function checkResult(Request $request)
+    {
+        $data = $request->validate(['ticket' => 'required|string|max:20', 'pin' => 'required|digits:6']);
+        $key = 'ticket:' . sha1(strtoupper($data['ticket']));
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->withErrors(['ticket' => 'Terlalu banyak percobaan. Coba lagi dalam 5 menit.']);
+        }
+        $report = IncidentReport::with(['histories' => fn ($q) => $q->orderBy('id')])->where('ticket_code', strtoupper(trim($data['ticket'])))->first();
+        if (! $report || ! $report->pin_hash || ! \Illuminate\Support\Facades\Hash::check($data['pin'], $report->pin_hash)) {
+            \Illuminate\Support\Facades\RateLimiter::hit($key, 300);
+            return back()->withInput($request->only('ticket'))->withErrors(['ticket' => 'Kode tiket atau PIN belum cocok. Coba lagi.']);
+        }
+        \Illuminate\Support\Facades\RateLimiter::clear($key);
+        return view('siswa.cek-status', ['report' => $report]);
     }
 
     public function sent(Request $request)

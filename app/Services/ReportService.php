@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class ReportService
 {
-    /** Kata berisiko (self-harm / ancaman) yang otomatis menaikkan prioritas ke Darurat. */
+    /** Kata berisiko (self-harm / ancaman) otomatis: prioritas Tinggi + penanda risiko + notifikasi segera. */
     private const RISK_TERMS = [
         'bunuh diri', 'mengakhiri hidup', 'ingin mati', 'menyakiti diri', 'melukai diri',
         'akan membunuh', 'ancam bunuh', 'membawa senjata', 'bawa pisau', 'bawa senjata',
@@ -58,12 +58,12 @@ class ReportService
             return $report;
         });
 
-        // Deteksi kata berisiko -> Darurat.
+        // Deteksi kata berisiko -> Tinggi + risk_flagged.
         $hay = mb_strtolower($report->judul . ' ' . $report->kronologi);
         foreach (self::RISK_TERMS as $term) {
             if (str_contains($hay, $term)) {
-                $report->update(['prioritas' => 'darurat']);
-                $report->histories()->create(['status_to' => 'baru', 'alasan' => 'Prioritas dinaikkan ke Darurat oleh deteksi kata berisiko.']);
+                $report->update(['prioritas' => 'tinggi', 'risk_flagged' => true]);
+                $report->histories()->create(['status_to' => 'baru', 'alasan' => 'Prioritas dinaikkan ke Tinggi oleh deteksi kata berisiko.']);
                 break;
             }
         }
@@ -79,17 +79,17 @@ class ReportService
     {
         $payload = ['report_id' => $report->id, 'ticket' => $report->ticket_code];
 
-        Notifier::toRole('bk', 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} masuk."]);
-
-        if ($report->prioritas === 'darurat') {
-            Notifier::toRole('bk', 'darurat', $payload + ['pesan' => "Prioritas darurat pada laporan {$report->ticket_code}."]);
+        // B2: laporan baru ditinjau Wali Kelas dulu; BK hanya diberi tahu langsung bila berisiko.
+        Notifier::toRole('wali_kelas', 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} menunggu tinjauan."]);
+        if ($report->risk_flagged) {
+            Notifier::toRole('bk', 'darurat', $payload + ['pesan' => "Kata berisiko terdeteksi pada laporan {$report->ticket_code}."]);
         }
 
         // Wali Kelas kelas asuhan siswa yang disebut mendapat notifikasi khusus.
         $classIds = $report->entities()->whereNotNull('kandidat_user_id')->get()
             ->map(fn ($e) => $e->candidate?->studentProfile?->classroom_id)->filter()->unique()->values();
         if ($classIds->isNotEmpty()) {
-            Notifier::toWaliKelasOf($classIds, $report->prioritas === 'darurat' ? 'darurat' : 'kelas_saya',
+            Notifier::toWaliKelasOf($classIds, $report->risk_flagged ? 'darurat' : 'kelas_saya',
                 $payload + ['pesan' => "Siswa kelas asuhanmu mungkin terlibat dalam laporan {$report->ticket_code}."]);
         }
     }

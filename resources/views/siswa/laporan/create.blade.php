@@ -67,12 +67,12 @@
         <div>
             <h2 class="mb-3 text-2xl">Seberapa mendesak?</h2>
             <div class="space-y-3" role="radiogroup">
-                @foreach ([['rendah', 'Rendah', 'Tidak mendesak, hanya ingin BK tahu.'], ['sedang', 'Sedang', 'Mengganggu, perlu ditindaklanjuti.'], ['tinggi', 'Tinggi', 'Berulang atau berdampak serius.'], ['darurat', 'Darurat', 'Ada bahaya sekarang.']] as [$v, $l, $d])
+                @foreach ([['rendah', 'Rendah', 'Tidak mendesak, hanya ingin BK tahu.'], ['sedang', 'Sedang', 'Mengganggu, perlu ditindaklanjuti.'], ['tinggi', 'Tinggi', 'Berulang atau berdampak serius.']] as [$v, $l, $d])
                     <label class="cursor-pointer"><input type="radio" name="prioritas" value="{{ $v }}" x-model="f.prioritas" class="peer sr-only">
                         <span class="card flex items-center gap-3 p-4 peer-checked:border-primary peer-checked:bg-soft"><x-priority-chip :priority="$v" /><span class="text-sm font-semibold">{{ $d }}</span></span></label>
                 @endforeach
             </div>
-            <div x-show="f.prioritas === 'darurat'" x-cloak class="mt-3 rounded-xl border-2 border-danger/40 bg-danger-soft p-4 text-sm font-semibold text-danger-dark">
+            <div x-show="f.prioritas === 'tinggi'" x-cloak class="mt-3 rounded-xl border-2 border-danger/40 bg-danger-soft p-4 text-sm font-semibold text-danger-dark">
                 Jika kamu dalam bahaya sekarang, hubungi 112.
                 <a href="{{ route('darurat') }}" class="btn btn-danger btn-sm mt-3 w-full">Buka bantuan darurat</a>
             </div>

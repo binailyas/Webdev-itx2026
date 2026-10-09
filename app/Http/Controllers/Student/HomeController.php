@@ -31,6 +31,13 @@ class HomeController extends Controller
         ]);
     }
 
+    /** T1: jawaban asisten (berbasis aturan). Pesan tidak disimpan. */
+    public function chatbot(Request $request)
+    {
+        $data = $request->validate(['message' => 'required|string|max:300']);
+        return response()->json(\App\Services\Chatbot::reply($data['message'], (bool) $request->attributes->get('is_anon')));
+    }
+
     public function notifications(Request $request)
     {
         $actor = $request->attributes->get('actor');

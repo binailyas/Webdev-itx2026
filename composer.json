@@ -1,7 +1,7 @@
 {
-    "name": "bk-sahabat/layanan-terpadu-bk",
+    "name": "ruangdengar/layanan-terpadu-bk",
     "type": "project",
-    "description": "Sistem Layanan Terpadu BK Sekolah (BK Sahabat).",
+    "description": "Sistem Layanan Terpadu BK Sekolah (RuangDengar).",
     "keywords": ["laravel", "bk", "sekolah"],
     "license": "MIT",
     "require": {

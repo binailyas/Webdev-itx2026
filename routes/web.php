@@ -15,14 +15,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicController::class, 'welcome'])->name('welcome');
 Route::get('/darurat', [PublicController::class, 'darurat'])->name('darurat');
 Route::get('/lupa-password', [PublicController::class, 'forgot'])->name('forgot');
-Route::get('/cek-status', [PublicController::class, 'checkForm'])->name('status.check');
-Route::post('/cek-status', [PublicController::class, 'checkResult'])->name('status.check.result')->middleware('throttle:10,1');
+Route::redirect('/admin/masuk', '/masuk');   // G6: tidak ada lagi login admin terpisah
 
 Route::middleware('guest:web')->group(function () {
     Route::get('/masuk', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/masuk', [AuthController::class, 'login'])->name('login.attempt');
-    Route::get('/admin/masuk', [AuthController::class, 'showAdminLogin'])->name('admin.login');
-    Route::post('/admin/masuk', [AuthController::class, 'login'])->name('admin.login.attempt');
     Route::get('/otp', [AuthController::class, 'showOtp'])->name('otp.show');
     Route::post('/otp', [AuthController::class, 'verifyOtp'])->name('otp.verify');
     Route::post('/otp/kirim-ulang', [AuthController::class, 'resendOtp'])->name('otp.resend');
@@ -46,6 +43,7 @@ Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function ()
     Route::get('/', [Student\HomeController::class, 'index'])->name('beranda');
     Route::get('/informasi', [Student\InfoController::class, 'index'])->name('informasi.index');
     Route::get('/informasi/{slug}', [Student\InfoController::class, 'show'])->name('informasi.show');
+    Route::post('/chatbot', [Student\HomeController::class, 'chatbot'])->name('chatbot')->middleware('throttle:30,1');
     Route::get('/notifikasi', [Student\HomeController::class, 'notifications'])->name('notifikasi');
     Route::post('/notifikasi/baca', [Student\HomeController::class, 'readAll'])->name('notifikasi.baca');
     Route::get('/profil', [Student\HomeController::class, 'profile'])->name('profil');
@@ -55,6 +53,8 @@ Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function ()
     Route::get('/laporan', [Student\ReportController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/buat', [Student\ReportController::class, 'create'])->name('laporan.create');
     Route::post('/laporan', [Student\ReportController::class, 'store'])->name('laporan.store');
+    Route::get('/cek-status', [Student\ReportController::class, 'checkForm'])->name('cekstatus');
+    Route::post('/cek-status', [Student\ReportController::class, 'checkResult'])->name('cekstatus.hasil')->middleware('throttle:10,1');
     Route::get('/laporan/terkirim', [Student\ReportController::class, 'sent'])->name('laporan.sent');
     Route::get('/laporan/{ticket}', [Student\ReportController::class, 'show'])->name('laporan.show');
     Route::get('/laporan/{ticket}/chat', [Student\ChatController::class, 'show'])->name('laporan.chat');
@@ -84,6 +84,7 @@ $staffRoutes = function () {
     Route::post('/laporan/{report}/status', [Staff\ReportController::class, 'status'])->name('laporan.status');
     Route::post('/laporan/{report}/prioritas', [Staff\ReportController::class, 'override'])->name('laporan.override');
     Route::post('/laporan/{report}/catatan', [Staff\ReportController::class, 'note'])->name('laporan.note');
+    Route::get('/laporan/{report}/lampiran/{attachment}', [Staff\ReportController::class, 'attachment'])->name('laporan.lampiran');
     Route::post('/laporan/{report}/pihak/{entity}', [Staff\ReportController::class, 'entity'])->name('laporan.entity');
     Route::get('/laporan/{report}/chat', [Staff\ChatController::class, 'show'])->name('chat.show');
 
@@ -91,6 +92,7 @@ $staffRoutes = function () {
     Route::get('/ringkasan/unduh', [Staff\SummaryController::class, 'download'])->name('ringkasan.unduh');
 
     Route::get('/analitik', [Staff\AnalyticsController::class, 'keywords'])->name('analitik.kata');
+    Route::get('/analitik/kata/{keyword}', [Staff\AnalyticsController::class, 'keywordDetail'])->name('analitik.kata.detail');
     Route::get('/analitik/orang', [Staff\AnalyticsController::class, 'people'])->name('analitik.orang');
     Route::get('/analitik/orang/{name}', [Staff\AnalyticsController::class, 'profile'])->name('analitik.profil');
     Route::post('/analitik/orang/{name}/unduh', [Staff\AnalyticsController::class, 'download'])->name('analitik.profil.unduh');

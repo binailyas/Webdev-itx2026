@@ -37,14 +37,14 @@
         <x-icon name="megaphone" :size="26" /><span class="text-base">Buat laporan</span><span class="text-xs font-medium text-white/80">Ceritakan kejadian dengan aman</span>
     </a>
     @unless ($anon)
-        <a href="{{ route('siswa.karir.create') }}" class="btn btn-outline !h-auto flex-col items-start gap-3 !p-4 text-left">
+        <a href="{{ route('siswa.karir.create', ['dari' => 'beranda']) }}" class="btn btn-outline !h-auto flex-col items-start gap-3 !p-4 text-left">
             <x-icon name="compass" :size="26" /><span class="text-base">Konsultasi karir</span><span class="text-xs font-medium text-muted">Tanya jurusan, kuliah, beasiswa</span>
         </a>
     @endunless
 </div>
 
 <section class="mt-7">
-    <h2 class="mb-3 text-lg">{{ $anon ? 'Cek status laporanmu' : 'Laporan terakhir' }}</h2>
+    <div class="mb-3 flex items-center justify-between"><h2 class="text-lg">{{ $anon ? 'Cek status laporanmu' : 'Laporan terakhir' }}</h2><a href="{{ route('siswa.cekstatus') }}" class="text-sm font-bold text-primary-dark hover:underline">Cek dengan kode tiket</a></div>
     @if ($last)
         <a href="{{ route('siswa.laporan.show', $last->ticket_code) }}" class="card card-pad block hover:bg-bg">
             <div class="flex items-center justify-between gap-3"><p class="font-mono text-sm font-bold">Laporan #{{ $last->ticket_code }}</p><x-status-chip :status="$last->status" /></div>

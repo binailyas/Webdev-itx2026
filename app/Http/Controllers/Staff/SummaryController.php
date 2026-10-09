@@ -26,6 +26,32 @@ class SummaryController extends Controller
             'tren' => $reports->groupBy(fn ($r) => $r->created_at->startOfWeek()->format('d M'))->map->count(),
             'menungguCatatan' => $reports->filter(fn ($r) => in_array($r->status, ['baru', 'ditinjau', 'diproses']) && ! $r->notes()->exists())->count(),
             'reports' => $reports,
+            'ai' => $this->aiSummary($reports),
+        ];
+    }
+
+    /** G3: ringkasan saran AI atas laporan pada filter ini (indikasi, bukan keputusan). */
+    private function aiSummary($reports): array
+    {
+        $with = $reports->whereNotNull('ai_priority_suggestion');
+        $ids = $reports->pluck('id');
+        $overrides = \App\Models\AiOverride::whereIn('report_id', $ids)->get();
+        // Matriks: saran AI (baris) x prioritas akhir (kolom).
+        $matrix = [];
+        foreach (['tinggi', 'sedang', 'rendah'] as $sg) {
+            foreach (['tinggi', 'sedang', 'rendah'] as $fin) {
+                $matrix[$sg][$fin] = $with->where('ai_priority_suggestion', $sg)->where('prioritas', $fin)->count();
+            }
+        }
+        $agree = $with->filter(fn ($r) => $r->ai_priority_suggestion === $r->prioritas)->count();
+        return [
+            'tersedia' => $with->count(), 'belum' => $reports->count() - $with->count(),
+            'avg_conf' => $with->isEmpty() ? null : round($with->avg('ai_priority_confidence') * 100),
+            'flagged' => $reports->where('ai_flagged', true)->count(),
+            'overrides' => $overrides->count(), 'override_pct' => $with->isEmpty() ? null : round($overrides->pluck('report_id')->unique()->count() / $with->count() * 100),
+            'sesuai_pct' => $with->isEmpty() ? null : round($agree / $with->count() * 100),
+            'per_saran' => $with->groupBy('ai_priority_suggestion')->map->count(), 'matrix' => $matrix,
+            'versi' => $with->map->aiModel->filter()->pluck('versi')->unique()->values(),
         ];
     }
 

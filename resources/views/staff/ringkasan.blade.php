@@ -39,6 +39,26 @@
         </tbody></table></section>
 </div>
 
+{{-- G3: ringkasan AI --}}
+<section class="card card-pad mt-6">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 class="flex items-center gap-2 text-lg"><x-icon name="bot" :size="20" class="text-primary" />Ringkasan saran AI</h2><span class="text-xs font-semibold text-muted">Indikasi, bukan keputusan · {{ $ai['versi']->implode(', ') ?: 'model belum tercatat' }}</span></div>
+    @if ($ai['tersedia'])
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <x-stat label="Laporan dianalisis AI" :value="$ai['tersedia']" icon="bot" :hint="$ai['belum'] . ' belum tersedia'" />
+            <x-stat label="Rata-rata keyakinan" :value="$ai['avg_conf'] . '%'" icon="gauge" />
+            <x-stat label="Sesuai prioritas akhir" :value="$ai['sesuai_pct'] . '%'" icon="check-circle" tone="mint" />
+            <x-stat label="Saran ditimpa petugas" :value="$ai['override_pct'] . '%'" icon="refresh" tone="warn" :hint="$ai['overrides'] . ' kali · ' . $ai['flagged'] . ' ditandai berisiko'" />
+        </div>
+        <div class="mt-5 overflow-x-auto"><table class="tbl"><thead><tr><th>Saran AI ↓ / Prioritas akhir →</th><th>Tinggi</th><th>Sedang</th><th>Rendah</th></tr></thead><tbody>
+            @foreach ($ai['matrix'] as $sg => $row)
+                <tr><td class="font-semibold"><x-ai-chip :suggestion="$sg" compact /></td>@foreach ($row as $fin => $n)<td class="{{ $sg === $fin ? 'bg-soft font-bold' : '' }}">{{ $n }}</td>@endforeach</tr>
+            @endforeach
+        </tbody></table></div>
+    @else
+        <x-empty icon="bot" title="Belum ada hasil analisis AI" text="Saran muncul setelah service model aktif dan ada laporan baru." />
+    @endif
+</section>
+
 <section class="card card-pad mt-6"><h2 class="mb-3 text-lg">Tren laporan</h2><x-bar-chart :points="$tren->all()" /></section>
 @if ($wk)<p class="mt-4 text-sm text-muted"><x-icon name="file-text" :size="14" class="mr-1 inline" />Laporan menunggu catatan Wali Kelas: <strong class="text-ink">{{ $menungguCatatan }}</strong></p>@endif
 @endsection

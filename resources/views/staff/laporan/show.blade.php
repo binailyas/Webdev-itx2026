@@ -33,7 +33,16 @@
             <p class="whitespace-pre-line leading-relaxed">{{ $r->kronologi }}</p>
             @if ($r->attachments->isNotEmpty())
                 <h3 class="mt-5 mb-2 text-sm font-bold">Lampiran</h3>
-                <div class="flex flex-wrap gap-2">@foreach ($r->attachments as $a)<span class="chip chip-gray"><x-icon name="paperclip" :size="14" />{{ $a->file_name }}</span>@endforeach</div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    @foreach ($r->attachments as $a)
+                        @php $isImg = str_starts_with((string) $a->mime_type, 'image/'); $url = sroute('laporan.lampiran', [$r, $a]); @endphp
+                        <div class="overflow-hidden rounded-xl border-2 border-line bg-bg">
+                            @if ($isImg)<a href="{{ $url }}" target="_blank" rel="noopener" aria-label="Buka gambar {{ $a->file_name }}"><img src="{{ $url }}" alt="{{ $a->file_name }}" loading="lazy" class="h-40 w-full object-cover"></a>@endif
+                            <div class="flex items-center gap-2 p-3 text-sm"><x-icon name="paperclip" :size="16" class="text-primary" /><span class="min-w-0 flex-1 truncate font-semibold">{{ $a->file_name }}</span>
+                                <a href="{{ $url }}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Buka</a><a href="{{ $url }}?unduh=1" class="btn btn-secondary btn-sm" aria-label="Unduh {{ $a->file_name }}"><x-icon name="download" :size="14" /></a></div>
+                        </div>
+                    @endforeach
+                </div>
             @endif
         </section>
 
@@ -82,8 +91,12 @@
         </section>
 
         {{-- Catatan internal --}}
-        <section class="card card-pad" id="catatan">
-            <div class="mb-1 flex items-center justify-between"><h2 class="text-lg">{{ $wk ? 'Catatan Wali Kelas untuk BK' : 'Catatan internal' }}</h2><span class="flex items-center gap-1 text-xs font-semibold text-muted"><x-icon name="lock" :size="13" />Hanya terlihat BK dan Wali Kelas</span></div>
+        <section class="card card-pad" id="catatan" x-data="{ open: true }">
+            <div class="mb-1 flex flex-wrap items-center justify-between gap-2"><h2 class="text-lg">{{ $wk ? 'Catatan Wali Kelas untuk BK' : 'Catatan internal' }} <span class="chip chip-gray ml-1 h-5 text-[10px]">{{ $r->notes->count() }}</span></h2>
+                <span class="flex items-center gap-3"><span class="hidden items-center gap-1 text-xs font-semibold text-muted sm:flex"><x-icon name="lock" :size="13" />Hanya terlihat BK dan Wali Kelas</span>
+                    {{-- B4: toggle tampil/sembunyikan catatan internal --}}
+                    <button type="button" class="btn btn-outline btn-sm" @click="open = ! open" :aria-expanded="open" aria-controls="catatan-isi"><x-icon name="eye" :size="14" x-show="! open" /><span x-text="open ? 'Sembunyikan' : 'Tampilkan'"></span></button></span></div>
+            <div id="catatan-isi" x-show="open" x-transition>
             <ul class="mt-4 space-y-3">
                 @forelse ($r->notes as $n)
                     <li class="flex gap-3"><x-avatar :name="$n->user->name" :size="36" :tone="$n->user->hasRole('bk') ? 'soft' : 'mint'" />
@@ -98,6 +111,7 @@
                     <label class="flex cursor-pointer items-center gap-2 text-sm font-bold"><input type="checkbox" name="penting" value="1" class="check"> Tandai penting</label>
                     <button class="btn btn-primary">Kirim catatan</button></div>
             </form>
+            </div>
         </section>
     </div>
 
@@ -117,10 +131,19 @@
             </ol>
             @if ($allowed)
                 <form method="post" action="{{ sroute('laporan.status', $r) }}" class="mt-5 space-y-3 border-t-2 border-line pt-4">@csrf
-                    <div><label class="label" for="status">Ubah status</label><select id="status" name="status" class="select" required>@foreach ($allowed as $s)<option value="{{ $s }}">{{ \App\Support\Ui::status($s)[0] }}</option>@endforeach</select></div>
+                    @if ($wk)
+                        {{-- W2/W3: Wali Kelas hanya dapat menandai "Ditinjau"; komponen statis (perubahan tidak bisa di-undo), bukan dropdown. --}}
+                        <input type="hidden" name="status" value="ditinjau">
+                        <div class="flex items-center gap-2 rounded-xl border-2 border-line bg-bg p-3 text-sm font-semibold"><x-status-chip :status="$r->status" /><x-icon name="arrow-right" :size="16" class="text-muted" /><x-status-chip status="ditinjau" /></div>
+                        <p class="help">Perubahan ini tidak bisa dibatalkan. Setelah ditinjau, laporan diteruskan ke guru BK.</p>
+                    @else
+                        <div><label class="label" for="status">Ubah status</label><select id="status" name="status" class="select" required>@foreach ($allowed as $s)<option value="{{ $s }}">{{ \App\Support\Ui::status($s)[0] }}</option>@endforeach</select></div>
+                    @endif
                     <div><label class="label" for="alasan">Alasan <span class="text-danger">*</span></label><textarea id="alasan" name="alasan" rows="2" class="textarea min-h-16" required>{{ old('alasan') }}</textarea>@error('alasan')<p class="error-text">{{ $message }}</p>@enderror</div>
-                    <button class="btn btn-primary btn-sm">Simpan status</button>
+                    <button class="btn btn-primary btn-sm" @if ($wk) onclick="return confirm('Tandai laporan ini sudah ditinjau? Tidak bisa dibatalkan.')" @endif>{{ $wk ? 'Tandai sudah ditinjau' : 'Simpan status' }}</button>
                 </form>
+            @elseif ($wk)
+                <p class="mt-4 rounded-xl bg-bg p-3 text-xs font-semibold text-muted">Wali Kelas hanya menandai laporan sebagai “Ditinjau”. Proses selanjutnya dilakukan guru BK.</p>
             @elseif (in_array($r->status, ['diarsipkan']))
                 <p class="mt-4 text-xs text-muted">Laporan sudah diarsipkan.</p>
             @endif

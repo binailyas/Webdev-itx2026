@@ -13,7 +13,7 @@
             @forelse ($rows as $r)
                 <tr>
                     <td class="font-bold text-muted">{{ $r->rank }}</td>
-                    <td><a href="{{ sroute('analitik.kata', array_merge(request()->query(), ['kata' => [$r->keyword]])) }}" class="font-bold hover:underline">{{ $r->keyword }}</a></td>
+                    <td><a href="{{ sroute('analitik.kata.detail', array_merge(request()->only('periode', 'kategori', 'prioritas', 'status', 'kelas'), ['keyword' => $r->keyword])) }}" class="inline-flex items-center gap-1 font-bold text-primary-dark hover:underline">{{ $r->keyword }}<x-icon name="chevron-right" :size="14" /></a></td>
                     <td><div class="flex items-center gap-3"><div class="bar flex-1"><span style="width: {{ $r->pct }}%"></span></div><span class="w-6 font-bold">{{ $r->n }}</span></div></td>
                     <td>@if ($r->change === null)<span class="text-muted">—</span>@elseif ($r->change >= 0)<span class="inline-flex items-center gap-1 font-bold text-danger-dark"><x-icon name="trending-up" :size="14" />{{ $r->change }}%</span>@else<span class="inline-flex items-center gap-1 font-bold text-accent-text"><x-icon name="trending-down" :size="14" />{{ abs($r->change) }}%</span>@endif</td>
                     <td class="text-right"><form method="post" action="{{ sroute('watchlist.store') }}">@csrf<input type="hidden" name="term" value="{{ $r->keyword }}"><input type="hidden" name="ambang" value="5">

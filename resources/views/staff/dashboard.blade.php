@@ -23,7 +23,7 @@
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <div class="card card-pad relative">
         <p class="text-[11px] font-bold tracking-wider text-muted uppercase">Laporan baru</p>
-        <p class="mt-3 flex items-center gap-3 text-4xl font-bold">{{ $stats['baru'] }}@if ($stats['darurat'])<span class="chip bg-danger text-white border-danger-dark"><x-icon name="alert-triangle" :size="14" />{{ $stats['darurat'] }} Darurat</span>@endif</p>
+        <p class="mt-3 flex items-center gap-3 text-4xl font-bold">{{ $stats['baru'] }}@if ($stats['berisiko'])<span class="chip bg-danger text-white border-danger-dark"><x-icon name="alert-triangle" :size="14" />{{ $stats['berisiko'] }} Berisiko</span>@endif</p>
         @if ($stats['ai_tinggi'])
             <a href="{{ sroute('laporan.index', ['ai' => 'tinggi']) }}" class="chip chip-warn mt-3 hover:brightness-95"><x-icon name="bot" :size="14" />AI sarankan Tinggi: {{ $stats['ai_tinggi'] }} laporan</a>
         @endif
@@ -54,9 +54,9 @@
         <h3 class="mt-6 mb-3 text-sm font-bold">Per prioritas</h3>
         @php $pm = max(1, $perPrio->max() ?? 1); @endphp
         <div class="space-y-2">
-            @foreach (['darurat', 'tinggi', 'sedang', 'rendah'] as $p)
+            @foreach (['tinggi', 'sedang', 'rendah'] as $p)
                 @php [$lbl, , $cls] = \App\Support\Ui::priority($p); $v = $perPrio[$p] ?? 0; @endphp
-                <div class="flex items-center gap-3 text-sm"><span class="w-16 font-semibold">{{ $lbl }}</span><div class="bar flex-1"><span class="{{ ['darurat' => 'bg-danger', 'tinggi' => 'bg-warning', 'sedang' => 'bg-accent', 'rendah' => 'bg-primary'][$p] }}" style="width: {{ $v / $pm * 100 }}%"></span></div><span class="w-6 text-right font-bold">{{ $v }}</span></div>
+                <div class="flex items-center gap-3 text-sm"><span class="w-16 font-semibold">{{ $lbl }}</span><div class="bar flex-1"><span class="{{ ['tinggi' => 'bg-warning', 'sedang' => 'bg-accent', 'rendah' => 'bg-primary'][$p] }}" style="width: {{ $v / $pm * 100 }}%"></span></div><span class="w-6 text-right font-bold">{{ $v }}</span></div>
             @endforeach
         </div>
     </section>

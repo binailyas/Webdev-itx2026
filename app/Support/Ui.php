@@ -25,8 +25,7 @@ class Ui
         return match ($p) {
             'rendah' => ['Rendah', 'arrow-down', 'bg-soft text-primary-dark border-line'],
             'sedang' => ['Sedang', 'minus', 'bg-mint text-accent-text border-accent/40'],
-            'tinggi' => ['Tinggi', 'arrow-up', 'bg-warning text-ink border-warning-dark'],
-            default => ['Darurat', 'alert-triangle', 'bg-danger text-white border-danger-dark'],
+            default => ['Tinggi', 'arrow-up', 'bg-warning text-ink border-warning-dark'],
         };
     }
 

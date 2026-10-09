@@ -25,7 +25,7 @@
         <div class="flex items-center gap-3 border-b-2 border-line/60 px-5 py-5">
             <span class="inline-flex size-11 items-center justify-center rounded-xl border-2 border-b-4 border-primary border-b-primary-dark bg-primary text-white"><x-icon name="heart" :size="22" /></span>
             <div class="leading-tight">
-                <p class="text-lg font-extrabold">BK Sahabat</p>
+                <p class="text-lg font-extrabold">RuangDengar</p>
                 <p class="text-[10px] font-bold tracking-wider text-primary-dark uppercase">{{ $portal }}</p>
             </div>
         </div>

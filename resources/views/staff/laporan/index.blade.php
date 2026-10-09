@@ -32,7 +32,7 @@
             <tbody>
             @forelse ($reports as $r)
                 @php $new = $r->status === 'baru'; $mine = in_array($r->id, $mineIds); @endphp
-                <tr class="{{ $r->prioritas === 'darurat' ? 'shadow-[inset_4px_0_0_var(--color-danger)]' : ($mine ? 'shadow-[inset_3px_0_0_var(--color-primary)]' : '') }}">
+                <tr class="{{ $r->risk_flagged ? 'shadow-[inset_4px_0_0_var(--color-danger)]' : ($mine ? 'shadow-[inset_3px_0_0_var(--color-primary)]' : '') }}">
                     <td class="font-mono whitespace-nowrap {{ $new ? 'font-bold' : '' }}">@if ($new)<span class="mr-1.5 inline-block size-2 rounded-full bg-primary align-middle" aria-label="Baru"></span>@endif<a href="{{ sroute('laporan.show', $r) }}" class="hover:underline">{{ $r->ticket_code }}</a></td>
                     <td class="max-w-48 truncate {{ $new ? 'font-bold' : 'font-semibold' }}">{{ $r->judul }}</td>
                     <td class="whitespace-nowrap">{{ $r->category->name }}</td>

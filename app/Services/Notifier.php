@@ -39,7 +39,7 @@ class Notifier
     {
         return match ($type) {
             'laporan_baru' => ['Laporan baru', 'file-text', 'bg-primary'],
-            'darurat' => ['Prioritas darurat', 'alert-triangle', 'bg-danger'],
+            'darurat' => ['Perlu perhatian segera', 'alert-triangle', 'bg-danger'],
             'ai_flagged' => ['Saran AI: berisiko tinggi', 'bot', 'bg-warning !text-ink'],
             'kelas_saya' => ['Kelas saya terlibat', 'home', 'bg-primary-dark'],
             'chat' => ['Pesan chat baru', 'message', 'bg-accent !text-ink'],

@@ -23,7 +23,7 @@
                         <td class="font-bold">{{ $c->name }}</td><td class="text-muted">{{ $c->description }}</td>
                         <td>@if ($c->is_active)<span class="chip chip-mint">Aktif</span>@else<span class="chip chip-gray">Nonaktif</span>@endif</td>
                         <td class="text-right whitespace-nowrap">
-                            <button class="btn btn-secondary btn-sm" @click='edit = @js(['id' => $c->id, 'name' => $c->name, 'description' => $c->description, 'urutan' => $c->urutan, 'is_active' => $c->is_active]); modal = true'>Ubah</button>
+                            <button class="btn btn-secondary btn-sm" @click="edit = @js(['id' => $c->id, 'name' => $c->name, 'description' => $c->description, 'urutan' => $c->urutan, 'is_active' => $c->is_active]); modal = true">Ubah</button>
                             <form method="post" action="{{ route('admin.kategori.destroy', ['insiden', $c->id]) }}" class="inline">@csrf @method('DELETE')<button class="btn btn-secondary btn-sm" aria-label="Hapus {{ $c->name }}"><x-icon name="trash" :size="14" /></button></form>
                         </td>
                     </tr>
@@ -38,7 +38,7 @@
                         <td><span class="chip chip-danger">−{{ $c->poin_pengurangan_default }}</span></td>
                         <td>@if ($c->is_active)<span class="chip chip-mint">Aktif</span>@else<span class="chip chip-gray">Nonaktif</span>@endif</td>
                         <td class="text-right whitespace-nowrap">
-                            <button class="btn btn-secondary btn-sm" @click='edit = @js(['id' => $c->id, 'name' => $c->name, 'poin' => $c->poin_pengurangan_default, 'is_active' => $c->is_active]); modal = true'>Ubah</button>
+                            <button class="btn btn-secondary btn-sm" @click="edit = @js(['id' => $c->id, 'name' => $c->name, 'poin' => $c->poin_pengurangan_default, 'is_active' => $c->is_active]); modal = true">Ubah</button>
                             <form method="post" action="{{ route('admin.kategori.destroy', ['skor', $c->id]) }}" class="inline">@csrf @method('DELETE')<button class="btn btn-secondary btn-sm" aria-label="Hapus {{ $c->name }}"><x-icon name="trash" :size="14" /></button></form>
                         </td>
                     </tr>

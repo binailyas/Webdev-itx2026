@@ -1,11 +1,12 @@
 @extends('layouts.student')
 @section('title', 'Konsultasi baru')
 @section('heading', 'Konsultasi baru')
-@section('back', route('siswa.karir.index'))
+@section('back', request('dari') === 'beranda' ? route('siswa.beranda') : route('siswa.karir.index'))
 
 @section('content')
 <form method="post" action="{{ route('siswa.karir.store') }}" class="space-y-5" x-data="{ topik: @js(old('topik', $topic ?? '')) }">
     @csrf
+    <input type="hidden" name="dari" value="{{ request('dari') }}">
     <fieldset>
         <legend class="label">Pilih topik</legend>
         <div class="flex flex-wrap gap-2">

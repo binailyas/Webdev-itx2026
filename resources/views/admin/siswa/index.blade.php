@@ -77,7 +77,7 @@
                         <td>@if ($s->is_active)<span class="chip chip-mint"><span class="size-1.5 rounded-full bg-accent"></span>Aktif</span>@else<span class="chip chip-gray"><span class="size-1.5 rounded-full bg-muted"></span>Nonaktif</span>@endif</td>
                         <td class="whitespace-nowrap">{!! $s->last_login_at ? e($s->last_login_at->translatedFormat('d M, H:i')) : '<span class="italic text-muted">Belum pernah</span>' !!}</td>
                         <td class="text-right whitespace-nowrap">
-                            <button type="button" class="btn btn-secondary btn-sm" @click='openEdit(@js(['id' => $s->id, 'name' => $s->name, 'email' => $s->email, 'nis' => $p?->nis, 'classroom_id' => $p?->classroom_id, 'angkatan' => $p?->angkatan, 'is_active' => $s->is_active]))'>Ubah</button>
+                            <button type="button" class="btn btn-secondary btn-sm" @click="openEdit(@js(['id' => $s->id, 'name' => $s->name, 'email' => $s->email, 'nis' => $p?->nis, 'classroom_id' => $p?->classroom_id, 'angkatan' => $p?->angkatan, 'is_active' => $s->is_active]))">Ubah</button>
                             <a href="{{ route('admin.siswa.show', $s) }}" class="btn btn-secondary btn-sm">Detail</a>
                         </td>
                     </tr>

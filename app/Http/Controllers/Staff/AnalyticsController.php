@@ -72,6 +72,25 @@ class AnalyticsController extends Controller
         return view('staff.analitik.kata', $this->common($request) + ['rows' => $rows, 'series' => $series, 'sel' => $sel, 'limit' => $limit, 'tab' => 'kata', 'total' => $ids->count()]);
     }
 
+    /** B3: daftar laporan yang tertaut ke satu kata kunci (dengan kutipan konteks pendek). */
+    public function keywordDetail(Request $request, string $keyword)
+    {
+        $ids = $this->ids($request);
+        $reports = IncidentReport::with('category')->whereIn('id', $ids)
+            ->whereHas('keywords', fn ($k) => $k->where('keyword', $keyword))->latest('created_at')->get();
+        if (! $this->isWk()) {
+            $reports = $reports->filter->isVisibleToBk()->values();   // B2
+        }
+        $snippet = function ($r) use ($keyword) {
+            $t = $r->judul . '. ' . $r->kronologi;
+            $p = mb_stripos($t, $keyword);
+            return $p === false ? \Illuminate\Support\Str::limit($t, 140) : (($p > 50 ? '…' : '') . trim(mb_substr($t, max(0, $p - 50), 140)) . '…');
+        };
+        audit('analitik.kata_dibuka', null, ['kata' => $keyword]);
+
+        return view('staff.analitik.kata-detail', $this->common($request) + ['keyword' => $keyword, 'reports' => $reports, 'snippet' => $snippet, 'tab' => 'kata']);
+    }
+
     /** Hitung per minggu (8 minggu terakhir), label tgl mulai minggu. */
     private function weekly($rows): array
     {

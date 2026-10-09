@@ -28,12 +28,10 @@ class AuthController extends Controller
     }
 
     // ---------------- Login terdaftar ----------------
-    public function showLogin() { return view('auth.login', ['admin' => false]); }
-    public function showAdminLogin() { return view('auth.login', ['admin' => true]); }
+    public function showLogin() { return view('auth.login'); }
 
     public function login(Request $request)
     {
-        $admin = $request->routeIs('admin.login.attempt');
         $data = $request->validate(['identifier' => 'required|string|max:120', 'password' => 'required|string']);
         $id = trim($data['identifier']);
 
@@ -44,13 +42,13 @@ class AuthController extends Controller
         }
 
         $user = $this->findUser($id);
-        $okRole = $user && ($admin ? $user->hasRole('admin') : ! $user->hasRole('admin'));
 
-        if (! $user || ! $okRole || ! Hash::check($data['password'], $user->password)) {
+        // G6: satu form untuk semua peran; peran dikenali dari akun yang cocok (nama / NIS / email + kata sandi).
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
             RateLimiter::hit($key, 300);
             \App\Models\AuditLog::create(['action' => 'login.gagal', 'data' => ['pengguna' => Str::mask($id, '*', 2)], 'created_at' => now()]);
             return back()->withInput($request->only('identifier'))
-                ->withErrors(['identifier' => $admin ? 'Email atau kata sandi belum cocok. Coba lagi.' : 'NIS/email atau kata sandi belum cocok. Coba lagi.']);
+                ->withErrors(['identifier' => 'Nama, NIS, atau email dan kata sandi belum cocok. Coba lagi.']);
         }
         if (! $user->is_active) {
             return back()->withInput($request->only('identifier'))
@@ -73,7 +71,12 @@ class AuthController extends Controller
             $profile = StudentProfile::where('nis', $id)->first();
             return $profile?->user()->with('role')->first();
         }
-        return User::with('role')->where('email', mb_strtolower($id))->first();
+        if (str_contains($id, '@')) {
+            return User::with('role')->where('email', mb_strtolower($id))->first();
+        }
+        // Nama lengkap: hanya bila tepat satu akun yang cocok (menghindari salah masuk akun).
+        $byName = User::with('role')->whereRaw('lower(name) = ?', [mb_strtolower($id)])->limit(2)->get();
+        return $byName->count() === 1 ? $byName->first() : null;
     }
 
     private function finish(Request $request, User $user)

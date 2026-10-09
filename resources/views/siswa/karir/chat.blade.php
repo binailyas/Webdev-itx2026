@@ -1,7 +1,7 @@
 @extends('layouts.student')
 @section('title', 'Konsultasi karir')
 @section('heading', 'Konsultasi karir')
-@section('back', route('siswa.karir.index'))
+@section('back', request('dari') === 'beranda' ? route('siswa.beranda') : route('siswa.karir.index', ['tab' => $room->status === 'selesai' ? 'selesai' : 'berlangsung']))
 
 @section('content')
 <div class="card card-pad mb-3 flex items-center gap-3"><span class="inline-flex size-10 items-center justify-center rounded-xl bg-soft text-primary"><x-icon name="compass" :size="20" /></span>

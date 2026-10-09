@@ -5,14 +5,14 @@
 @section('body')
 <div class="grid min-h-screen lg:grid-cols-2">
     {{-- Kiri: sambutan di latar soft --}}
-    <aside class="hidden flex-col justify-between bg-soft p-12 lg:flex">
-        <div class="flex items-center gap-3">
+    <aside class="hidden flex-col items-center justify-center gap-10 bg-soft p-12 text-center lg:flex">
+        <div class="flex items-center justify-center gap-3">
             <span class="inline-flex size-12 items-center justify-center rounded-xl border-2 border-b-4 border-primary border-b-primary-dark bg-primary text-white"><x-icon name="heart" :size="24" /></span>
-            <span class="text-xl font-extrabold">BK Sahabat</span>
+            <span class="text-xl font-extrabold">RuangDengar</span>
         </div>
-        <div>
+        <div class="flex flex-col items-center">
             {{-- Ilustrasi datar: perisai ramah --}}
-            <svg viewBox="0 0 320 260" class="mb-8 w-full max-w-xs" aria-hidden="true">
+            <svg viewBox="0 0 320 260" class="mx-auto mb-8 w-full max-w-xs" aria-hidden="true">
                 <circle cx="160" cy="130" r="112" fill="#fff" stroke="#DAD6F2" stroke-width="3"/>
                 <path d="M160 52c20 14 40 20 60 20v52c0 44-26 70-60 84-34-14-60-40-60-84V72c20 0 40-6 60-20z" fill="#6A5AE0" stroke="#4A3EB0" stroke-width="4"/>
                 <path d="m132 128 20 20 38-40" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -21,14 +21,14 @@
             <h2 class="max-w-md text-[32px] leading-tight">@yield('hero-title', 'Ruang aman untuk bercerita')</h2>
             <p class="mt-3 max-w-md text-muted">@yield('hero-text', 'Layanan terpadu bimbingan konseling sekolah. Privasi pelapor selalu kami jaga.')</p>
         </div>
-        <p class="text-xs text-muted">Sistem Layanan Terpadu BK Sekolah</p>
+        <p class="text-xs text-muted">RuangDengar · Sistem Layanan Terpadu BK Sekolah</p>
     </aside>
 
     <main class="flex items-center justify-center p-6">
         <div class="w-full max-w-[440px]">
-            <div class="mb-6 flex items-center gap-3 lg:hidden">
+            <div class="mb-6 flex items-center justify-center gap-3 lg:hidden">
                 <span class="inline-flex size-10 items-center justify-center rounded-xl bg-primary text-white"><x-icon name="heart" :size="20" /></span>
-                <span class="text-lg font-extrabold">BK Sahabat</span>
+                <span class="text-lg font-extrabold">RuangDengar</span>
             </div>
             @yield('content')
         </div>

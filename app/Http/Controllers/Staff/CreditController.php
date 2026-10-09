@@ -31,12 +31,17 @@ class CreditController extends Controller
     public function index(Request $request)
     {
         $q = $this->students();
+        $picked = array_map('intval', (array) $request->query('kelas', []));   // W1: chip kelas dapat di-toggle
+        $picked = array_values(array_intersect($picked, $this->myClassIds()));
+        if ($this->isWk() && $picked) {
+            $q->whereHas('studentProfile', fn ($p) => $p->whereIn('classroom_id', $picked));
+        }
         if ($s = trim((string) $request->query('q'))) {
             $q->where(fn ($w) => $w->where('name', 'like', "%$s%")->orWhereHas('studentProfile', fn ($p) => $p->where('nis', 'like', "%$s%")));
         }
         $list = $q->orderBy('name')->limit(40)->get();
 
-        return view('staff.skor.index', ['students' => $list, 'wk' => $this->isWk(), 'classes' => $this->classChips(), 'q' => $s ?? null]);
+        return view('staff.skor.index', ['students' => $list, 'wk' => $this->isWk(), 'classes' => $this->classChips(), 'q' => $s ?? null, 'picked' => $picked]);
     }
 
     public function show(Request $request, User $student)

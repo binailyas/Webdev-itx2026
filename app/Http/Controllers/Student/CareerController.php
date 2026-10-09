@@ -45,7 +45,7 @@ class CareerController extends Controller
         ChatMessage::create(['chat_room_id' => $room->id, 'sender_user_id' => $u->id, 'isi' => $data['pesan']]);
         Notifier::toRole('bk', 'karir', ['room_id' => $room->id, 'pesan' => "Sesi karir baru ({$data['topik']})."]);
 
-        return redirect()->route('siswa.karir.show', $room)->with('status', 'Permintaan terkirim. Guru BK akan menerima sesimu.');
+        return redirect()->route('siswa.karir.show', array_filter(['room' => $room->id, 'dari' => $request->input('dari') === 'beranda' ? 'beranda' : null]))->with('status', 'Permintaan terkirim. Guru BK akan menerima sesimu.');
     }
 
     public function show(Request $request, ChatRoom $room)

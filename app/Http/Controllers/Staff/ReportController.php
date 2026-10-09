@@ -34,6 +34,9 @@ class ReportController extends Controller
             'chatRoom as unread' => fn ($c) => $c->whereHas('messages', fn ($m) => $m->where('is_read', false)->where(fn ($w) => $w->whereNotNull('sender_anon_id')->orWhereHas('senderUser.role', fn ($r) => $r->where('name', 'siswa')))),
         ]);
 
+        if (! $this->isWk()) {
+            $q->visibleToBk();   // B2
+        }
         if ($s = trim((string) $request->query('q'))) {
             $q->where(fn ($w) => $w->where('ticket_code', 'like', "%$s%")->orWhere('judul', 'like', "%$s%"));
         }
@@ -54,7 +57,7 @@ class ReportController extends Controller
             $mineIds ? $q->whereIn('id', $mineIds) : $q->whereRaw('1 = 0');
         }
 
-        // Aktif dulu: Darurat teratas, lalu Baru, lalu terbaru.
+        // Aktif dulu: prioritas tertinggi, lalu Baru, lalu terbaru.
         $q->byPriority()->orderByRaw("CASE status WHEN 'baru' THEN 0 WHEN 'ditinjau' THEN 1 WHEN 'diproses' THEN 2 ELSE 3 END")->latest('created_at');
 
         return view('staff.laporan.index', [
@@ -68,10 +71,14 @@ class ReportController extends Controller
     {
         $user = $request->user();
 
-        // Laporan Baru yang dibuka otomatis menjadi "Ditinjau".
-        if ($report->status === 'baru') {
+        // B2: BK hanya boleh membuka laporan yang sudah ditinjau Wali Kelas (atau berisiko).
+        if ($user->hasRole('bk') && ! $report->isVisibleToBk()) {
+            return redirect()->route('bk.laporan.index')->with('error', 'Laporan ini belum ditinjau Wali Kelas, jadi belum bisa dibuka BK.');
+        }
+        // Laporan berisiko yang masih Baru dan dibuka BK langsung menjadi Ditinjau.
+        if ($report->status === 'baru' && $user->hasRole('bk')) {
             $report->update(['opened_at' => now()]);
-            app(ReportService::class)->changeStatus($report, $user, 'ditinjau', 'Laporan dibuka oleh ' . $user->role->label . '.');
+            app(ReportService::class)->changeStatus($report, $user, 'ditinjau', 'Laporan berisiko dibuka langsung oleh BK.');
             session()->now('status', 'Status diubah ke Ditinjau');
             $report->refresh();
         }
@@ -92,8 +99,9 @@ class ReportController extends Controller
     private function allowedNext(IncidentReport $r): array
     {
         $u = auth()->user();
-        if ($u->hasRole('wali_kelas') && setting('fitur.wk_status', '1') !== '1') {
-            return [];
+        if ($u->hasRole('wali_kelas')) {
+            // W2: Wali Kelas hanya boleh menandai Baru -> Ditinjau.
+            return setting('fitur.wk_status', '1') === '1' && $r->status === 'baru' ? ['ditinjau'] : [];
         }
         return collect(self::FLOW[$r->status] ?? [])->reject(fn ($s) => $s === 'diarsipkan' && ! $u->hasRole('bk'))->values()->all();
     }
@@ -118,6 +126,10 @@ class ReportController extends Controller
         ], ['status.in' => 'Perubahan status ini tidak tersedia.', 'alasan.required' => 'Tulis alasan perubahan status.']);
 
         $service->changeStatus($report, $request->user(), $data['status'], $data['alasan']);
+        if ($data['status'] === 'ditinjau' && $request->user()->hasRole('wali_kelas')) {
+            $report->update(['opened_at' => $report->opened_at ?? now()]);
+            Notifier::toRole('bk', 'laporan_baru', ['report_id' => $report->id, 'ticket' => $report->ticket_code, 'pesan' => "Laporan {$report->ticket_code} sudah ditinjau Wali Kelas dan siap diproses."]);
+        }
         return back()->with('status', 'Status diubah ke ' . \App\Support\Ui::status($data['status'])[0] . '.');
     }
 
@@ -132,7 +144,7 @@ class ReportController extends Controller
     /** Timpa saran AI / ubah prioritas manual. */
     public function override(Request $request, IncidentReport $report)
     {
-        $data = $request->validate(['priority_set' => 'required|in:rendah,sedang,tinggi,darurat', 'alasan' => 'nullable|string|max:500']);
+        $data = $request->validate(['priority_set' => 'required|in:rendah,sedang,tinggi', 'alasan' => 'nullable|string|max:500']);
         $old = $report->prioritas;
 
         $report->update(['prioritas' => $data['priority_set']]);
@@ -148,9 +160,9 @@ class ReportController extends Controller
         }
 
         $msg = 'Prioritas diubah ke ' . ucfirst($data['priority_set']) . '.';
-        if ($data['priority_set'] === 'darurat' && $old !== 'darurat') {
+        if ($data['priority_set'] === 'tinggi' && $old !== 'tinggi') {
             $ids = $report->entities()->whereNotNull('kandidat_user_id')->with('candidate.studentProfile')->get()->map(fn ($e) => $e->candidate?->studentProfile?->classroom_id)->filter()->unique();
-            Notifier::toWaliKelasOf($ids, 'darurat', ['report_id' => $report->id, 'ticket' => $report->ticket_code, 'pesan' => "Prioritas darurat pada laporan {$report->ticket_code}."]);
+            Notifier::toWaliKelasOf($ids, 'darurat', ['report_id' => $report->id, 'ticket' => $report->ticket_code, 'pesan' => "Prioritas dinaikkan ke Tinggi pada laporan {$report->ticket_code}."]);
             $msg .= ' Notifikasi dikirim ke Wali Kelas yang relevan.';
         }
         return back()->with('status', $msg);
@@ -167,6 +179,22 @@ class ReportController extends Controller
             : Notifier::toRole('bk', 'catatan', $payload);
 
         return back()->with('status', 'Catatan terkirim.');
+    }
+
+    /** B1: tampilkan lampiran (disk privat) hanya untuk staf yang berhak melihat laporan. */
+    public function attachment(Request $request, IncidentReport $report, \App\Models\ReportAttachment $attachment)
+    {
+        abort_unless($attachment->report_id === $report->id, 404);
+        if ($request->user()->hasRole('bk') && ! $report->isVisibleToBk()) {
+            abort(403);
+        }
+        $disk = \Illuminate\Support\Facades\Storage::disk('local');
+        abort_unless($disk->exists($attachment->file_path), 404, 'Berkas tidak ditemukan.');
+        audit('laporan.lampiran_dibuka', $report, ['berkas' => $attachment->file_name]);
+
+        $inline = str_starts_with((string) $attachment->mime_type, 'image/') || $attachment->mime_type === 'application/pdf';
+        return $disk->response($attachment->file_path, $attachment->file_name, ['Content-Type' => $attachment->mime_type ?: 'application/octet-stream', 'X-Content-Type-Options' => 'nosniff'],
+            $inline && ! $request->boolean('unduh') ? 'inline' : 'attachment');
     }
 
     /** Konfirmasi / tolak saran pihak terlibat (hanya yang terkonfirmasi dihitung di profil keterlibatan). */

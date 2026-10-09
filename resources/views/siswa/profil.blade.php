@@ -24,13 +24,13 @@
         <a href="{{ route('siswa.notifikasi') }}" class="flex items-center justify-between p-4 font-bold">Notifikasi<x-icon name="chevron-right" :size="18" /></a>
     @endunless
     <a href="{{ route('darurat') }}" class="flex items-center justify-between p-4 font-bold">Bantuan<x-icon name="chevron-right" :size="18" /></a>
-    <a href="{{ route('status.check') }}" class="flex items-center justify-between p-4 font-bold">Cek status dengan kode tiket<x-icon name="chevron-right" :size="18" /></a>
+    <a href="{{ route('siswa.cekstatus') }}" class="flex items-center justify-between p-4 font-bold">Cek status dengan kode tiket<x-icon name="chevron-right" :size="18" /></a>
 </div>
 
 <form method="post" action="{{ route('logout') }}" class="mt-5">@csrf<button class="btn btn-secondary btn-block"><x-icon name="log-out" :size="18" />Keluar</button></form>
 
 @if ($anon)
-    <button type="button" class="btn btn-danger btn-block mt-3" x-data @click="$dispatch('confirm', { action: '{{ route('siswa.profil.hapus') }}', method: 'DELETE', title: 'Hapus akun sementara?', text: 'Alias dan kata sandi akan hilang. Kamu tidak bisa lagi melihat status laporan lewat akun ini (kode tiket + PIN tetap bisa dipakai).', button: 'Hapus akun sementara' })">Hapus akun sementara</button>
+    <button type="button" class="btn btn-danger btn-block mt-3" x-data @click="$dispatch('confirm', { action: '{{ route('siswa.profil.hapus') }}', method: 'DELETE', title: 'Hapus akun sementara?', text: 'Alias dan kata sandi akan hilang. Kamu tidak bisa lagi melihat status laporan lewat akun ini.', button: 'Hapus akun sementara' })">Hapus akun sementara</button>
     <x-confirm-dialog />
 @endif
 @endsection

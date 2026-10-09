@@ -43,7 +43,8 @@ return new class extends Migration
             $t->date('tanggal_kejadian')->nullable();
             $t->string('lokasi')->nullable();
             $t->text('pihak_terlibat')->nullable();
-            $t->enum('prioritas', ['rendah', 'sedang', 'tinggi', 'darurat'])->default('sedang');
+            $t->enum('prioritas', ['rendah', 'sedang', 'tinggi'])->default('sedang');
+            $t->boolean('risk_flagged')->default(false);   // kata berisiko terdeteksi (self-harm/ancaman)
             $t->enum('status', ['baru', 'ditinjau', 'diproses', 'selesai', 'ditolak', 'diarsipkan'])->default('baru');
             $t->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete(); // PIC (BK)
             // Saran AI (M10)
@@ -117,7 +118,7 @@ return new class extends Migration
             $t->foreignId('report_id')->constrained('incident_reports')->cascadeOnDelete();
             $t->foreignId('user_id')->constrained('users');
             $t->enum('ai_suggestion', ['rendah', 'sedang', 'tinggi'])->nullable();
-            $t->enum('priority_set', ['rendah', 'sedang', 'tinggi', 'darurat']);
+            $t->enum('priority_set', ['rendah', 'sedang', 'tinggi']);
             $t->text('alasan')->nullable();
             $t->timestamps();
         });

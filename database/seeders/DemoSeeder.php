@@ -110,7 +110,7 @@ class DemoSeeder extends Seeder
         // [judul, kategori, kronologi, lokasi, pihak, prioritas, status, ai[label,conf,flag]|null, pelapor, hariLalu]
         $seeds = [
             ['Diejek terus soal penampilan', 'Perundungan', 'Setiap istirahat Dimas dan temannya mengejek penampilanku di kantin. Mereka menertawakan dan merekam. Sudah dua minggu dan aku jadi takut ke sekolah.', 'Kantin', 'Dimas', 'tinggi', 'baru', ['tinggi', 0.91, true], 'anon', 0],
-            ['Dikunci di toilet', 'Kekerasan fisik', 'Sepulang olahraga aku didorong lalu dikunci di toilet lantai dua oleh Farhan dan Rafi. Aku baru keluar setelah satpam datang. Lenganku memar.', 'Toilet', 'Farhan, Rafi', 'darurat', 'baru', ['tinggi', 0.94, true], 'rani', 0],
+            ['Dikunci di toilet', 'Kekerasan fisik', 'Sepulang olahraga aku didorong lalu dikunci di toilet lantai dua oleh Farhan dan Rafi. Aku baru keluar setelah satpam datang. Lenganku memar.', 'Toilet', 'Farhan, Rafi', 'tinggi', 'baru', ['tinggi', 0.94, true], 'rani', 0],
             ['Komentar kasar di grup kelas', 'Perundungan online', 'Di grup kelas ada yang terus mengirim komentar kasar dan stiker menghina tentang temanku. Banyak yang ikut tertawa.', 'Media sosial', '', 'sedang', 'baru', ['sedang', 0.78, false], 'rani', 1],
             ['Barang diambil dengan paksa', 'Ancaman', 'Uang jajan diminta paksa oleh kakak kelas di belakang kantin. Katanya kalau melapor akan dicari. Kejadian sudah tiga kali.', 'Belakang kantin', 'Rafi', 'tinggi', 'ditinjau', ['tinggi', 0.83, false], 'anon', 2],
             ['Dibentak dan dikata-katai kakak kelas', 'Kekerasan verbal', 'Di koridor aku dibentak dengan kata-kata kasar karena dianggap menghalangi jalan. Salsa melihat kejadiannya.', 'Koridor', 'Salsa', 'sedang', 'diproses', ['sedang', 0.66, false], 'rani', 4],
@@ -135,7 +135,7 @@ class DemoSeeder extends Seeder
                 'judul' => $judul, 'kronologi' => $kron, 'tanggal_kejadian' => $created->toDateString(),
                 'lokasi' => $lok, 'pihak_terlibat' => $pihak ?: null, 'prioritas' => $prio, 'status' => $status,
                 'ai_priority_suggestion' => $ai[0] ?? null, 'ai_priority_confidence' => $ai[1] ?? null,
-                'ai_flagged' => $ai[2] ?? false, 'ai_model_version_id' => $ai ? $model->id : null,
+                'ai_flagged' => $ai[2] ?? false, 'risk_flagged' => $judul === 'Dikunci di toilet', 'ai_model_version_id' => $ai ? $model->id : null,
                 'assigned_to' => in_array($status, ['diproses', 'selesai', 'ditolak', 'diarsipkan'], true) ? $bk1->id : null,
                 'created_at' => $created, 'updated_at' => $created,
             ]);

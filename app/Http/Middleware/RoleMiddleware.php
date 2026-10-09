@@ -13,7 +13,7 @@ class RoleMiddleware
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->route(in_array('admin', $roles) ? 'admin.login' : 'login');
+            return redirect()->route('login');
         }
         if (! $user->is_active || ! $user->hasRole(...$roles)) {
             abort(403, 'Halaman ini tidak tersedia untuk perananmu.');

@@ -1,10 +1,10 @@
-@extends('layouts.plain')
+@extends('layouts.student')
 @section('title', 'Cek status laporan')
+@section('heading', 'Cek status laporan')
+@section('back', route('siswa.beranda'))
 
 @section('content')
-<a href="{{ route('welcome') }}" class="btn-icon mb-6 bg-soft !text-primary-dark" aria-label="Kembali"><x-icon name="chevron-left" :size="20" /></a>
-<h1 class="text-[28px] leading-tight">Cek status laporan</h1>
-<p class="mt-2 mb-6 text-muted">Masukkan kode tiket dan PIN 6 digit yang kamu terima saat mengirim laporan.</p>
+<p class="mb-5 text-sm text-muted">Masukkan kode tiket dan PIN 6 digit yang kamu terima saat mengirim laporan.</p>
 
 @if ($report)
     <div class="card card-pad">
@@ -20,9 +20,9 @@
             @endforeach
         </ol>
     </div>
-    <a href="{{ route('status.check') }}" class="btn btn-outline btn-block mt-4">Cek tiket lain</a>
+    <a href="{{ route('siswa.cekstatus') }}" class="btn btn-outline btn-block mt-4">Cek tiket lain</a>
 @else
-    <form method="post" action="{{ route('status.check.result') }}" class="space-y-4">
+    <form method="post" action="{{ route('siswa.cekstatus.hasil') }}" class="space-y-4">
         @csrf
         <x-field name="ticket" label="Kode tiket">
             <input id="ticket" name="ticket" value="{{ old('ticket') }}" class="input font-mono uppercase @error('ticket') input-error @enderror" placeholder="BK-0231" required>

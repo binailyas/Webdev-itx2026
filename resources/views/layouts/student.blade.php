@@ -31,6 +31,8 @@
     @yield('content')
 </div>
 
+<x-chatbot />
+
 <nav class="pill-nav" aria-label="Navigasi utama">
     @foreach ($nav as [$label, $routeName, $icon, $match])
         <a href="{{ route($routeName) }}" class="pill-item" @if (request()->routeIs($match)) aria-current="page" @endif aria-label="{{ $label }}">
