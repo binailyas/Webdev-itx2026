@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
+use App\Models\IncidentCategory;
+use App\Models\IncidentReport;
+use App\Services\ReportService;
+use Illuminate\Http\Request;
+
+class ReportController extends Controller
+{
+    private function owned(Request $request, string $ticket): IncidentReport
+    {
+        return IncidentReport::ownedBy($request->attributes->get('actor'))->where('ticket_code', $ticket)->firstOrFail();
+    }
+
+    public function index(Request $request)
+    {
+        $filter = $request->query('status', 'semua');
+        $q = IncidentReport::ownedBy($request->attributes->get('actor'))->latest('id');
+        match ($filter) {
+            'baru' => $q->where('status', 'baru'),
+            'diproses' => $q->whereIn('status', ['ditinjau', 'diproses']),
+            'selesai' => $q->whereIn('status', ['selesai', 'ditolak', 'diarsipkan']),
+            default => null,
+        };
+        $reports = $q->with('chatRoom')->get();
+        $reports->each(fn ($r) => $r->setAttribute('unread', $r->chatRoom ? $r->chatRoom->messages()->where('is_read', false)->whereNotNull('sender_user_id')->count() : 0));
+
+        return view('siswa.laporan.index', ['reports' => $reports, 'filter' => $filter]);
+    }
+
+    public function create()
+    {
+        return view('siswa.laporan.create', ['categories' => IncidentCategory::where('is_active', true)->orderBy('urutan')->get()]);
+    }
+
+    public function store(Request $request, ReportService $service)
+    {
+        $data = $request->validate([
+            'category_id' => 'required|exists:incident_categories,id',
+            'judul' => 'required|string|max:150',
+            'kronologi' => 'required|string|min:10|max:5000',
+            'tanggal_kejadian' => 'nullable|date|before_or_equal:today',
+            'lokasi' => 'nullable|string|max:80',
+            'pihak_terlibat' => 'nullable|string|max:300',
+            'prioritas' => 'required|in:rendah,sedang,tinggi,darurat',
+            'lampiran' => 'nullable|array|max:5',
+            'lampiran.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
+        ], [
+            'kronologi.required' => 'Ceritakan sedikit supaya kami bisa membantu.',
+            'kronologi.min' => 'Ceritakan sedikit lebih lengkap supaya kami bisa membantu.',
+            'lampiran.max' => 'Maksimal 5 berkas.',
+            'lampiran.*.max' => 'Ukuran tiap berkas maksimal 10 MB.',
+        ]);
+
+        [$report, $pin] = $service->create($request->attributes->get('actor'), $data, $request->file('lampiran', []));
+        $request->session()->put('report_sent', ['ticket' => $report->ticket_code, 'pin' => $pin]);
+
+        return redirect()->route('siswa.laporan.sent');
+    }
+
+    public function sent(Request $request)
+    {
+        $sent = $request->session()->pull('report_sent');
+        if (! $sent) {
+            return redirect()->route('siswa.laporan.index');
+        }
+        return view('siswa.laporan.sent', $sent);
+    }
+
+    public function show(Request $request, string $ticket)
+    {
+        $report = $this->owned($request, $ticket)->load(['category', 'histories', 'chatRoom']);
+
+        // Catatan: saran AI sengaja tidak dikirim ke tampilan siswa.
+        $unread = $report->chatRoom ? $report->chatRoom->messages()->where('is_read', false)->whereNotNull('sender_user_id')->count() : 0;
+        return view('siswa.laporan.show', ['r' => $report, 'unread' => $unread]);
+    }
+}

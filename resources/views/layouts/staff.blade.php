@@ -104,6 +104,8 @@
     </div>
 </div>
 
+<x-confirm-dialog />
+
 @if ($role !== 'admin')
     @push('scripts')
     <script>

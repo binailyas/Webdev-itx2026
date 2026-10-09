@@ -173,6 +173,7 @@ Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function
     Route::get('/impor', [Admin\ImportController::class, 'index'])->name('impor.index');
     Route::get('/impor/templat', [Admin\ImportController::class, 'template'])->name('impor.template');
     Route::post('/impor/tinjau', [Admin\ImportController::class, 'preview'])->name('impor.preview');
+    Route::get('/impor/sandi', [Admin\ImportController::class, 'passwords'])->name('impor.sandi');
     Route::post('/impor/proses', [Admin\ImportController::class, 'commit'])->name('impor.commit');
 
     Route::get('/kelas', [Admin\ClassroomController::class, 'index'])->name('kelas.index');

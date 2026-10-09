@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
+use App\Models\AnonymousAccount;
+use App\Models\ChatMessage;
+use App\Models\IncidentReport;
+use App\Models\User;
+use App\Services\Notifier;
+use Illuminate\Http\Request;
+
+class ChatController extends Controller
+{
+    private function report(Request $request, string $ticket): IncidentReport
+    {
+        return IncidentReport::ownedBy($request->attributes->get('actor'))->where('ticket_code', $ticket)->with('chatRoom')->firstOrFail();
+    }
+
+    public function show(Request $request, string $ticket)
+    {
+        $r = $this->report($request, $ticket);
+        $room = $r->chatRoom;
+        $actor = $request->attributes->get('actor');
+
+        if ($room) {
+            $room->messages()->where('is_read', false)->whereNotNull('sender_user_id')
+                ->when(! $actor instanceof AnonymousAccount, fn ($q) => $q->where('sender_user_id', '!=', $actor->id))
+                ->update(['is_read' => true]);
+        }
+
+        $messages = $room ? $room->messages()->with('senderUser.role')->get() : collect();
+
+        if ($request->boolean('partial')) {
+            return view('partials.chat-messages', ['messages' => $messages, 'viewer' => 'siswa', 'actor' => $actor]);
+        }
+
+        return view('siswa.laporan.chat', ['r' => $r, 'room' => $room, 'messages' => $messages, 'actor' => $actor]);
+    }
+
+    public function send(Request $request, string $ticket)
+    {
+        $r = $this->report($request, $ticket);
+        $room = $r->chatRoom;
+        abort_unless($room && ! $room->is_readonly, 403, 'Percakapan belum dibuka atau sudah ditutup.');
+
+        $data = $request->validate(['isi' => 'required|string|max:2000']);
+        $actor = $request->attributes->get('actor');
+
+        ChatMessage::create([
+            'chat_room_id' => $room->id,
+            'sender_user_id' => $actor instanceof User ? $actor->id : null,
+            'sender_anon_id' => $actor instanceof AnonymousAccount ? $actor->id : null,
+            'isi' => $data['isi'],
+        ]);
+        if ($r->assigned_to) {
+            Notifier::to($r->assigned_to, 'chat', ['report_id' => $r->id, 'pesan' => "Pesan baru pada laporan {$r->ticket_code}."]);
+        }
+
+        return $request->expectsJson() ? response()->json(['ok' => true]) : back();
+    }
+}
