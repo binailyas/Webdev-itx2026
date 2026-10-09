@@ -207,5 +207,24 @@ class DemoSeeder extends Seeder
         Notifier::to($rani, 'status', ['pesan' => 'Status laporanmu berubah menjadi Diproses.']);
         Notifier::to($rani, 'skor', ['pesan' => 'Ada catatan pengurangan skor baru.']);
         Notifier::to($rani, 'info', ['pesan' => 'Informasi baru dari BK: Mengelola stres menjelang ujian.']);
+
+        // Riwayat login 90 hari (untuk grafik "Pengguna aktif harian") + beberapa aktivitas admin.
+        $ids = array_map(fn ($u) => $u->id, array_values($students));
+        $ids = array_merge($ids, [$bk1->id, $bk2->id, $wk1->id, $wk2->id, $wk3->id, $admin->id]);
+        mt_srand(42);
+        $rows = [];
+        for ($d = 89; $d >= 0; $d--) {
+            $day = now()->subDays($d);
+            $n = $day->isWeekend() ? mt_rand(2, 6) : mt_rand(12, 26);
+            foreach ((array) array_rand(array_flip($ids), min($n, count($ids))) as $uid) {
+                $rows[] = ['user_id' => $uid, 'action' => 'login.sukses', 'created_at' => $day->copy()->setTime(mt_rand(6, 20), mt_rand(0, 59))];
+            }
+        }
+        foreach (array_chunk($rows, 500) as $chunk) {
+            \App\Models\AuditLog::insert($chunk);
+        }
+        foreach ([['akun.dibuat', 'Budi Hartono', 2], ['akun.reset_sandi', 'Rani Putri', 1], ['role.diubah', 'Bu Sari Wulandari', 4], ['kelas.ditetapkan', 'Bu Sari Wulandari', 4], ['akun.dinonaktifkan', 'Dimas Setiawan', 6], ['login.gagal', 'x', 0]] as [$a, $t, $ago]) {
+            \App\Models\AuditLog::create(['user_id' => $a === 'login.gagal' ? null : $admin->id, 'action' => $a, 'data' => ['target' => $t], 'created_at' => now()->subDays($ago)->subMinutes(mt_rand(5, 300))]);
+        }
     }
 }

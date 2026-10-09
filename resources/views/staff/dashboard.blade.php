@@ -1,6 +1,6 @@
 @extends('layouts.staff')
 @section('title', 'Dashboard')
-@section('heading', 'Hai, ' . explode(' ', auth()->user()->name)[0])
+@section('heading', 'Hai, ' . auth()->user()->firstName())
 @section('subheading', $wk ? 'Ringkasan laporan insiden dan sorotan kelas asuhanmu.' : 'Ringkasan aktivitas masuk dan antrean yang perlu tindakan.')
 
 @section('actions')

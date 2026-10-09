@@ -27,14 +27,14 @@
 
 <section class="card mt-4 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="tbl min-w-[980px]">
-            <thead><tr><th>Tiket</th><th>Judul</th><th>Kategori</th><th>Pelapor</th><th>Prioritas</th><th>AI Saran</th>@if ($wk)<th>Kelas</th>@endif<th>Status</th><th>Umur</th><th>PIC</th><th></th></tr></thead>
+        <table class="tbl min-w-[900px]">
+            <thead><tr><th>Tiket</th><th>Judul</th><th>Kategori</th><th>Pelapor</th><th>Prioritas</th><th>AI Saran</th>@if ($wk)<th>Kelas</th>@endif<th>Status</th><th>Umur</th><th class="hidden 2xl:table-cell">PIC</th><th></th></tr></thead>
             <tbody>
             @forelse ($reports as $r)
                 @php $new = $r->status === 'baru'; $mine = in_array($r->id, $mineIds); @endphp
                 <tr class="{{ $r->prioritas === 'darurat' ? 'shadow-[inset_4px_0_0_var(--color-danger)]' : ($mine ? 'shadow-[inset_3px_0_0_var(--color-primary)]' : '') }}">
                     <td class="font-mono whitespace-nowrap {{ $new ? 'font-bold' : '' }}">@if ($new)<span class="mr-1.5 inline-block size-2 rounded-full bg-primary align-middle" aria-label="Baru"></span>@endif<a href="{{ sroute('laporan.show', $r) }}" class="hover:underline">{{ $r->ticket_code }}</a></td>
-                    <td class="max-w-64 truncate {{ $new ? 'font-bold' : 'font-semibold' }}">{{ $r->judul }}</td>
+                    <td class="max-w-48 truncate {{ $new ? 'font-bold' : 'font-semibold' }}">{{ $r->judul }}</td>
                     <td class="whitespace-nowrap">{{ $r->category->name }}</td>
                     <td class="whitespace-nowrap">@if ($r->isAnonymous())<span class="font-mono text-xs">{{ $r->reporterAnon?->alias }}</span>@else<span class="text-muted">Siswa terdaftar</span>@endif</td>
                     <td><x-priority-chip :priority="$r->prioritas" /></td>
@@ -42,7 +42,7 @@
                     @if ($wk)<td>@if ($mine)<span class="chip chip-soft"><x-icon name="home" :size="12" />Kelas saya</span>@endif</td>@endif
                     <td><x-status-chip :status="$r->status" /></td>
                     <td class="whitespace-nowrap {{ $new && $r->created_at->lt(now()->subDay()) ? 'font-bold text-warning-dark' : 'text-muted' }}">{{ \App\Support\Ui::age($r->created_at) }}</td>
-                    <td class="whitespace-nowrap text-muted">{{ $r->pic?->name ?? '—' }}</td>
+                    <td class="hidden whitespace-nowrap text-muted 2xl:table-cell">{{ $r->pic?->name ?? '—' }}</td>
                     <td class="text-right whitespace-nowrap">@if ($r->unread)<x-icon name="message" :size="18" class="mr-2 inline text-primary" aria-label="Pesan baru" />@endif
                         <a href="{{ sroute('laporan.show', $r) }}{{ $wk ? '#catatan' : '' }}" class="btn btn-secondary btn-sm">{{ $wk ? 'Beri catatan' : 'Buka' }}</a></td>
                 </tr>

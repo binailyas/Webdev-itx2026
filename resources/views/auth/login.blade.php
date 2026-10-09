@@ -18,7 +18,7 @@
             <div class="relative">
                 <input id="password" name="password" :type="show ? 'text' : 'password'" class="input pr-12" autocomplete="current-password" required>
                 <button type="button" @click="show = ! show" class="absolute top-1/2 right-3 -translate-y-1/2 text-muted" :aria-label="show ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'">
-                    <x-icon name="eye" :size="20" x-show="! show" /><x-icon name="eye-off" :size="20" x-show="show" x-cloak />
+                    <span x-show="! show"><x-icon name="eye" :size="20" /></span><span x-show="show" x-cloak><x-icon name="eye-off" :size="20" /></span>
                 </button>
             </div>
         </x-field>

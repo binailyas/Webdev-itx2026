@@ -48,6 +48,18 @@ class User extends Authenticatable
         return $this->assignments()->pluck('classroom_id')->all();
     }
 
+    /** Nama panggilan: kata pertama selain gelar/sapaan (Bu, Pak, Dra., dst). */
+    public function firstName(): string
+    {
+        $skip = ['bu', 'ibu', 'pak', 'bapak', 'dra.', 'drs.', 'dr.', 'prof.', 'h.', 'hj.'];
+        foreach (preg_split('/\s+/', trim($this->name)) as $w) {
+            if (! in_array(mb_strtolower($w), $skip, true)) {
+                return $w;
+            }
+        }
+        return $this->name;
+    }
+
     public function initials(): string
     {
         $p = preg_split('/\s+/', trim($this->name));

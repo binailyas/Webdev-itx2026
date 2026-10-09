@@ -3,7 +3,7 @@
 @section('body-class', 'min-h-screen bg-bg')
 
 @php
-    $first = $anon ? $actor->alias : explode(' ', $actor->name)[0];
+    $first = $anon ? $actor->alias : $actor->firstName();
     $score = $score ?? null;
     [$lvl, $lvlIcon, $lvlCls, $lvlBar] = $score !== null ? \App\Support\Ui::score($score) : [null, null, null, null];
 @endphp
@@ -27,8 +27,7 @@
 
 @unless ($anon)
     <a href="{{ route('siswa.kredit') }}" class="card card-pad mb-4 block hover:bg-bg">
-        <div class="flex items-center justify-between"><p class="text-sm font-bold">Skor kredit</p><span class="chip {{ $lvlCls }}"><x-icon :name="$lvlIcon" :size="14" />{{ $lvl }}</span></div>
-        <p class="mt-1 text-sm text-muted">Skor kredit <strong class="text-ink">{{ $score }}</strong> · {{ $lvl }}</p>
+        <div class="flex items-center justify-between gap-3"><p class="text-base font-bold">Skor kredit {{ $score }} · {{ $lvl }}</p><span class="chip {{ $lvlCls }}"><x-icon :name="$lvlIcon" :size="14" />{{ $lvl }}</span></div>
         <div class="bar mt-3 !h-2.5"><span class="{{ $lvlBar }}" style="width: {{ $score }}%"></span></div>
     </a>
 @endunless

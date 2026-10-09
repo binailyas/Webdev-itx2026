@@ -6,7 +6,7 @@
     $n = max(count($labels), 1);
     $max = max(1, ...array_values(array_map(fn ($s) => $s ? max($s) : 0, $series)));
     $step = max(1, (int) ceil($max / 4)); $top = $step * 4;
-    $W = 640; $H = $height; $pl = 36; $pr = 12; $pt = 12; $pb = 28;
+    $W = 640; $H = $height; $pl = 36; $pr = 26; $pt = 12; $pb = 28;
     $x = fn ($i) => $pl + ($n === 1 ? ($W - $pl - $pr) / 2 : $i * (($W - $pl - $pr) / ($n - 1)));
     $y = fn ($v) => $pt + ($H - $pt - $pb) * (1 - $v / $top);
     $every = max(1, (int) ceil($n / 6));
