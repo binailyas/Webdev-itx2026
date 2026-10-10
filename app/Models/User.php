@@ -66,12 +66,27 @@ class User extends Authenticatable
         return strtoupper(mb_substr($p[0] ?? '', 0, 1) . mb_substr($p[1] ?? '', 0, 1));
     }
 
-    /** Skor kredit berjalan: skor awal dikurangi pengurangan aktif pada tahun ajaran berjalan. */
+    /**
+     * Skor kredit: skor awal dikurangi SELURUH pengurangan aktif. Tidak direset saat naik kelas (A3);
+     * sisa tahun ajaran sebelumnya terbawa. Beri $tahunAjaran untuk menghitung satu tahun saja.
+     */
     public function creditScore(?string $tahunAjaran = null): int
     {
-        $tahunAjaran ??= setting('tahun_ajaran', Classroom::currentYear());
-        $dikurangi = $this->creditRecords()->whereNull('voided_at')
-            ->where('tahun_ajaran', $tahunAjaran)->sum('poin_dikurangi');
-        return max(0, ($this->studentProfile?->skor_awal ?? 100) - (int) $dikurangi);
+        $q = $this->creditRecords()->whereNull('voided_at');
+        if ($tahunAjaran) {
+            $q->where('tahun_ajaran', $tahunAjaran);
+        }
+        return max(0, ($this->studentProfile?->skor_awal ?? 100) - (int) $q->sum('poin_dikurangi'));
+    }
+
+    /** Saldo bawaan: skor pada akhir tahun-tahun ajaran sebelumnya (null bila belum ada riwayat tahun lalu). */
+    public function carriedScore(): ?int
+    {
+        $now = setting('tahun_ajaran', Classroom::currentYear());
+        $prior = $this->creditRecords()->whereNull('voided_at')->where('tahun_ajaran', '!=', $now);
+        if (! (clone $prior)->exists()) {
+            return null;
+        }
+        return max(0, ($this->studentProfile?->skor_awal ?? 100) - (int) $prior->sum('poin_dikurangi'));
     }
 }

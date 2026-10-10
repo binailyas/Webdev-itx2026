@@ -6,10 +6,7 @@
 <div class="grid min-h-screen lg:grid-cols-2">
     {{-- Kiri: sambutan di latar soft --}}
     <aside class="hidden flex-col items-center justify-center gap-10 bg-soft p-12 text-center lg:flex">
-        <div class="flex items-center justify-center gap-3">
-            <span class="inline-flex size-12 items-center justify-center rounded-xl border-2 border-b-4 border-primary border-b-primary-dark bg-primary text-white"><x-icon name="heart" :size="24" /></span>
-            <span class="text-xl font-extrabold">RuangDengar</span>
-        </div>
+        <img src="{{ asset('images/logo-ruangdengar.svg') }}" alt="RuangDengar" class="-my-6 h-28 w-auto max-w-none">
         <div class="flex flex-col items-center">
             {{-- Ilustrasi datar: perisai ramah --}}
             <svg viewBox="0 0 320 260" class="mx-auto mb-8 w-full max-w-xs" aria-hidden="true">
@@ -26,10 +23,7 @@
 
     <main class="flex items-center justify-center p-6">
         <div class="w-full max-w-[440px]">
-            <div class="mb-6 flex items-center justify-center gap-3 lg:hidden">
-                <span class="inline-flex size-10 items-center justify-center rounded-xl bg-primary text-white"><x-icon name="heart" :size="20" /></span>
-                <span class="text-lg font-extrabold">RuangDengar</span>
-            </div>
+            <div class="mb-4 flex justify-center lg:hidden"><img src="{{ asset('images/logo-ruangdengar.svg') }}" alt="RuangDengar" class="-my-3 h-24 w-auto max-w-none"></div>
             @yield('content')
         </div>
     </main>

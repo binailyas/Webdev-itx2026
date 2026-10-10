@@ -34,6 +34,22 @@
         </label>
     </section>
 
+    {{-- A1: ambang skor kredit; perubahan langsung terbaca di halaman skor siswa (S6) --}}
+    <section class="card card-pad">
+        <h2 class="text-lg">Skor kredit</h2>
+        <p class="mb-4 text-sm text-muted">Batas bawah tiap tingkat dan keterangannya. Berlaku langsung di halaman skor siswa. Skor hanya berkurang dan tidak direset saat naik kelas.</p>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach ([['skor_baik', 'Baik mulai dari', 90], ['skor_perhatian', 'Perhatian mulai dari', 70], ['skor_peringatan', 'Peringatan mulai dari', 50], ['skor_do', 'Batas DO (di bawah/sama dengan)', 0]] as [$k, $l, $def])
+                <x-field :name="$k" :label="$l"><input id="{{ $k }}" name="{{ $k }}" type="number" min="0" max="100" class="input" value="{{ old($k, setting($k, $def)) }}" required></x-field>
+            @endforeach
+        </div>
+        <div class="mt-4 grid gap-4 md:grid-cols-2">
+            @foreach ([['ket_baik', 'Keterangan Baik', 'Perilaku baik. Pertahankan.'], ['ket_perhatian', 'Keterangan Perhatian', 'Ada beberapa pelanggaran. Mulai perbaiki.'], ['ket_peringatan', 'Keterangan Peringatan', 'Pelanggaran berulang. Guru BK akan memanggil.'], ['ket_kritis', 'Keterangan Kritis', 'Pelanggaran serius. Pembinaan intensif.'], ['ket_do', 'Keterangan batas DO', 'Skor pada atau di bawah batas ini dapat berujung pada pemberhentian sesuai tata tertib sekolah.']] as [$k, $l, $def])
+                <x-field :name="$k" :label="$l"><textarea id="{{ $k }}" name="{{ $k }}" rows="2" class="textarea min-h-16">{{ old($k, setting($k, $def)) }}</textarea></x-field>
+            @endforeach
+        </div>
+    </section>
+
     <section class="card card-pad" x-data="{ detail: false }">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="flex items-center gap-2 text-lg"><x-icon name="bot" :size="20" class="text-primary" />AI Model</h2>

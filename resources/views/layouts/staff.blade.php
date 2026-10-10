@@ -2,6 +2,7 @@
 
 @php
     $user = auth()->user();
+    $homeRoute = ['admin' => route('admin.dashboard'), 'bk' => route('bk.dashboard'), 'wali_kelas' => route('wk.dashboard')][$user->role->name];
     $role = $user->role->name;
     $portal = ['admin' => 'Portal administrator', 'bk' => 'Portal guru BK', 'wali_kelas' => 'Portal wali kelas'][$role];
     $roleLabel = ['admin' => 'Admin sekolah', 'bk' => 'Guru BK', 'wali_kelas' => 'Wali kelas'][$role];
@@ -22,13 +23,10 @@
     {{-- Sidebar 264px --}}
     <aside :class="drawer ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
            class="fixed inset-y-0 left-0 z-40 flex w-[264px] flex-col border-r-2 border-line bg-surface transition-transform lg:sticky lg:top-0 lg:h-screen lg:shrink-0">
-        <div class="flex items-center gap-3 border-b-2 border-line/60 px-5 py-5">
-            <span class="inline-flex size-11 items-center justify-center rounded-xl border-2 border-b-4 border-primary border-b-primary-dark bg-primary text-white"><x-icon name="heart" :size="22" /></span>
-            <div class="leading-tight">
-                <p class="text-lg font-extrabold">RuangDengar</p>
-                <p class="text-[10px] font-bold tracking-wider text-primary-dark uppercase">{{ $portal }}</p>
-            </div>
-        </div>
+        <a href="{{ $homeRoute }}" class="block border-b-2 border-line/60 px-4 pt-3 pb-4" aria-label="RuangDengar, ke dashboard">
+            <img src="{{ asset('images/logo-ruangdengar.svg') }}" alt="RuangDengar" class="-mx-6 -my-1 h-[72px] w-auto max-w-none">
+            <p class="mt-1 text-[10px] font-bold tracking-wider text-primary-dark uppercase">{{ $portal }}</p>
+        </a>
         <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-4" aria-label="Navigasi utama">
             @foreach ($items as [$label, $routeName, $icon, $badgeKey, $match])
                 @php $active = collect(explode('|', $match))->contains(fn ($m) => request()->routeIs($m)); @endphp
@@ -54,8 +52,11 @@
         {{-- Header atas --}}
         <header class="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b-2 border-line bg-surface px-4 md:px-8">
             <button class="btn-icon bg-soft !text-primary-dark lg:hidden" @click="drawer = true" aria-label="Buka menu"><x-icon name="menu" :size="20" /></button>
+            {{-- G1.7: breadcrumb dapat diklik --}}
             <nav class="hidden items-center gap-2 text-sm font-semibold sm:flex" aria-label="Breadcrumb">
-                <x-icon name="home" :size="16" class="text-muted" /><span class="text-muted">/</span><span>{{ $portal }}</span>
+                <a href="{{ $homeRoute }}" class="text-muted hover:text-primary-dark" aria-label="Dashboard"><x-icon name="home" :size="16" /></a><span class="text-muted">/</span>
+                <a href="{{ $homeRoute }}" class="text-muted hover:text-primary-dark hover:underline">{{ $portal }}</a>
+                @unless (request()->url() === $homeRoute)<span class="text-muted">/</span><span class="max-w-48 truncate" aria-current="page">@yield('title')</span>@endunless
             </nav>
             <form action="{{ $searchAction }}" method="get" role="search" class="mx-auto hidden max-w-lg flex-1 md:block">
                 <label class="relative block">

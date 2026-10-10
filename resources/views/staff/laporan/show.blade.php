@@ -130,7 +130,7 @@
                 @endforeach
             </ol>
             @if ($allowed)
-                <form method="post" action="{{ sroute('laporan.status', $r) }}" class="mt-5 space-y-3 border-t-2 border-line pt-4">@csrf
+                <form method="post" action="{{ sroute('laporan.status', $r) }}" class="mt-5 space-y-3 border-t-2 border-line pt-4" @if ($wk) data-confirm="Tandai laporan ini sudah ditinjau? Perubahan ini tidak bisa dibatalkan." data-confirm-title="Tandai sudah ditinjau?" data-confirm-label="Tandai ditinjau" @endif>@csrf
                     @if ($wk)
                         {{-- W2/W3: Wali Kelas hanya dapat menandai "Ditinjau"; komponen statis (perubahan tidak bisa di-undo), bukan dropdown. --}}
                         <input type="hidden" name="status" value="ditinjau">
@@ -140,7 +140,7 @@
                         <div><label class="label" for="status">Ubah status</label><select id="status" name="status" class="select" required>@foreach ($allowed as $s)<option value="{{ $s }}">{{ \App\Support\Ui::status($s)[0] }}</option>@endforeach</select></div>
                     @endif
                     <div><label class="label" for="alasan">Alasan <span class="text-danger">*</span></label><textarea id="alasan" name="alasan" rows="2" class="textarea min-h-16" required>{{ old('alasan') }}</textarea>@error('alasan')<p class="error-text">{{ $message }}</p>@enderror</div>
-                    <button class="btn btn-primary btn-sm" @if ($wk) onclick="return confirm('Tandai laporan ini sudah ditinjau? Tidak bisa dibatalkan.')" @endif>{{ $wk ? 'Tandai sudah ditinjau' : 'Simpan status' }}</button>
+                    <button class="btn btn-primary btn-sm">{{ $wk ? 'Tandai sudah ditinjau' : 'Simpan status' }}</button>
                 </form>
             @elseif ($wk)
                 <p class="mt-4 rounded-xl bg-bg p-3 text-xs font-semibold text-muted">Wali Kelas hanya menandai laporan sebagai “Ditinjau”. Proses selanjutnya dilakukan guru BK.</p>

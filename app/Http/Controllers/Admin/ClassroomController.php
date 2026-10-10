@@ -85,7 +85,7 @@ class ClassroomController extends Controller
             set_setting('tahun_ajaran', $ta);
         });
 
-        audit('naik_kelas', null, ['tahun_baru' => $data['tahun_baru']]);
-        return redirect()->route('admin.kelas.index')->with('status', 'Naik kelas selesai. Skor kredit siswa kembali 100 pada tahun ajaran ' . $data['tahun_baru'] . '.');
+        audit('naik_kelas', null, ['tahun_baru' => $data['tahun_baru'], 'skor' => 'saldo bawaan, tidak direset']);
+        return redirect()->route('admin.kelas.index')->with('status', 'Naik kelas selesai. Skor kredit siswa tetap membawa saldo dari tahun ajaran sebelumnya (tidak direset) pada ' . $data['tahun_baru'] . '.');
     }
 }

@@ -66,7 +66,7 @@
     <div class="flex items-center justify-between border-b-2 border-line p-5"><h2 class="text-lg">{{ $wk ? 'Prioritas tertinggi' : 'Perlu tindakan' }}</h2><a href="{{ sroute('laporan.index') }}" class="text-sm font-bold text-primary-dark hover:underline">Semua laporan</a></div>
     <div class="overflow-x-auto">
         <table class="tbl">
-            <thead><tr><th>Tiket</th><th>Kategori</th><th>Prioritas</th><th>AI saran</th><th>Umur</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Tiket</th><th>Kategori</th><th>Prioritas</th><th>AI saran</th><th>Dibuat</th><th>Status</th><th></th></tr></thead>
             <tbody>
             @forelse ($queue as $q)
                 <tr>
@@ -74,7 +74,7 @@
                     <td>{{ $q->category->name }}</td>
                     <td><x-priority-chip :priority="$q->prioritas" /></td>
                     <td><x-ai-chip :suggestion="$q->ai_priority_suggestion" :confidence="$q->ai_priority_confidence" :flagged="$q->ai_flagged" /></td>
-                    <td class="whitespace-nowrap {{ $q->status === 'baru' && $q->created_at->lt(now()->subDay()) ? 'font-bold text-warning-dark' : 'text-muted' }}">@if ($q->status === 'baru' && $q->created_at->lt(now()->subDay()))<x-icon name="clock" :size="14" class="mr-1 inline" />@endif{{ \App\Support\Ui::age($q->created_at) }}</td>
+                    <td class="whitespace-nowrap {{ $q->status === 'baru' && $q->created_at->lt(now()->subDay()) ? 'font-bold text-warning-dark' : 'text-muted' }}">@if ($q->status === 'baru' && $q->created_at->lt(now()->subDay()))<x-icon name="clock" :size="14" class="mr-1 inline" />@endif{{ $q->created_at->diffForHumans() }}</td>
                     <td><x-status-chip :status="$q->status" /></td>
                     <td class="text-right"><a href="{{ sroute('laporan.show', $q) }}" class="btn btn-primary btn-sm">Tinjau</a></td>
                 </tr>

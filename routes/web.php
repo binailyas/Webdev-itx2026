@@ -88,6 +88,7 @@ $staffRoutes = function () {
     Route::post('/laporan/{report}/pihak/{entity}', [Staff\ReportController::class, 'entity'])->name('laporan.entity');
     Route::get('/laporan/{report}/chat', [Staff\ChatController::class, 'show'])->name('chat.show');
 
+    Route::get('/arsip', [Staff\ReportController::class, 'archived'])->name('arsip.index');
     Route::get('/ringkasan', [Staff\SummaryController::class, 'index'])->name('ringkasan');
     Route::get('/ringkasan/unduh', [Staff\SummaryController::class, 'download'])->name('ringkasan.unduh');
 
@@ -119,7 +120,7 @@ $staffRoutes = function () {
     Route::post('/notifikasi/baca', [Staff\NotificationController::class, 'readAll'])->name('notifikasi.baca');
 };
 
-Route::prefix('bk')->name('bk.')->middleware('role:bk')->group(function () use ($staffRoutes) {
+Route::prefix('bk')->name('bk.')->middleware(['role:bk', 'feature'])->group(function () use ($staffRoutes) {
     $staffRoutes();
 
     // Khusus BK: buka/tulis chat, izin baca Wali Kelas, arsip, karir, informasi, pembatalan skor.
@@ -144,7 +145,7 @@ Route::prefix('bk')->name('bk.')->middleware('role:bk')->group(function () use (
     Route::post('/skor/catatan/{record}/batalkan', [Staff\CreditController::class, 'void'])->name('skor.void');
 });
 
-Route::prefix('wali-kelas')->name('wk.')->middleware('role:wali_kelas')->group(function () use ($staffRoutes) {
+Route::prefix('wali-kelas')->name('wk.')->middleware(['role:wali_kelas', 'feature'])->group(function () use ($staffRoutes) {
     $staffRoutes();
 });
 

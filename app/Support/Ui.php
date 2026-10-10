@@ -43,11 +43,25 @@ class Ui
     public static function score(int $s): array
     {
         return match (true) {
-            $s >= 90 => ['Baik', 'check-circle', 'bg-mint text-accent-text border-accent/40', 'bg-accent'],
-            $s >= 70 => ['Perhatian', 'info', 'bg-warning/20 text-ink border-warning/60', 'bg-warning'],
-            $s >= 50 => ['Peringatan', 'alert-triangle', 'bg-warning/45 text-ink border-warning-dark', 'bg-warning-dark'],
+            $s >= (int) setting('skor_baik', 90) => ['Baik', 'check-circle', 'bg-mint text-accent-text border-accent/40', 'bg-accent'],
+            $s >= (int) setting('skor_perhatian', 70) => ['Perhatian', 'info', 'bg-warning/20 text-ink border-warning/60', 'bg-warning'],
+            $s >= (int) setting('skor_peringatan', 50) => ['Peringatan', 'alert-triangle', 'bg-warning/45 text-ink border-warning-dark', 'bg-warning-dark'],
             default => ['Kritis', 'alert-circle', 'bg-danger-soft text-danger-dark border-danger', 'bg-danger'],
         };
+    }
+
+    /** Tingkat skor + rentang + keterangan (dari pengaturan admin) untuk legenda. */
+    public static function scoreLevels(): array
+    {
+        $b = (int) setting('skor_baik', 90);
+        $p = (int) setting('skor_perhatian', 70);
+        $w = (int) setting('skor_peringatan', 50);
+        return [
+            ['Baik', $b . '–100', setting('ket_baik', 'Perilaku baik. Pertahankan.'), 'check-circle', 'bg-mint text-accent-text border-accent/40'],
+            ['Perhatian', $p . '–' . ($b - 1), setting('ket_perhatian', 'Ada beberapa pelanggaran. Mulai perbaiki.'), 'info', 'bg-warning/20 text-ink border-warning/60'],
+            ['Peringatan', $w . '–' . ($p - 1), setting('ket_peringatan', 'Pelanggaran berulang. Guru BK akan memanggil.'), 'alert-triangle', 'bg-warning/45 text-ink border-warning-dark'],
+            ['Kritis', '< ' . $w, setting('ket_kritis', 'Pelanggaran serius. Pembinaan intensif.'), 'alert-circle', 'bg-danger-soft text-danger-dark border-danger'],
+        ];
     }
 
     public static function age(\DateTimeInterface $t): string

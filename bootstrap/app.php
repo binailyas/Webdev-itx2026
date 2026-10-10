@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'student' => EnsureStudent::class,
+            'feature' => \App\Http\Middleware\FeatureGate::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('welcome'));
     })

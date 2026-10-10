@@ -59,7 +59,7 @@ class CreditController extends Controller
         return view('staff.skor.show', [
             'student' => $student, 'score' => $student->creditScore(), 'records' => $records, 'related' => $related,
             'cats' => CreditCategory::where('is_active', true)->orderBy('poin_pengurangan_default')->get(), 'wk' => $this->isWk(),
-            'canRecord' => ! $this->isWk() || setting('fitur.wk_skor', '1') === '1',
+            'canRecord' => \App\Support\Perm::allows(auth()->user(), 'skor.catat'),
         ]);
     }
 
@@ -72,7 +72,7 @@ class CreditController extends Controller
     {
         abort_unless($student->hasRole('siswa'), 404);
         $wk = $this->isWk();
-        abort_if($wk && (! $this->inMyClasses($student) || setting('fitur.wk_skor', '1') !== '1'), 403, 'Siswa ini bukan bagian dari kelas asuhanmu. Hubungi guru BK.');
+        abort_if($wk && (! $this->inMyClasses($student) || ! \App\Support\Perm::allows($request->user(), 'skor.catat')), 403, 'Siswa ini bukan bagian dari kelas asuhanmu. Hubungi guru BK.');
 
         $data = $request->validate([
             'category_id' => 'required|exists:credit_categories,id',

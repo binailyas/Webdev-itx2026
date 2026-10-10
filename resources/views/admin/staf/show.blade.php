@@ -85,7 +85,7 @@
                 <form method="post" action="{{ route('admin.staf.toggle', $u) }}">@csrf<button class="btn btn-outline">{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form>
                 @if ($load > 0)
                     <form method="post" action="{{ route('admin.staf.destroy', $u) }}" class="flex w-full flex-wrap items-end gap-3 rounded-xl border-2 border-danger/40 bg-danger-soft p-4"
-                          x-data @submit="if (! confirm('Alihkan {{ $load }} laporan lalu hapus akun ini? Tindakan ini dicatat di audit log.')) $event.preventDefault()">
+                          data-confirm="Alihkan {{ $load }} laporan lalu hapus akun ini? Tindakan ini dicatat di audit log." data-confirm-title="Alihkan lalu hapus akun?" data-confirm-label="Alihkan lalu hapus" data-confirm-tone="danger">
                         @csrf @method('DELETE')
                         <div class="min-w-56 flex-1">
                             <label class="label" for="alihkan_ke">Alihkan ke petugas</label>

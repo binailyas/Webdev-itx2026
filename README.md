@@ -17,7 +17,7 @@ Port bawaan Laragon: web **80**, MySQL **3306** (user `root`, tanpa sandi). `.en
 composer install
 copy .env.example .env          # lewati bila .env sudah ada
 php artisan key:generate
-# buat database kosong "bk_sahabat" (HeidiSQL/phpMyAdmin Laragon), lalu:
+# buat database kosong "ruang_dengar" (HeidiSQL/phpMyAdmin Laragon), lalu:
 php artisan migrate --seed      # skema 28 tabel + data demo (hanya env local)
 ```
 

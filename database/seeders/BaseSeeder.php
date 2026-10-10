@@ -52,9 +52,10 @@ class BaseSeeder extends Seeder
             'retensi' => 'tahun_ajaran',
             'wajib_2fa' => '1',
             'ekstraksi_chat' => '1',
-            'fitur.wk_skor' => '1',
-            'fitur.wk_status' => '1',
-            'fitur.wk_chat' => '1',
+            'skor_baik' => '90',
+            'skor_perhatian' => '70',
+            'skor_peringatan' => '50',
+            'skor_do' => '0',
         ] as $k => $v) {
             \App\Models\AppSetting::firstOrCreate(['key' => $k], ['value' => $v]);
         }

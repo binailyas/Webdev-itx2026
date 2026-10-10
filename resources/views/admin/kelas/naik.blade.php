@@ -54,7 +54,7 @@
                 @endforeach
             </ul>
         </div>
-        <div class="flex gap-3 rounded-xl border-2 border-warning bg-warning/15 p-4 text-sm font-semibold"><x-icon name="alert-triangle" :size="20" />Skor kredit siswa kembali 100 di tahun ajaran baru. Catatan lama tetap tersimpan sebagai arsip.</div>
+        <div class="flex gap-3 rounded-xl border-2 border-warning bg-warning/15 p-4 text-sm font-semibold"><x-icon name="alert-triangle" :size="20" />Skor kredit TIDAK direset: sisa skor tahun ajaran ini terbawa sebagai saldo bawaan ke tahun ajaran baru, dan tercatat di riwayat.</div>
         <label class="flex cursor-pointer items-center gap-3 text-sm font-bold"><input type="checkbox" name="konfirmasi" value="1" class="check"> Saya sudah memeriksa pemetaan dan ingin memproses</label>
         @error('konfirmasi')<p class="error-text">{{ $message }}</p>@enderror
         @error('tahun_baru')<p class="error-text">{{ $message }}</p>@enderror

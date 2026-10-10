@@ -23,7 +23,7 @@ class ReportController extends Controller
         'baru' => ['ditinjau'],
         'ditinjau' => ['diproses', 'ditolak'],
         'diproses' => ['selesai'],
-        'selesai' => ['diarsipkan'],
+        'selesai' => ['diarsipkan', 'diproses'],   // B8: BK dapat membuka kembali kasus selesai
         'ditolak' => ['diarsipkan'],
         'diarsipkan' => [],
     ];
@@ -99,16 +99,19 @@ class ReportController extends Controller
     private function allowedNext(IncidentReport $r): array
     {
         $u = auth()->user();
+        if (! \App\Support\Perm::allows($u, 'laporan.status')) {
+            return [];
+        }
         if ($u->hasRole('wali_kelas')) {
             // W2: Wali Kelas hanya boleh menandai Baru -> Ditinjau.
-            return setting('fitur.wk_status', '1') === '1' && $r->status === 'baru' ? ['ditinjau'] : [];
+            return $r->status === 'baru' ? ['ditinjau'] : [];
         }
         return collect(self::FLOW[$r->status] ?? [])->reject(fn ($s) => $s === 'diarsipkan' && ! $u->hasRole('bk'))->values()->all();
     }
 
     public static function wkMayReadChat(IncidentReport $r, $user): bool
     {
-        return setting('fitur.wk_chat', '1') === '1'
+        return \App\Support\Perm::allows($user, 'chat.baca')
             && ($r->chatRoom?->wk_diizinkan || $r->involvesClassrooms($user->classroomIds()));
     }
 
@@ -195,6 +198,27 @@ class ReportController extends Controller
         $inline = str_starts_with((string) $attachment->mime_type, 'image/') || $attachment->mime_type === 'application/pdf';
         return $disk->response($attachment->file_path, $attachment->file_name, ['Content-Type' => $attachment->mime_type ?: 'application/octet-stream', 'X-Content-Type-Options' => 'nosniff'],
             $inline && ! $request->boolean('unduh') ? 'inline' : 'attachment');
+    }
+
+    /** G3: halaman arsip kasus (BK dan Wali Kelas): pencarian dan filter. */
+    public function archived(Request $request)
+    {
+        $q = IncidentReport::with(['category', 'pic'])->where('status', 'diarsipkan');
+        if (! $this->isWk()) {
+            $q->visibleToBk();
+        }
+        if ($s = trim((string) $request->query('q'))) {
+            $q->where(fn ($w) => $w->where('ticket_code', 'like', "%$s%")->orWhere('judul', 'like', "%$s%"));
+        }
+        if ($request->filled('kategori')) $q->where('category_id', $request->query('kategori'));
+        if ($request->filled('prioritas')) $q->where('prioritas', $request->query('prioritas'));
+        if ($request->filled('dari')) $q->whereDate('archived_at', '>=', $request->query('dari'));
+        if ($request->filled('sampai')) $q->whereDate('archived_at', '<=', $request->query('sampai'));
+
+        return view('staff.arsip', [
+            'reports' => $q->latest('archived_at')->paginate(15)->withQueryString(),
+            'categories' => IncidentCategory::orderBy('urutan')->get(),
+        ]);
     }
 
     /** Konfirmasi / tolak saran pihak terlibat (hanya yang terkonfirmasi dihitung di profil keterlibatan). */
