@@ -31,6 +31,7 @@ class DashboardController extends Controller
             'baru' => $baru->count(),
             'berisiko' => (clone $baru)->where(fn ($w) => $w->where('risk_flagged', true)->orWhere('ai_flagged', true))->count(),
             'diproses' => (clone $all)->whereIn('status', ['ditinjau', 'diproses'])->count(),
+            'selesai_total' => (clone $all)->whereIn('status', ['selesai', 'diarsipkan'])->count(),
             'selesai_bulan' => (clone $all)->where('status', 'selesai')->where('updated_at', '>=', now()->startOfMonth())->count(),
             'kelas_saya' => $mine->isEmpty() ? 0 : IncidentReport::whereIn('id', $mine)->whereNotIn('status', ['selesai', 'ditolak', 'diarsipkan'])->count(),
             'karir' => $wk ? null : ChatRoom::where('type', 'karir')->where('status', 'menunggu')->count(),

@@ -23,7 +23,9 @@
             @yield('header-actions')
             @if (View::hasSection('quick-exit') || request()->routeIs('siswa.laporan.*'))
                 {{-- Keluar cepat: satu ketukan menutup ke halaman netral --}}
-                <a href="https://www.google.com" rel="noopener noreferrer" class="chip chip-gray h-9 shrink-0 !rounded-full px-3" aria-label="Keluar cepat ke halaman netral"><x-icon name="x" :size="14" />Keluar cepat</a>
+                <form method="post" action="{{ route('keluar.cepat') }}" onsubmit="try { localStorage.removeItem('bk-draf'); sessionStorage.clear(); } catch (e) {}">@csrf
+                    <button class="chip chip-gray h-9 shrink-0 cursor-pointer !rounded-full px-3 hover:bg-line/60" aria-label="Keluar cepat: keluar akun dan kembali ke halaman awal"><x-icon name="x" :size="14" />Keluar cepat</button>
+                </form>
             @endif
         </header>
     @endunless

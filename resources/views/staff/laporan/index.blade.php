@@ -47,7 +47,7 @@
                         <a href="{{ sroute('laporan.show', $r) }}{{ $wk ? '#catatan' : '' }}" class="btn btn-secondary btn-sm">{{ $wk ? 'Beri catatan' : 'Buka' }}</a></td>
                 </tr>
             @empty
-                <tr><td colspan="11"><x-empty icon="inbox" title="Antrean kosong" text="Tidak ada laporan yang cocok dengan filter." /></td></tr>
+                <tr><td colspan="11"><x-empty art icon="inbox" title="Antrean kosong" text="Tidak ada laporan yang cocok dengan filter." /></td></tr>
             @endforelse
             </tbody>
         </table>

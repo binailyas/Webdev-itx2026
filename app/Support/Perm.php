@@ -77,6 +77,6 @@ class Perm
             return false;
         }
         $default = self::defaults()[$role][$feature] ?? 'n';
-        return $default !== 'n' || in_array($role, config("permissions.grantable.$feature", []), true);
+        return $default !== 'n' || in_array($role, (config('permissions.grantable') ?? [])[$feature] ?? [], true);
     }
 }

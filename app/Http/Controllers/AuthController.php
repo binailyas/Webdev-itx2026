@@ -204,6 +204,16 @@ class AuthController extends Controller
         return redirect()->route('siswa.beranda');
     }
 
+    /** S2/K1: keluar cepat = logout semua sesi lalu ke landing page (menyembunyikan layar). */
+    public function quickExit(Request $request)
+    {
+        Auth::guard('web')->logout();
+        Auth::guard('anon')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('welcome');
+    }
+
     public function logout(Request $request)
     {
         Auth::guard('web')->logout();

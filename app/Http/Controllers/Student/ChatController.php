@@ -38,6 +38,26 @@ class ChatController extends Controller
         return view('siswa.laporan.chat', ['r' => $r, 'room' => $room, 'messages' => $messages, 'actor' => $actor]);
     }
 
+    /** S5/G4.4: siswa (juga anonim) membuka sesi chat dengan BK langsung setelah melapor. */
+    public function start(Request $request, string $ticket)
+    {
+        $r = $this->report($request, $ticket);
+        $actor = $request->attributes->get('actor');
+
+        if (! $r->chatRoom) {
+            $room = \App\Models\ChatRoom::create([
+                'type' => 'insiden', 'report_id' => $r->id, 'status' => 'berlangsung',
+                'created_by' => $actor instanceof User ? $actor->id : null,
+            ]);
+            $room->participants()->create(['user_id' => $r->reporter_user_id, 'anon_id' => $r->reporter_anon_id, 'role' => 'pelapor']);
+            $pesan = "Siswa membuka chat pada laporan {$r->ticket_code}" . ($r->risk_flagged ? ' (berisiko, mohon segera dibalas).' : '.');
+            $r->assigned_to ? Notifier::to($r->assigned_to, 'chat', ['report_id' => $r->id, 'pesan' => $pesan]) : Notifier::toRole('bk', 'chat', ['report_id' => $r->id, 'pesan' => $pesan]);
+            audit('chat.dimulai_siswa', $r);
+        }
+
+        return redirect()->route('siswa.laporan.chat', $r->ticket_code);
+    }
+
     public function send(Request $request, string $ticket)
     {
         $r = $this->report($request, $ticket);
@@ -53,9 +73,8 @@ class ChatController extends Controller
             'sender_anon_id' => $actor instanceof AnonymousAccount ? $actor->id : null,
             'isi' => $data['isi'],
         ]);
-        if ($r->assigned_to) {
-            Notifier::to($r->assigned_to, 'chat', ['report_id' => $r->id, 'pesan' => "Pesan baru pada laporan {$r->ticket_code}."]);
-        }
+        $payload = ['report_id' => $r->id, 'pesan' => "Pesan baru pada laporan {$r->ticket_code}."];
+        $r->assigned_to ? Notifier::to($r->assigned_to, 'chat', $payload) : Notifier::toRole('bk', 'chat', $payload);
 
         return $request->expectsJson() ? response()->json(['ok' => true]) : back();
     }

@@ -3,6 +3,7 @@
 @section('heading', 'Konsultasi karir')
 
 @section('content')
+<img src="{{ asset('images/career.svg') }}" alt="" class="mb-4 w-full rounded-xl">
 <div class="tabs mb-4">
     <a href="?tab=berlangsung" class="tab" @if ($tab === 'berlangsung') aria-current="page" @endif>Berlangsung</a>
     <a href="?tab=selesai" class="tab" @if ($tab === 'selesai') aria-current="page" @endif>Selesai</a>

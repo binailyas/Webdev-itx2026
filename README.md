@@ -8,6 +8,7 @@ Lima peran: **Siswa**, **Anonim**, **Admin**, **Guru BK**, **Wali Kelas** (tanpa
 ## Jalankan lokal (Laragon, port bawaan)
 
 Port bawaan Laragon: web **80**, MySQL **3306** (user `root`, tanpa sandi). `.env` sudah disetel demikian.
+Nama database: **`ruang_dengar`** (sebelumnya `bk_sahabat`).
 
 1. Letakkan folder proyek di `C:\laragon\www\ruangdengar` → Laragon otomatis membuat **http://ruangdengar.test** (ubah `APP_URL` bila perlu).
    Tanpa Laragon: `.\serve-local.ps1` menjalankan `php artisan serve` di **http://127.0.0.1:80**.
@@ -25,6 +26,21 @@ php artisan migrate --seed      # skema 28 tabel + data demo (hanya env local)
    (unduh `tailwindcss-windows-x64.exe` v4.1 ke `tools/tailwindcss.exe`):
    `composer css` (sekali) atau `composer css:watch`.
 
+### Pindah dari database lama `bk_sahabat`
+
+Salin tabel dan data ke `ruang_dengar` (tanpa menghapus yang lama), lalu `php artisan migrate`:
+
+```sql
+CREATE DATABASE ruang_dengar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- per tabel:  CREATE TABLE ruang_dengar.t LIKE bk_sahabat.t;  INSERT INTO ruang_dengar.t SELECT * FROM bk_sahabat.t;
+```
+
+Atau `mysqldump bk_sahabat | mysql ruang_dengar`. Setelah yakin berjalan, `bk_sahabat` boleh dihapus.
+
+### Penjadwal (arsip kasus otomatis)
+
+Kasus Selesai diarsipkan 30 hari kemudian (pemberitahuan hari ke-25) oleh `php artisan kasus:arsipkan`, dijadwalkan harian.
+Jalankan scheduler tiap menit: cron `* * * * * php artisan schedule:run`, atau Task Scheduler Windows memanggil `php artisan schedule:run`.
 ### Akun demo (kata sandi: `password`)
 
 | Peran | Login |
@@ -55,6 +71,9 @@ saran AI tak bocor ke siswa, 2FA, akun anonim).
 
 ## Batasan yang perlu diketahui
 
+* Hak akses per peran diedit admin di Role dan akses (tabel `role_permissions`); ambang skor kredit di Pengaturan.
+* Skor kredit tidak direset saat naik kelas (saldo bawaan).
+* Gambar informasi BK disajikan lewat `/media/informasi/...` (tanpa `storage:link`).
 * Login satu form (`/masuk`): nama lengkap (hanya bila unik), NIS, atau email; peran dikenali otomatis.
 * Alur laporan: Baru → Wali Kelas menandai Ditinjau (satu-satunya perubahan status untuk WK) → BK memproses sampai diarsipkan. Laporan berisiko (kata berisiko / AI ≥ 90% Tinggi) langsung terlihat BK.
 * Asisten chat di beranda siswa berbasis aturan (bukan LLM).

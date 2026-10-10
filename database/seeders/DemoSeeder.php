@@ -137,6 +137,8 @@ class DemoSeeder extends Seeder
                 'ai_priority_suggestion' => $ai[0] ?? null, 'ai_priority_confidence' => $ai[1] ?? null,
                 'ai_flagged' => $ai[2] ?? false, 'risk_flagged' => $judul === 'Dikunci di toilet', 'ai_model_version_id' => $ai ? $model->id : null,
                 'assigned_to' => in_array($status, ['diproses', 'selesai', 'ditolak', 'diarsipkan'], true) ? $bk1->id : null,
+                'selesai_at' => in_array($status, ['selesai', 'diarsipkan'], true) ? $created->copy()->addHours(15) : null,
+                'archived_at' => $status === 'diarsipkan' ? $created->copy()->addDays(31) : null,
                 'created_at' => $created, 'updated_at' => $created,
             ]);
             $r->histories()->create(['status_to' => 'baru', 'alasan' => 'Laporan dikirim.', 'created_at' => $created, 'updated_at' => $created]);

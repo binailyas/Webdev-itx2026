@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/', [PublicController::class, 'welcome'])->name('welcome');
 Route::get('/darurat', [PublicController::class, 'darurat'])->name('darurat');
+Route::get('/media/informasi/{file}', [PublicController::class, 'informationImage'])->where('file', '[A-Za-z0-9._-]+')->name('media.informasi');
 Route::get('/lupa-password', [PublicController::class, 'forgot'])->name('forgot');
 Route::redirect('/admin/masuk', '/masuk');   // G6: tidak ada lagi login admin terpisah
 
@@ -31,6 +32,7 @@ Route::get('/lapor-anonim/berhasil', [AuthController::class, 'anonCreated'])->na
 Route::get('/masuk-anonim', [AuthController::class, 'showAnonLogin'])->name('login.anon');
 Route::post('/masuk-anonim', [AuthController::class, 'anonLogin'])->name('login.anon.attempt');
 Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
+Route::post('/keluar-cepat', [AuthController::class, 'quickExit'])->name('keluar.cepat');
 
 Route::get('/badges', [Staff\NotificationController::class, 'badges'])->name('badges')->middleware('role:bk,wali_kelas');
 
@@ -59,6 +61,7 @@ Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function ()
     Route::get('/laporan/{ticket}', [Student\ReportController::class, 'show'])->name('laporan.show');
     Route::get('/laporan/{ticket}/chat', [Student\ChatController::class, 'show'])->name('laporan.chat');
     Route::post('/laporan/{ticket}/chat', [Student\ChatController::class, 'send'])->name('laporan.chat.send');
+    Route::post('/laporan/{ticket}/chat/mulai', [Student\ChatController::class, 'start'])->name('laporan.chat.mulai');
 
     Route::middleware('student:registered')->group(function () {
         Route::get('/karir', [Student\CareerController::class, 'index'])->name('karir.index');

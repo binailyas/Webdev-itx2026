@@ -46,6 +46,18 @@
             @endif
         </section>
 
+        {{-- G4.1: ringkasan otomatis (ekstraktif, bukan AI generatif) --}}
+        <section class="card card-pad border-primary/40 bg-soft/40">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2"><h2 class="flex items-center gap-2 text-lg"><x-icon name="sparkles" :size="18" class="text-primary" />Ringkasan otomatis</h2>
+                <span class="text-[11px] font-semibold text-muted">Dirangkum dari teks laporan · bukan keputusan</span></div>
+            <p class="text-sm leading-relaxed">{{ $ringkas['kalimat'] }}</p>
+            <dl class="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                <div><dt class="font-bold tracking-wider text-muted uppercase">Kata kunci</dt><dd class="mt-1 flex flex-wrap gap-1">@forelse ($ringkas['kata'] as $k)<span class="chip chip-soft h-6">{{ $k }}</span>@empty<span class="text-muted">—</span>@endforelse</dd></div>
+                <div><dt class="font-bold tracking-wider text-muted uppercase">Fakta</dt><dd class="mt-1 font-semibold">{{ $ringkas['fakta'] }}</dd></div>
+            </dl>
+            <p class="mt-3 flex items-center gap-2 text-xs font-semibold"><x-icon name="bot" :size="14" class="text-primary" />{{ $ringkas['ai'] }}</p>
+        </section>
+
         {{-- Pihak terlibat --}}
         <section class="card card-pad" x-data="{ panel: false }">
             <div class="mb-3 flex items-center justify-between"><h2 class="text-lg">Pihak terlibat</h2>
@@ -69,19 +81,19 @@
                 <div class="flex items-center justify-between border-b-2 border-line p-5"><h2 class="text-xl">Tandai pihak terlibat</h2><button type="button" class="btn-icon bg-soft !text-primary-dark" @click="panel = false" aria-label="Tutup"><x-icon name="x" :size="18" /></button></div>
                 <div class="flex-1 space-y-4 overflow-y-auto p-5">
                     <p class="rounded-xl bg-soft px-3 py-2 text-xs font-semibold text-primary-dark">Hanya yang kamu konfirmasi dihitung di profil keterlibatan.</p>
-                    @forelse ($r->entities->where('status', 'saran') as $e)
-                        <form method="post" action="{{ sroute('laporan.entity', [$r, $e]) }}" class="card-flat space-y-3 p-4" x-data="{ peran: 'terlapor' }">
+                    @forelse ($r->entities->where('status', '!=', 'ditolak') as $e)
+                        <form method="post" action="{{ sroute('laporan.entity', [$r, $e]) }}" class="card-flat space-y-3 p-4" x-data="{ peran: '{{ $e->jenis_entitas ?? 'terlapor' }}' }">
                             @csrf
-                            <div class="flex items-center justify-between"><p class="font-bold">“{{ $e->nama_entitas }}”</p><span class="chip chip-soft">Saran</span></div>
+                            <div class="flex items-center justify-between"><p class="font-bold">“{{ $e->nama_entitas }}”</p>@if ($e->status === 'terkonfirmasi')<span class="chip chip-mint">Terkonfirmasi</span>@else<span class="chip chip-soft">Saran</span>@endif</div>
                             <p class="rounded-lg bg-bg p-3 text-xs leading-relaxed text-muted">{{ $e->konteks }}</p>
                             <div><label class="label" for="s{{ $e->id }}">Kandidat siswa</label>
                                 <select id="s{{ $e->id }}" name="student_id" class="select"><option value="">Belum ditautkan</option>
-                                    @foreach ($students as $s)<option value="{{ $s->id }}" @selected($e->kandidat_user_id === $s->id)>{{ $s->name }} · {{ $s->studentProfile?->classroom?->nama_kelas }}</option>@endforeach</select></div>
+                                    @foreach ($students as $s)<option value="{{ $s->id }}" @selected(($e->user_id_terkait ?? $e->kandidat_user_id) === $s->id)>{{ $s->name }} · {{ $s->studentProfile?->classroom?->nama_kelas }}</option>@endforeach</select></div>
                             <fieldset><legend class="label">Peran</legend>
                                 <div class="grid grid-cols-4 gap-1 rounded-xl border-2 border-line p-1">
                                     @foreach ($roleLabel as $v => $l)<label class="cursor-pointer text-center"><input type="radio" name="peran" value="{{ $v }}" x-model="peran" class="peer sr-only"><span class="block rounded-lg px-1 py-1.5 text-xs font-bold text-muted peer-checked:bg-primary peer-checked:text-white">{{ $l }}</span></label>@endforeach
                                 </div></fieldset>
-                            <div class="flex gap-2"><button class="btn btn-primary btn-sm flex-1">Konfirmasi</button><button name="aksi" value="tolak" formnovalidate class="btn btn-outline btn-sm">Tolak</button></div>
+                            <div class="flex gap-2"><button class="btn btn-primary btn-sm flex-1">{{ $e->status === 'terkonfirmasi' ? 'Simpan perubahan' : 'Konfirmasi' }}</button><button name="aksi" value="tolak" formnovalidate class="btn btn-outline btn-sm">Tolak</button></div>
                         </form>
                     @empty
                         <x-empty icon="check-circle" title="Tidak ada saran tersisa" text="Semua saran sudah dikonfirmasi atau ditolak." />
@@ -137,7 +149,7 @@
                         <div class="flex items-center gap-2 rounded-xl border-2 border-line bg-bg p-3 text-sm font-semibold"><x-status-chip :status="$r->status" /><x-icon name="arrow-right" :size="16" class="text-muted" /><x-status-chip status="ditinjau" /></div>
                         <p class="help">Perubahan ini tidak bisa dibatalkan. Setelah ditinjau, laporan diteruskan ke guru BK.</p>
                     @else
-                        <div><label class="label" for="status">Ubah status</label><select id="status" name="status" class="select" required>@foreach ($allowed as $s)<option value="{{ $s }}">{{ \App\Support\Ui::status($s)[0] }}</option>@endforeach</select></div>
+                        <div><label class="label" for="status">Ubah status</label><select id="status" name="status" class="select" required>@foreach ($allowed as $s)<option value="{{ $s }}">{{ $r->status === 'selesai' && $s === 'diproses' ? 'Buka kembali (Diproses)' : \App\Support\Ui::status($s)[0] }}</option>@endforeach</select></div>
                     @endif
                     <div><label class="label" for="alasan">Alasan <span class="text-danger">*</span></label><textarea id="alasan" name="alasan" rows="2" class="textarea min-h-16" required>{{ old('alasan') }}</textarea>@error('alasan')<p class="error-text">{{ $message }}</p>@enderror</div>
                     <button class="btn btn-primary btn-sm">{{ $wk ? 'Tandai sudah ditinjau' : 'Simpan status' }}</button>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" fill="none" role="img" aria-label="Jalan bercabang dengan papan petunjuk menuju berbagai karier">
+  <rect width="360" height="200" rx="20" fill="#ECE9FD"/>
+  <circle cx="300" cy="46" r="22" fill="#E0A23A"/>
+  <path d="M-10 170c80-16 120-44 160-84 20-20 50-30 90-28" stroke="#fff" stroke-width="30" stroke-linecap="round"/>
+  <path d="M150 110c24 6 60 8 100 36" stroke="#fff" stroke-width="26" stroke-linecap="round"/>
+  <path d="M-10 170c80-16 120-44 160-84 20-20 50-30 90-28" stroke="#DAD6F2" stroke-width="3" stroke-dasharray="10 10" stroke-linecap="round"/>
+  <!-- papan petunjuk -->
+  <rect x="176" y="58" width="6" height="92" rx="3" fill="#4A3EB0"/>
+  <path d="M182 64h70l12 12-12 12h-70z" fill="#6A5AE0"/><path d="M176 96h-60l-12 12 12 12h60z" fill="#1FA88A"/><path d="M182 124h54l10 10-10 10h-54z" fill="#E0A23A"/>
+  <circle cx="226" cy="76" r="4" fill="#fff"/><circle cx="130" cy="108" r="4" fill="#fff"/><circle cx="214" cy="134" r="4" fill="#26214A"/>
+  <!-- siswa kecil -->
+  <circle cx="76" cy="124" r="13" fill="#fff" stroke="#DAD6F2" stroke-width="3"/><rect x="64" y="136" width="24" height="30" rx="10" fill="#6A5AE0"/>
+</svg>

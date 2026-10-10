@@ -2,7 +2,7 @@
 @php $anon = request()->attributes->get('is_anon', false); @endphp
 <div x-data="chatbot(@js(route('siswa.chatbot')), @js($anon), @js($anon ? route('siswa.laporan.create') : route('siswa.karir.create', ['topik' => 'Lainnya', 'dari' => 'beranda'])))" @keydown.escape.window="open = false">
     <button type="button" @click="toggle()" :aria-expanded="open" aria-controls="chatbot-panel"
-            class="fixed right-4 bottom-24 z-40 inline-flex size-14 items-center justify-center rounded-full border-2 border-b-4 border-primary-dark bg-primary text-white" aria-label="Buka asisten RuangDengar">
+            class="fixed bottom-24 left-4 z-40 inline-flex size-14 items-center justify-center rounded-full border-2 border-b-4 border-primary-dark bg-primary text-white" aria-label="Buka asisten RuangDengar">
         <span x-show="! open"><x-icon name="bot" :size="26" /></span><span x-show="open" x-cloak><x-icon name="x" :size="24" /></span>
     </button>
 

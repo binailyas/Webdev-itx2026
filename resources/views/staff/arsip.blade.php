@@ -30,7 +30,7 @@
                     <td class="text-right"><a href="{{ sroute('laporan.show', $r) }}" class="btn btn-secondary btn-sm">Buka</a></td>
                 </tr>
             @empty
-                <tr><td colspan="7"><x-empty icon="archive" title="Belum ada kasus diarsipkan" text="Kasus yang sudah selesai akan masuk ke sini setelah 30 hari." /></td></tr>
+                <tr><td colspan="7"><x-empty art icon="archive" title="Belum ada kasus diarsipkan" text="Kasus yang sudah selesai akan masuk ke sini setelah 30 hari." /></td></tr>
             @endforelse
             </tbody>
         </table>

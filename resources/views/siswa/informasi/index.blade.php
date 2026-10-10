@@ -17,6 +17,7 @@
 <div class="space-y-3">
     @forelse ($items as $a)
         <a href="{{ route('siswa.informasi.show', $a->slug) }}" class="card {{ $loop->first ? 'card-pad border-primary bg-soft' : 'p-4' }} block hover:bg-bg">
+            @if ($a->image_url)<img src="{{ $a->image_url }}" alt="" loading="lazy" class="mb-3 {{ $loop->first ? 'h-40' : 'h-24' }} w-full rounded-lg border-2 border-line object-cover">@endif
             @if ($loop->first)<span class="chip border-primary bg-primary text-white">Terbaru</span>@endif
             <div class="mt-1 flex items-center gap-2"><span class="chip chip-soft">{{ $cats[$a->kategori] ?? $a->kategori }}</span><span class="text-xs text-muted">{{ $a->published_at->translatedFormat('d M Y') }}</span></div>
             <p class="mt-2 {{ $loop->first ? 'text-lg' : '' }} font-bold">{{ $a->judul }}</p>

@@ -51,10 +51,29 @@
             </div>
             <input id="lokasi" name="lokasi" x-model="f.lokasi" maxlength="80" class="input" placeholder="Atau tulis lokasi lain">
         </div>
-        <x-field name="pihak_terlibat" label="Siapa saja yang terlibat? (opsional)" help="Boleh nama atau panggilan. Pisahkan dengan koma."><input id="pihak_terlibat" name="pihak_terlibat" x-model="f.pihak_terlibat" maxlength="300" class="input" placeholder="contoh: Dimas, Rafi"></x-field>
+
+        {{-- S4: peran tiap orang yang terlibat --}}
+        <fieldset class="space-y-3 rounded-xl border-2 border-line bg-white p-4">
+            <legend class="px-1 text-[13px] font-bold">Siapa saja yang terlibat? (opsional)</legend>
+            <p class="help !mt-0">Pilih peran tiap orang. Boleh nama atau panggilan. Peran ini hanya masukan awal; guru BK dan wali kelas yang memastikan.</p>
+            <template x-for="(p, i) in f.pihak" :key="i">
+                <div class="flex flex-wrap items-center gap-2 rounded-xl border-2 border-line bg-bg p-2">
+                    <input :name="'pihak[' + i + '][nama]'" x-model="p.nama" :readonly="p.self" maxlength="80" class="input !h-11 min-w-32 flex-1" :class="p.self && 'bg-soft font-bold'" placeholder="Nama atau panggilan" :aria-label="'Nama orang ke-' + (i + 1)">
+                    <select :name="'pihak[' + i + '][peran]'" x-model="p.peran" class="select !h-11 !w-auto" :aria-label="'Peran orang ke-' + (i + 1)">
+                        <option value="korban">Korban</option><option value="terlapor">Terduga pelaku</option><option value="saksi">Saksi</option><option value="lainnya">Lainnya</option>
+                    </select>
+                    <input type="hidden" :name="'pihak[' + i + '][self]'" :value="p.self ? 1 : 0">
+                    <button type="button" class="btn-icon bg-gray-soft !text-muted" @click="f.pihak.splice(i, 1); save()" aria-label="Hapus orang ini"><x-icon name="x" :size="16" /></button>
+                </div>
+            </template>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" class="chip chip-soft cursor-pointer hover:bg-line/50" @click="f.pihak.push({ nama: '', peran: 'terlapor', self: false }); save()"><x-icon name="plus" :size="12" />Tambah orang</button>
+                <button type="button" class="chip chip-mint cursor-pointer hover:brightness-95" x-show="! f.pihak.some(p => p.self)" @click="f.pihak.unshift({ nama: 'Saya sendiri', peran: 'korban', self: true }); save()"><x-icon name="user" :size="12" />Saya sendiri (korban)</button>
+            </div>
+        </fieldset>
     </section>
 
-    {{-- 3. Bukti dan prioritas --}}
+    {{-- 3. Bukti --}}
     <section x-show="step === 3" x-cloak class="space-y-5">
         <div>
             <h2 class="mb-1 text-2xl">Punya bukti? <span class="text-base font-medium text-muted">(opsional)</span></h2>
@@ -64,18 +83,12 @@
             </label>
             <ul class="mt-3 space-y-2"><template x-for="(fl, i) in files" :key="i"><li class="flex items-center gap-3 rounded-xl border-2 border-line bg-white p-3 text-sm"><x-icon name="file-text" :size="18" class="text-primary" /><span class="flex-1 truncate font-semibold" x-text="fl.name"></span><span class="text-xs text-muted" x-text="(fl.size/1048576).toFixed(1) + ' MB'"></span></li></template></ul>
         </div>
-        <div>
-            <h2 class="mb-3 text-2xl">Seberapa mendesak?</h2>
-            <div class="space-y-3" role="radiogroup">
-                @foreach ([['rendah', 'Rendah', 'Tidak mendesak, hanya ingin BK tahu.'], ['sedang', 'Sedang', 'Mengganggu, perlu ditindaklanjuti.'], ['tinggi', 'Tinggi', 'Berulang atau berdampak serius.']] as [$v, $l, $d])
-                    <label class="cursor-pointer"><input type="radio" name="prioritas" value="{{ $v }}" x-model="f.prioritas" class="peer sr-only">
-                        <span class="card flex items-center gap-3 p-4 peer-checked:border-primary peer-checked:bg-soft"><x-priority-chip :priority="$v" /><span class="text-sm font-semibold">{{ $d }}</span></span></label>
-                @endforeach
-            </div>
-            <div x-show="f.prioritas === 'tinggi'" x-cloak class="mt-3 rounded-xl border-2 border-danger/40 bg-danger-soft p-4 text-sm font-semibold text-danger-dark">
-                Jika kamu dalam bahaya sekarang, hubungi 112.
-                <a href="{{ route('darurat') }}" class="btn btn-danger btn-sm mt-3 w-full">Buka bantuan darurat</a>
-            </div>
+        <div class="rounded-xl border-2 border-line bg-soft p-4 text-sm font-semibold text-primary-dark">
+            <x-icon name="bot" :size="16" class="mr-1 inline" />Tingkat urgensi ditentukan otomatis oleh sistem, lalu ditinjau wali kelas dan guru BK. Kamu tidak perlu memilihnya.
+        </div>
+        <div class="rounded-xl border-2 border-danger/40 bg-danger-soft p-4 text-sm font-semibold text-danger-dark">
+            Jika kamu dalam bahaya sekarang, hubungi 112.
+            <a href="{{ route('darurat') }}" class="btn btn-danger btn-sm mt-3 w-full">Buka bantuan darurat</a>
         </div>
     </section>
 
@@ -83,9 +96,9 @@
     <section x-show="step === 4" x-cloak class="space-y-4">
         <h2 class="text-2xl">Tinjau laporanmu</h2>
         <div class="card card-pad space-y-3 text-sm">
-            @foreach ([['Kategori', 'catName()', 1], ['Judul', 'f.judul', 2], ['Cerita', "f.kronologi.slice(0, 160) + (f.kronologi.length > 160 ? '…' : '')", 2], ['Tanggal', "f.tanggal_kejadian || '—'", 2], ['Lokasi', "f.lokasi || '—'", 2], ['Lampiran', "files.length + ' berkas'", 3], ['Prioritas', "f.prioritas", 3]] as [$l, $expr, $goto])
+            @foreach ([['Kategori', 'catName()', 1], ['Judul', 'f.judul', 2], ['Cerita', "f.kronologi.slice(0, 160) + (f.kronologi.length > 160 ? '…' : '')", 2], ['Tanggal', "f.tanggal_kejadian || '—'", 2], ['Lokasi', "f.lokasi || '—'", 2], ['Pihak terlibat', "pihakText()", 2], ['Lampiran', "files.length + ' berkas'", 3]] as [$l, $expr, $goto])
                 <div class="flex items-start justify-between gap-3 border-b-2 border-line/60 pb-3 last:border-0 last:pb-0">
-                    <div class="min-w-0"><p class="text-xs font-bold tracking-wider text-muted uppercase">{{ $l }}</p><p class="font-semibold capitalize-first break-words" x-text="{!! $expr !!}"></p></div>
+                    <div class="min-w-0"><p class="text-xs font-bold tracking-wider text-muted uppercase">{{ $l }}</p><p class="font-semibold break-words" x-text="{!! $expr !!}"></p></div>
                     <button type="button" class="shrink-0 text-xs font-bold text-primary-dark" @click="step = {{ $goto }}">Ubah</button>
                 </div>
             @endforeach
@@ -110,10 +123,12 @@
 <script>
 function reportForm() {
     const cats = @js($categories->pluck('name', 'id'));
+    const labels = { korban: 'korban', terlapor: 'terduga pelaku', saksi: 'saksi', lainnya: 'lainnya' };
     return {
         step: {{ $errors->any() ? 4 : 1 }}, saved: false, files: [], err: {},
-        f: { category_id: @js((string) old('category_id', '')), judul: @js(old('judul', '')), kronologi: @js(old('kronologi', '')), tanggal_kejadian: @js(old('tanggal_kejadian', '')), lokasi: @js(old('lokasi', '')), pihak_terlibat: @js(old('pihak_terlibat', '')), prioritas: @js(old('prioritas', 'sedang')) },
+        f: { category_id: @js((string) old('category_id', '')), judul: @js(old('judul', '')), kronologi: @js(old('kronologi', '')), tanggal_kejadian: @js(old('tanggal_kejadian', '')), lokasi: @js(old('lokasi', '')), pihak: @js(array_values(old('pihak', []))) },
         catName() { return cats[this.f.category_id] || '—'; },
+        pihakText() { const p = this.f.pihak.filter(x => (x.nama || '').trim()); return p.length ? p.map(x => x.nama + ' (' + (labels[x.peran] || x.peran) + ')').join(', ') : '—'; },
         next() {
             this.err = {};
             if (this.step === 2) {
@@ -124,7 +139,7 @@ function reportForm() {
             this.step++; window.scrollTo(0, 0);
         },
         save() { try { localStorage.setItem('bk-draf', JSON.stringify(this.f)); this.saved = true; setTimeout(() => this.saved = false, 1800); } catch (e) {} },
-        load() { try { const d = JSON.parse(localStorage.getItem('bk-draf') || 'null'); if (d && ! this.f.judul && ! this.f.kronologi) this.f = { ...this.f, ...d }; } catch (e) {} },
+        load() { try { const d = JSON.parse(localStorage.getItem('bk-draf') || 'null'); if (d && ! this.f.judul && ! this.f.kronologi) { this.f = { ...this.f, ...d, pihak: Array.isArray(d.pihak) ? d.pihak : [] }; } } catch (e) {} },
         clear() { try { localStorage.removeItem('bk-draf'); } catch (e) {} },
     };
 }

@@ -4,12 +4,23 @@ use App\Models\AppSetting;
 use App\Models\AuditLog;
 use Illuminate\Support\Facades\Auth;
 
-if (! function_exists('setting')) {
-    /** Baca pengaturan aplikasi (tabel app_settings) dengan cache per-request. */
-    function setting(string $key, mixed $default = null): mixed
+if (! function_exists('settings_cache')) {
+    /** Cache pengaturan per-proses; $reset=true memuat ulang dari basis data. */
+    function settings_cache(bool $reset = false): array
     {
         static $cache = null;
-        $cache ??= AppSetting::query()->pluck('value', 'key')->all();
+        if ($reset || $cache === null) {
+            $cache = AppSetting::query()->pluck('value', 'key')->all();
+        }
+        return $cache;
+    }
+}
+
+if (! function_exists('setting')) {
+    /** Baca pengaturan aplikasi (tabel app_settings). */
+    function setting(string $key, mixed $default = null): mixed
+    {
+        $cache = settings_cache();
         return array_key_exists($key, $cache) && $cache[$key] !== null ? $cache[$key] : $default;
     }
 }
@@ -18,6 +29,7 @@ if (! function_exists('set_setting')) {
     function set_setting(string $key, mixed $value): void
     {
         AppSetting::updateOrCreate(['key' => $key], ['value' => (string) $value]);
+        settings_cache(true);   // segera terbaca di request yang sama
     }
 }
 

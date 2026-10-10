@@ -5,7 +5,11 @@
 
 @section('content')
 <article>
-    <div class="mb-5 flex h-36 items-center justify-center rounded-xl border-2 border-line bg-soft text-primary"><x-icon name="book-open" :size="56" /></div>
+    @if ($a->image_url)
+        <img src="{{ $a->image_url }}" alt="Gambar untuk {{ $a->judul }}" class="mb-5 max-h-72 w-full rounded-xl border-2 border-line object-cover">
+    @else
+        <div class="mb-5 flex h-36 items-center justify-center rounded-xl border-2 border-line bg-soft text-primary"><x-icon name="book-open" :size="56" /></div>
+    @endif
     <span class="chip chip-soft">{{ $cats[$a->kategori] ?? $a->kategori }}</span>
     <h1 class="mt-2 text-[24px] leading-tight">{{ $a->judul }}</h1>
     <p class="mt-1 text-xs text-muted">{{ $a->published_at->translatedFormat('d F Y') }} · {{ $a->author->name }}</p>

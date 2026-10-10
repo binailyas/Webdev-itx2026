@@ -60,12 +60,12 @@ class IncidentReport extends Model
     /** B2: BK hanya melihat laporan yang sudah ditinjau Wali Kelas (kecuali ditandai berisiko / AI berisiko tinggi). */
     public function scopeVisibleToBk(Builder $q): Builder
     {
-        return $q->where(fn ($w) => $w->where('status', '!=', 'baru')->orWhere('risk_flagged', true)->orWhere('ai_flagged', true));
+        return $q->where(fn ($w) => $w->where('status', '!=', 'baru')->orWhere('risk_flagged', true)->orWhere('ai_flagged', true)->orWhereHas('chatRoom'));
     }
 
     public function isVisibleToBk(): bool
     {
-        return $this->status !== 'baru' || $this->risk_flagged || $this->ai_flagged;
+        return $this->status !== 'baru' || $this->risk_flagged || $this->ai_flagged || $this->chatRoom()->exists();
     }
 
     /** Urut prioritas: tinggi, sedang, rendah (portabel MySQL/SQLite). */

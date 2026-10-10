@@ -92,6 +92,7 @@ class ReportController extends Controller
         return view('staff.laporan.show', [
             'r' => $report, 'isMine' => $isMine, 'wk' => $this->isWk(), 'students' => $students,
             'allowed' => $this->allowedNext($report),
+            'ringkas' => \App\Services\AutoSummary::make($report),
             'canChat' => $this->canReadChat($report),
         ]);
     }
@@ -233,11 +234,13 @@ class ReportController extends Controller
         }
 
         $data = $request->validate(['student_id' => 'nullable|exists:users,id', 'peran' => 'required|in:terlapor,korban,saksi,lainnya']);
+        $wasConfirmed = $entity->status === 'terkonfirmasi';
+        $oldRole = $entity->jenis_entitas;   // B3: riwayat perubahan peran tercatat di audit log
         $entity->update([
             'jenis_entitas' => $data['peran'], 'user_id_terkait' => $data['student_id'] ?? null,
             'status' => 'terkonfirmasi', 'dikonfirmasi' => true, 'confirmed_by' => $request->user()->id, 'confirmed_at' => now(),
         ]);
-        audit('laporan.pihak_dikonfirmasi', $report, ['nama' => $entity->nama_entitas, 'peran' => $data['peran']]);
+        audit($wasConfirmed ? 'laporan.pihak_diubah' : 'laporan.pihak_dikonfirmasi', $report, ['nama' => $entity->nama_entitas, 'peran_lama' => $oldRole, 'peran' => $data['peran']]);
         return back()->with('status', 'Pihak terlibat dikonfirmasi.');
     }
 }

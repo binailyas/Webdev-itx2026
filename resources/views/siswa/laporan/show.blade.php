@@ -40,6 +40,14 @@
 @if ($r->chatRoom)
     <a href="{{ route('siswa.laporan.chat', $r->ticket_code) }}" class="btn btn-primary btn-lg btn-block mt-4 relative"><x-icon name="message" :size="20" />Buka chat @if ($unread)<span class="num-badge num-badge-danger" aria-label="{{ $unread }} pesan baru">{{ $unread }}</span>@endif</a>
 @else
-    <p class="mt-4 text-center text-xs text-muted">Bila BK membuka percakapan, tombol chat akan muncul di sini.</p>
+    {{-- S5/G4.4: siswa (termasuk anonim) dapat langsung membuka chat dengan BK tanpa menunggu. --}}
+    <form method="post" action="{{ route('siswa.laporan.chat.mulai', $r->ticket_code) }}" class="mt-4">@csrf
+        @if ($r->risk_flagged || $r->prioritas === 'tinggi')
+            <button class="btn btn-danger btn-lg btn-block"><x-icon name="phone" :size="20" />Hubungi BK sekarang</button>
+        @else
+            <button class="btn btn-primary btn-lg btn-block"><x-icon name="message" :size="20" />Chat dengan BK</button>
+        @endif
+        <p class="mt-2 text-center text-xs text-muted">{{ request()->attributes->get('is_anon') ? 'Kamu tetap anonim di chat.' : 'Guru BK akan membalas di chat ini.' }}</p>
+    </form>
 @endif
 @endsection

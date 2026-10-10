@@ -46,7 +46,11 @@ class AiClassifyPriorityJob implements ShouldQueue
 
         $flag = $result['label'] === 'tinggi' && $result['confidence'] >= config('ai.flag_threshold');
 
+        // Prioritas awal "rendah" diganti saran AI, kecuali sudah ditimpa petugas atau ditandai berisiko (tetap Tinggi).
+        $keep = $report->overrides()->exists() || $report->risk_flagged;
+
         $report->update([
+            'prioritas' => $keep ? $report->prioritas : $result['label'],
             'ai_priority_suggestion' => $result['label'],
             'ai_priority_confidence' => $result['confidence'],
             'ai_flagged' => $flag,

@@ -38,12 +38,13 @@ class RoleController extends Controller
                         }
                         $old = Perm::value($role, $feature);
                         $default = Perm::defaults()[$role][$feature] ?? 'n';
-                        $checked = $request->boolean("p.$feature.$role");
+                        // nama fitur memuat titik: baca langsung dari array p[fitur][peran], bukan notasi titik
+                        $checked = filter_var(($request->input('p', [])[$feature][$role] ?? false), FILTER_VALIDATE_BOOLEAN);
                         // Dicentang: kembalikan ke nilai default (y atau r) — bila default 'n' (fitur yang diberikan), jadi 'y'.
                         $new = $checked ? ($default === 'n' ? 'y' : $default) : 'n';
                         if ($new !== $old) {
                             DB::table('role_permissions')->updateOrInsert(['role' => $role, 'feature' => $feature], ['value' => $new, 'updated_at' => now(), 'created_at' => now()]);
-                            $changes[] = "$role/$feature: $old→$new";
+                            $changes[] = "{$role}/{$feature}: {$old}→{$new}";
                         }
                     }
                 }

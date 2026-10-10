@@ -39,7 +39,7 @@ class ReportService
                 'tanggal_kejadian' => $data['tanggal_kejadian'] ?? null,
                 'lokasi' => $data['lokasi'] ?? null,
                 'pihak_terlibat' => $data['pihak_terlibat'] ?? null,
-                'prioritas' => $data['prioritas'] ?? 'sedang',
+                'prioritas' => $data['prioritas'] ?? 'rendah',   // nilai awal; AI lalu wali kelas/BK menyesuaikan
                 'status' => 'baru',
             ]);
 
@@ -69,10 +69,26 @@ class ReportService
         }
 
         app(KeywordExtractor::class)->process($report->fresh());
+        $this->storePihak($report, $data['pihak'] ?? []);
         $this->notifyStaff($report->fresh());
         AiClassifyPriorityJob::dispatch($report->id);
 
         return [$report->fresh(), $pin];
+    }
+
+    /** S4: simpan peran awal tiap orang terlibat sebagai saran (BK/Wali Kelas yang memastikan). */
+    private function storePihak(IncidentReport $report, array $pihak): void
+    {
+        foreach ($pihak as $p) {
+            $peran = $p['peran'] ?? 'lainnya';
+            if (! empty($p['self'])) {
+                $report->entities()->create(['nama_entitas' => 'Pelapor (saya sendiri)', 'jenis_entitas' => 'korban', 'status' => 'saran', 'konteks' => 'Dipilih pelapor sebagai dirinya sendiri.']);
+                continue;
+            }
+            $nama = trim((string) ($p['nama'] ?? ''));
+            $e = $report->entities()->whereRaw('lower(nama_entitas) = ?', [mb_strtolower($nama)])->first();
+            $e ? $e->update(['jenis_entitas' => $peran]) : $report->entities()->create(['nama_entitas' => $nama, 'jenis_entitas' => $peran, 'status' => 'saran', 'konteks' => 'Disebut pelapor di kolom pihak terlibat.']);
+        }
     }
 
     private function notifyStaff(IncidentReport $report): void
@@ -94,30 +110,67 @@ class ReportService
         }
     }
 
-    /** Ubah status + riwayat + notifikasi ke pelapor. */
-    public function changeStatus(IncidentReport $report, User $by, string $to, ?string $alasan): void
+    /**
+     * Ubah status + riwayat + notifikasi ke pelapor. $by null = sistem (arsip otomatis).
+     * Selesai memulai hitungan 30 hari menuju arsip; membuka kembali (selesai -> diproses) mengatur ulang hitungan.
+     */
+    public function changeStatus(IncidentReport $report, ?User $by, string $to, ?string $alasan): void
     {
         $from = $report->status;
         if ($from === $to) {
             return;
         }
 
-        $report->update([
+        $attrs = [
             'status' => $to,
-            'archived_at' => $to === 'diarsipkan' ? now() : $report->archived_at,
-            'assigned_to' => $report->assigned_to ?? ($by->hasRole('bk') ? $by->id : null),
-        ]);
-        $report->histories()->create(['user_id' => $by->id, 'status_from' => $from, 'status_to' => $to, 'alasan' => $alasan]);
+            'assigned_to' => $report->assigned_to ?? ($by?->hasRole('bk') ? $by->id : null),
+        ];
+        if ($to === 'selesai') {
+            $attrs += ['selesai_at' => now(), 'arsip_notified_at' => null];
+        }
+        if ($from === 'selesai' && $to === 'diproses') {
+            $attrs += ['selesai_at' => null, 'arsip_notified_at' => null];   // kasus dibuka kembali
+        }
+        if ($to === 'diarsipkan') {
+            $attrs += ['archived_at' => now()];
+        }
+        $report->update($attrs);
+        $report->histories()->create(['user_id' => $by?->id, 'status_from' => $from, 'status_to' => $to, 'alasan' => $alasan]);
         audit('laporan.status', $report, ['dari' => $from, 'ke' => $to]);
 
-        // Chat otomatis baca-saja saat laporan selesai.
-        if (in_array($to, ['selesai', 'ditolak', 'diarsipkan'], true) && $report->chatRoom) {
-            $report->chatRoom->update(['is_readonly' => true, 'closed_at' => now()]);
+        // Chat baca-saja saat selesai/ditolak/diarsipkan; dibuka lagi bila kasus dibuka kembali.
+        if ($report->chatRoom) {
+            if (in_array($to, ['selesai', 'ditolak', 'diarsipkan'], true)) {
+                $report->chatRoom->update(['is_readonly' => true, 'closed_at' => now()]);
+            } elseif ($from === 'selesai') {
+                $report->chatRoom->update(['is_readonly' => false, 'closed_at' => null]);
+            }
         }
 
         $reporter = $report->reporterUser ?? $report->reporterAnon;
         if ($reporter) {
             Notifier::to($reporter, 'status', ['ticket' => $report->ticket_code, 'pesan' => "Status laporan {$report->ticket_code} berubah."]);
+        }
+
+        if ($to === 'diarsipkan') {
+            $this->closeAnonymousAccess($report);
+        }
+    }
+
+    /**
+     * G3: setelah diarsipkan, akses akun anonim pelapor dihapus (isi kasus tetap tersimpan sebagai arsip).
+     * Akun dipertahankan bila masih punya kasus lain yang belum diarsipkan.
+     */
+    private function closeAnonymousAccess(IncidentReport $report): void
+    {
+        if (! $report->reporter_anon_id) {
+            return;
+        }
+        $stillOpen = IncidentReport::where('reporter_anon_id', $report->reporter_anon_id)
+            ->where('id', '!=', $report->id)->whereNotIn('status', ['diarsipkan', 'ditolak'])->exists();
+        if (! $stillOpen) {
+            AnonymousAccount::whereKey($report->reporter_anon_id)->delete();
+            audit('akun.anonim_ditutup', $report, ['alasan' => 'kasus diarsipkan']);
         }
     }
 }

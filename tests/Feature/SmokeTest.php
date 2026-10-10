@@ -86,7 +86,7 @@ class SmokeTest extends TestCase
                   '/wali-kelas/analitik/lokasi', '/wali-kelas/analitik/tren', '/wali-kelas/analitik/watchlist', '/wali-kelas/skor', '/wali-kelas/notifikasi'] as $url) {
             $this->get($url)->assertOk();
         }
-        $this->get('/wali-kelas/pengaturan-analitik')->assertRedirect('/wali-kelas/analitik/watchlist');
+        $this->get('/wali-kelas/pengaturan-analitik')->assertForbidden();   // K4: menu ini dikontrol izin (default tidak diberikan ke Wali Kelas)
     }
 
     public function test_wali_kelas_chat_is_read_only_and_scoped(): void
@@ -211,7 +211,9 @@ class SmokeTest extends TestCase
         $this->get('/siswa')->assertSee('Butuh bantuan sekarang');
         $this->get('/siswa/laporan/buat')->assertDontSee('Darurat');
         $cat = \App\Models\IncidentCategory::first();
-        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'x', 'kronologi' => 'Aku ingin mati rasanya, tolong.', 'prioritas' => 'darurat'])->assertSessionHasErrors('prioritas');
+        // S3: siswa tidak lagi memilih prioritas; nilai kiriman diabaikan dan nilai awal "rendah".
+        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Biasa', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.', 'prioritas' => 'tinggi'])->assertRedirect();
+        $this->assertSame('rendah', IncidentReport::latest('id')->first()->prioritas);
         $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Curhat', 'kronologi' => 'Aku ingin mati rasanya, tolong aku.', 'prioritas' => 'rendah'])->assertRedirect();
         $r = IncidentReport::latest('id')->first();
         $this->assertSame('tinggi', $r->prioritas);   // kata berisiko menaikkan ke Tinggi

@@ -18,7 +18,7 @@
             <div class="mt-2 flex items-center justify-between text-xs text-muted"><span>{{ $r->created_at->translatedFormat('d M Y') }}</span><x-priority-chip :priority="$r->prioritas" /></div>
         </a>
     @empty
-        <div class="card"><x-empty icon="file-text" title="Belum ada laporan" text="Kamu bisa cerita kapan pun."><x-btn :href="route('siswa.laporan.create')" icon="plus">Buat laporan</x-btn></x-empty></div>
+        <div class="card"><x-empty art icon="file-text" title="Belum ada laporan" text="Kamu bisa cerita kapan pun."><x-btn :href="route('siswa.laporan.create')" icon="plus">Buat laporan</x-btn></x-empty></div>
     @endforelse
 </div>
 

@@ -37,9 +37,9 @@
             <p class="mt-2 flex flex-wrap gap-1">@foreach ($classes as $c)<span class="chip chip-soft h-5 text-[10px]">{{ $c->nama_kelas }}</span>@endforeach</p>
         </a>
     @else
-        <x-stat label="Sesi karir menunggu" :value="$stats['karir']" icon="compass" tone="mint" :href="route('bk.karir.index')" />
-        <x-stat label="Rata-rata respons" :value="$stats['respons'] ?? '—'" :unit="$stats['respons'] ? 'jam' : null" icon="clock" />
         <x-stat label="Laporan diproses" :value="$stats['diproses']" icon="loader" tone="warn" />
+        <x-stat label="Total laporan selesai" :value="$stats['selesai_total']" icon="check-circle" tone="mint" />
+        <x-stat label="Sesi karir menunggu" :value="$stats['karir']" icon="compass" :href="route('bk.karir.index')" />
     @endif
 </div>
 

@@ -44,8 +44,10 @@ class ReportController extends Controller
             'kronologi' => 'required|string|min:10|max:5000',
             'tanggal_kejadian' => 'nullable|date|before_or_equal:today',
             'lokasi' => 'nullable|string|max:80',
-            'pihak_terlibat' => 'nullable|string|max:300',
-            'prioritas' => 'required|in:rendah,sedang,tinggi',
+            'pihak' => 'nullable|array|max:10',
+            'pihak.*.nama' => 'nullable|string|max:80',
+            'pihak.*.peran' => 'nullable|in:korban,terlapor,saksi,lainnya',
+            'pihak.*.self' => 'nullable|boolean',
             'lampiran' => 'nullable|array|max:5',
             'lampiran.*' => 'file|max:10240|mimes:jpg,jpeg,png,webp,pdf,doc,docx',
         ], [
@@ -54,6 +56,10 @@ class ReportController extends Controller
             'lampiran.max' => 'Maksimal 5 berkas.',
             'lampiran.*.max' => 'Ukuran tiap berkas maksimal 10 MB.',
         ]);
+
+        // S4: tiap orang punya peran; "Saya sendiri" tidak menyimpan nama.
+        $data['pihak'] = collect($data['pihak'] ?? [])->filter(fn ($p) => ! empty($p['self']) || trim((string) ($p['nama'] ?? '')) !== '')->values()->all();
+        $data['pihak_terlibat'] = collect($data['pihak'])->reject(fn ($p) => ! empty($p['self']))->pluck('nama')->map(fn ($n) => trim($n))->implode(', ') ?: null;
 
         [$report, $pin] = $service->create($request->attributes->get('actor'), $data, $request->file('lampiran', []));
         $request->session()->put('report_sent', ['ticket' => $report->ticket_code, 'pin' => $pin]);

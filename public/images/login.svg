@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" fill="none" role="img" aria-label="Ponsel dengan perisai pelindung dan gelembung percakapan">
+  <circle cx="180" cy="150" r="124" fill="#fff" stroke="#DAD6F2" stroke-width="3"/>
+  <circle cx="64" cy="70" r="10" fill="#1FA88A"/><circle cx="302" cy="214" r="8" fill="#E0A23A"/><circle cx="56" cy="228" r="6" fill="#6A5AE0"/>
+  <!-- ponsel -->
+  <rect x="124" y="58" width="112" height="196" rx="22" fill="#26214A"/>
+  <rect x="132" y="70" width="96" height="172" rx="14" fill="#FAF9FF"/>
+  <rect x="160" y="62" width="40" height="5" rx="2.5" fill="#625E85"/>
+  <!-- perisai di layar -->
+  <path d="M180 92c14 10 28 14 40 14v30c0 24-16 38-40 48-24-10-40-24-40-48v-30c12 0 26-4 40-14z" fill="#6A5AE0" stroke="#4A3EB0" stroke-width="3"/>
+  <path d="m164 136 12 12 22-26" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="148" y="196" width="64" height="9" rx="4.5" fill="#DAD6F2"/><rect x="148" y="212" width="44" height="9" rx="4.5" fill="#ECE9FD"/>
+  <!-- gelembung -->
+  <path d="M236 92a14 14 0 0 1 14-14h50a14 14 0 0 1 14 14v22a14 14 0 0 1-14 14h-30l-16 16v-16h-4a14 14 0 0 1-14-14z" fill="#1FA88A"/>
+  <circle cx="258" cy="103" r="4.5" fill="#fff"/><path d="M270 96c4 4 4 14 0 18M282 90c8 8 8 26 0 34" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
