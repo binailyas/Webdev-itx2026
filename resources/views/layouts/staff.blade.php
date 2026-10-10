@@ -24,7 +24,7 @@
     <aside :class="drawer ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
            class="fixed inset-y-0 left-0 z-40 flex w-[264px] flex-col border-r-2 border-line bg-surface transition-transform lg:sticky lg:top-0 lg:h-screen lg:shrink-0">
         <a href="{{ $homeRoute }}" class="block border-b-2 border-line/60 px-4 pt-3 pb-4" aria-label="RuangDengar, ke dashboard">
-            <img src="{{ asset('images/logo-ruangdengar.svg') }}" alt="RuangDengar" class="-mx-6 -my-1 h-[72px] w-auto max-w-none">
+            <img src="{{ asset('images/logo-ruangdengar-slogan.png') }}" alt="RuangDengar. Suarakan Ceritamu, Temukan Jalanmu" width="1276" height="251" class="h-auto w-full">
             <p class="mt-1 text-[10px] font-bold tracking-wider text-primary-dark uppercase">{{ $portal }}</p>
         </a>
         <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-4" aria-label="Navigasi utama">

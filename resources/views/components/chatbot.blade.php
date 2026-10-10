@@ -10,7 +10,8 @@
              style="bottom: calc(11rem + env(safe-area-inset-bottom))" class="fixed right-3 left-3 z-40 mx-auto flex max-h-[70vh] max-w-[420px] flex-col overflow-hidden rounded-xl border-2 border-b-4 border-line bg-white">
         <header class="flex items-center gap-3 border-b-2 border-line bg-soft p-3">
             <span class="inline-flex size-9 items-center justify-center rounded-full bg-primary text-white"><x-icon name="bot" :size="18" /></span>
-            <div class="flex-1 leading-tight"><p class="text-sm font-bold">Asisten RuangDengar</p><p class="text-[11px] text-muted">Asisten otomatis, bukan konselor</p></div>
+            <div class="min-w-0 flex-1 leading-tight"><p class="text-sm font-bold">Asisten RuangDengar</p><p class="text-[11px] text-muted">Asisten otomatis, bukan konselor</p></div>
+            <button type="button" @click="open = false" class="inline-flex size-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-white hover:text-ink" aria-label="Tutup asisten"><x-icon name="x" :size="20" /></button>
         </header>
 
         <div x-ref="list" class="flex-1 space-y-3 overflow-y-auto p-3" aria-live="polite">

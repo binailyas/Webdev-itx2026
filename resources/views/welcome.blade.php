@@ -4,7 +4,7 @@
 
 @section('body')
 <header class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 pt-4">
-    <a href="{{ route('welcome') }}" aria-label="RuangDengar, beranda"><img src="{{ asset('images/logo-ruangdengar.svg') }}" alt="RuangDengar" class="-my-2 -ml-4 h-20 w-auto max-w-none"></a>
+    <a href="{{ route('welcome') }}" aria-label="RuangDengar, beranda"><img src="{{ asset('images/logo-ruangdengar-slogan.png') }}" alt="RuangDengar. Suarakan Ceritamu, Temukan Jalanmu" width="1276" height="251" class="h-auto w-48 max-w-full sm:w-64"></a>
     <a href="{{ route('login') }}" class="btn btn-primary btn-sm md:h-11 md:px-5 md:text-sm">Masuk</a>
 </header>
 
@@ -13,7 +13,7 @@
     <section class="mx-auto grid w-full max-w-6xl items-center gap-8 px-5 py-8 lg:grid-cols-2 lg:py-14">
         <div class="text-center lg:text-left">
             <span class="chip chip-soft mb-5"><x-icon name="shield-check" :size="14" />Aman, privat, tidak menghakimi</span>
-            <h1 class="text-[34px] leading-[1.1] font-extrabold md:text-5xl">Ceritakan saja.<br><span class="text-primary">Kami mendengarkan.</span></h1>
+            <h1 class="text-[34px] leading-[1.1] font-extrabold md:text-5xl">Suarakan Ceritamu,<br><span class="text-primary">Temukan Jalanmu</span></h1>
             <p class="mx-auto mt-4 max-w-lg text-lg text-muted lg:mx-0">Laporkan kejadian di sekolah, konsultasi karir, dan cari info BK. Kamu bisa melapor tanpa nama, dan identitasmu tetap terjaga.</p>
             <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <a href="{{ route('login') }}" class="btn btn-primary btn-lg sm:min-w-44">Masuk</a>
@@ -24,7 +24,7 @@
                 <li class="flex items-center gap-1.5"><x-icon name="eye" :size="16" class="text-primary" />Hanya BK dan wali kelas yang melihat</li>
             </ul>
         </div>
-        <img src="{{ asset('images/hero.svg') }}" alt="Siswa dan guru BK berbincang di ruang yang aman" class="mx-auto w-full max-w-md lg:max-w-none">
+        <img src="{{ asset('images/landing-hero.webp') }}" alt="Guru BK berhijab tersenyum berjabat tangan dengan siswa berseragam, dengan ikon obrolan dan perisai tanda aman" width="1200" height="998" loading="eager" fetchpriority="high" class="mx-auto h-auto w-full max-w-md lg:max-w-none">
     </section>
 
     {{-- Butuh bantuan (sederhana & menonjol, K5) --}}
@@ -56,7 +56,7 @@
     {{-- Fitur --}}
     <section class="border-y-2 border-line bg-white">
         <div class="mx-auto grid w-full max-w-6xl items-center gap-8 px-5 py-14 lg:grid-cols-[1fr_1.2fr]">
-            <img src="{{ asset('images/career.svg') }}" alt="Jalan bercabang dengan papan petunjuk karier" loading="lazy" class="w-full rounded-xl">
+            <img src="{{ asset('images/career.webp') }}" alt="Siswa berransel memikirkan arah di persimpangan dengan papan petunjuk karier" width="1400" height="781" loading="lazy" class="h-auto w-full rounded-xl">
             <div class="grid gap-4 sm:grid-cols-2">
                 @foreach ([['compass', 'Konsultasi karir', 'Tanya jurusan, kuliah, kerja, atau beasiswa langsung ke guru BK.'], ['book-open', 'Info BK', 'Artikel tentang karir, kesehatan mental, dan anti-perundungan.'], ['star', 'Skor kredit transparan', 'Lihat catatan dan alasan pengurangan skormu, tanpa kejutan.'], ['bot', 'Asisten RuangDengar', 'Tanya hal dasar kapan saja, lalu teruskan ke guru BK bila perlu.']] as [$ic, $t, $d])
                     <div class="rounded-xl border-2 border-line bg-bg p-4"><span class="mb-2 inline-flex size-9 items-center justify-center rounded-lg bg-soft text-primary"><x-icon :name="$ic" :size="18" /></span><h3 class="text-base">{{ $t }}</h3><p class="mt-1 text-sm text-muted">{{ $d }}</p></div>
@@ -75,7 +75,7 @@
 
 <footer class="border-t-2 border-line bg-white">
     <div class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-3 px-5 py-6 sm:flex-row">
-        <img src="{{ asset('images/logo-ruangdengar-ungu.svg') }}" alt="RuangDengar" class="h-14 w-auto">
+        <img src="{{ asset('images/logo-ruangdengar-slogan.png') }}" alt="RuangDengar. Suarakan Ceritamu, Temukan Jalanmu" width="1276" height="251" class="h-auto w-56 max-w-full">
         <p class="text-xs text-muted">Sistem Layanan Terpadu BK Sekolah · Privasi pelapor adalah prioritas kami.</p>
     </div>
 </footer>

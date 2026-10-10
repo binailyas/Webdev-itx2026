@@ -34,6 +34,12 @@
 
 @layer base {
     html { font-family: var(--font-sans); -webkit-text-size-adjust: 100%; }
+    /* V13: tata letak tidak boleh bisa digeser ke samping melebihi lebar layar. */
+    html, body { max-width: 100%; overflow-x: clip; }
+    img, svg, video, canvas { max-width: 100%; }
+    /* V13-3: sembunyikan ikon mata/hapus bawaan Edge supaya hanya ada satu ikon buatan sendiri. */
+    input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
+    input::-webkit-credentials-auto-fill-button { visibility: hidden; position: absolute; right: 0; }
     body { background: var(--color-bg); color: var(--color-ink); font-weight: 500; line-height: 1.5; }
     h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; }
     :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
