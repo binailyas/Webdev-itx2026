@@ -144,13 +144,18 @@ class EvaluasiV12Test extends TestCase
         $this->post("/wali-kelas/laporan/{$rOther->id}/status", ['status' => 'ditinjau', 'alasan' => 'uji'])->assertForbidden();
         $this->post("/wali-kelas/laporan/{$rOther->id}/prioritas", ['priority_set' => 'tinggi'])->assertForbidden();
         $this->get("/wali-kelas/laporan/{$rMine->id}")->assertOk();
-        $this->get("/wali-kelas/laporan/{$rOpen->id}")->assertOk();
-        $this->get('/wali-kelas/laporan')->assertOk()->assertSee('Laporan kelas saya')->assertSee('Laporan belum diklasifikasi')->assertDontSee('Laporan kelas lain');
+        $this->get("/wali-kelas/laporan/{$rOpen->id}")->assertForbidden();     // V13-2: tanpa kelas = bukan untuk Wali Kelas
+        $this->get('/wali-kelas/laporan')->assertOk()->assertSee('Laporan kelas saya')->assertDontSee('Laporan belum diklasifikasi')->assertDontSee('Laporan kelas lain');
+        $this->get('/wali-kelas')->assertOk()->assertDontSee('Laporan kelas lain')->assertDontSee('Laporan belum diklasifikasi');
 
         // Fitur "semua kelas" sudah tidak ada.
         $this->get('/wali-kelas/ringkasan')->assertOk()->assertDontSee('Semua kelas');
         $this->get('/wali-kelas')->assertOk()->assertDontSee('Lihat semua kelas');
         $this->post('/wali-kelas/analitik/semua-kelas')->assertStatus(404);
+        auth()->logout();
+
+        $this->actingAs($this->user('bk1@sekolah.sch.id'));
+        $this->get("/bk/laporan/{$rOpen->id}")->assertOk();                       // laporan tanpa kelas ditangani BK
         auth()->logout();
 
         $this->actingAs($this->user('wk2@sekolah.sch.id'));
@@ -161,6 +166,7 @@ class EvaluasiV12Test extends TestCase
     public function test_wali_kelas_may_change_priority_only_while_new(): void
     {
         $r = $this->newReport();
+        $this->mention($r, $this->nisUser('Dimas Pratama'));   // kelas X-3 (wk1)
         $wk = $this->user('wk1@sekolah.sch.id');
 
         $this->actingAs($wk);

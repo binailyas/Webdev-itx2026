@@ -52,9 +52,9 @@ class EvaluasiV11Test extends TestCase
         }
         $this->assertSame('RuangDengar', json_decode(file_get_contents(public_path('site.webmanifest')), true)['name']);
 
-        $this->get('/')->assertOk()->assertSee('images/logo-ruangdengar.svg', false)->assertSee('favicon.ico', false)->assertSee('apple-touch-icon.png', false)
-            ->assertSee('Ceritakan saja')->assertSee('tel:112', false)->assertDontSee('Cek status')->assertDontSee('BK Sahabat');
-        $this->get('/masuk')->assertOk()->assertSee('images/logo-ruangdengar.svg', false)->assertSee('images/login.svg', false);
+        $this->get('/')->assertOk()->assertSee('images/logo-ruangdengar-slogan.png', false)->assertSee('images/landing-hero.webp', false)->assertSee('favicon.ico', false)->assertSee('apple-touch-icon.png', false)
+            ->assertSee('Suarakan Ceritamu')->assertDontSee('Ceritakan saja')->assertSee('tel:112', false)->assertDontSee('Cek status')->assertDontSee('BK Sahabat');
+        $this->get('/masuk')->assertOk()->assertSee('images/logo-ruangdengar-slogan.png', false)->assertSee('images/login.svg', false);
     }
 
     public function test_database_is_named_ruang_dengar(): void

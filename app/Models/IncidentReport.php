@@ -60,12 +60,12 @@ class IncidentReport extends Model
     /** B2: BK hanya melihat laporan yang sudah ditinjau Wali Kelas (kecuali ditandai berisiko / AI berisiko tinggi). */
     public function scopeVisibleToBk(Builder $q): Builder
     {
-        return $q->where(fn ($w) => $w->where('status', '!=', 'baru')->orWhere('risk_flagged', true)->orWhere('ai_flagged', true)->orWhereHas('chatRoom'));
+        return $q->where(fn ($w) => $w->where('status', '!=', 'baru')->orWhere('risk_flagged', true)->orWhere('ai_flagged', true)->orWhereHas('chatRoom')->orWhere(fn ($x) => $x->withoutClass()));   // tanpa kelas: tak ada Wali Kelas yang bisa meninjau
     }
 
     public function isVisibleToBk(): bool
     {
-        return $this->status !== 'baru' || $this->risk_flagged || $this->ai_flagged || $this->chatRoom()->exists();
+        return $this->status !== 'baru' || $this->risk_flagged || $this->ai_flagged || $this->chatRoom()->exists() || static::query()->whereKey($this->id)->withoutClass()->exists();
     }
 
     /** Urut prioritas: tinggi, sedang, rendah (portabel MySQL/SQLite). */
@@ -86,20 +86,31 @@ class IncidentReport extends Model
         });
     }
 
+    /** Laporan yang melibatkan siswa di kelas tertentu: lewat pihak terlibat (tidak ditolak) atau pelapornya sendiri. */
+    private function classLink(Builder $q, array $classroomIds): Builder
+    {
+        $inClass = fn ($s) => $s->select('user_id')->from('student_profiles')->whereIn('classroom_id', $classroomIds);
+
+        return $q->where(fn ($w) => $w->involvingClassrooms($classroomIds)->orWhereIn('reporter_user_id', $inClass));
+    }
+
     /**
-     * W1: laporan yang boleh dilihat Wali Kelas = melibatkan siswa kelas asuhannya, ATAU belum ada pihak
-     * bersiswa yang teridentifikasi (supaya laporan baru tetap bisa ditinjau sebelum diklasifikasi).
+     * V13-2: Wali Kelas hanya melihat laporan yang terkait siswa kelas naungannya (pihak terlibat atau pelapor).
+     * Tidak ada pengecualian untuk laporan tanpa kelas; laporan seperti itu ditangani BK (lihat scopeVisibleToBk).
      */
     public function scopeVisibleToWk(Builder $q, array $classroomIds): Builder
     {
-        return $q->where(function ($w) use ($classroomIds) {
-            $w->whereDoesntHave('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($x) => $x->whereNotNull('user_id_terkait')->orWhereNotNull('kandidat_user_id')));
-            if ($classroomIds) {
-                $w->orWhere(fn ($m) => $m->involvingClassrooms($classroomIds));
-            }
-        });
+        return $classroomIds ? (new static)->classLink($q, $classroomIds) : $q->whereRaw('1 = 0');
     }
 
+    /** Laporan yang tidak terkait kelas mana pun (pelapor anonim/tanpa pihak bersiswa): tidak terlihat Wali Kelas mana pun. */
+    public function scopeWithoutClass(Builder $q): Builder
+    {
+        $anyClass = fn ($s) => $s->select('user_id')->from('student_profiles')->whereNotNull('classroom_id');
+
+        return $q->whereDoesntHave('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($w) => $w->whereIn('user_id_terkait', $anyClass)->orWhereIn('kandidat_user_id', $anyClass)))
+            ->where(fn ($w) => $w->whereNull('reporter_user_id')->orWhereNotIn('reporter_user_id', $anyClass));
+    }
     public function isVisibleToWk(array $classroomIds): bool
     {
         return static::query()->whereKey($this->id)->visibleToWk($classroomIds)->exists();
