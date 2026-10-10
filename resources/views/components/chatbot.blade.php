@@ -2,12 +2,12 @@
 @php $anon = request()->attributes->get('is_anon', false); @endphp
 <div x-data="chatbot(@js(route('siswa.chatbot')), @js($anon), @js($anon ? route('siswa.laporan.create') : route('siswa.karir.create', ['topik' => 'Lainnya', 'dari' => 'beranda'])))" @keydown.escape.window="open = false">
     <button type="button" @click="toggle()" :aria-expanded="open" aria-controls="chatbot-panel"
-            class="fixed bottom-24 left-4 z-40 inline-flex size-14 items-center justify-center rounded-full border-2 border-b-4 border-primary-dark bg-primary text-white" aria-label="Buka asisten RuangDengar">
+            class="fab fab-left !z-40" aria-label="Buka asisten RuangDengar">
         <span x-show="! open"><x-icon name="bot" :size="26" /></span><span x-show="open" x-cloak><x-icon name="x" :size="24" /></span>
     </button>
 
     <section id="chatbot-panel" x-show="open" x-cloak x-transition role="dialog" aria-label="Asisten RuangDengar"
-             class="fixed right-3 bottom-40 left-3 z-40 mx-auto flex max-h-[70vh] max-w-[420px] flex-col overflow-hidden rounded-xl border-2 border-b-4 border-line bg-white">
+             style="bottom: calc(11rem + env(safe-area-inset-bottom))" class="fixed right-3 left-3 z-40 mx-auto flex max-h-[70vh] max-w-[420px] flex-col overflow-hidden rounded-xl border-2 border-b-4 border-line bg-white">
         <header class="flex items-center gap-3 border-b-2 border-line bg-soft p-3">
             <span class="inline-flex size-9 items-center justify-center rounded-full bg-primary text-white"><x-icon name="bot" :size="18" /></span>
             <div class="flex-1 leading-tight"><p class="text-sm font-bold">Asisten RuangDengar</p><p class="text-[11px] text-muted">Asisten otomatis, bukan konselor</p></div>

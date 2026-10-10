@@ -13,11 +13,8 @@
     <select name="kategori" class="select !w-auto" onchange="this.form.submit()" aria-label="Kategori"><option value="">Kategori: semua</option>@foreach ($categories as $c)<option value="{{ $c->id }}" @selected(request('kategori') == $c->id)>{{ $c->name }}</option>@endforeach</select>
     @if ($wk)
         <span class="chip {{ $scoped ? 'border-primary bg-soft text-primary-dark' : 'chip-warn' }}"><x-icon name="school" :size="14" />{{ $scoped ? 'Kelas asuhan: ' . $classes->pluck('nama_kelas')->implode(' · ') : 'Semua kelas' }}</span>
-        @if ($scoped)<button type="button" class="btn btn-outline btn-sm" @click="$dispatch('semua-kelas')">Semua kelas</button>
-        @else<form method="post" action="{{ route('wk.analitik.semua') }}">@csrf<input type="hidden" name="reset" value="1"><button class="btn btn-secondary btn-sm">Kembali ke kelas asuhan</button></form>@endif
     @endif
 </form>
-@if ($wk)@include('staff.analitik._semua-kelas-dialog')@endif
 
 <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
     <x-stat label="Total laporan" :value="$total" icon="file-text" />

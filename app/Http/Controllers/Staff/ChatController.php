@@ -25,7 +25,7 @@ class ChatController extends Controller
         $messages = $room ? $room->messages()->with(['senderUser.role', 'senderAnon'])->get() : collect();
         if ($user->hasRole('bk') && $room) {
             // Pesan dari pelapor ditandai terbaca oleh BK.
-            $room->messages()->where('is_read', false)->where(fn ($q) => $q->whereNotNull('sender_anon_id')->orWhereHas('senderUser.role', fn ($r) => $r->where('name', 'siswa')))->update(['is_read' => true]);
+            $room->messages()->unreadForStaff()->update(['is_read' => true]);
         }
 
         if ($request->boolean('partial')) {

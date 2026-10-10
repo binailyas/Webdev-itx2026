@@ -14,8 +14,7 @@
 return [
     'roles' => ['siswa' => 'Siswa', 'anonim' => 'Anonim', 'admin' => 'Admin', 'bk' => 'BK', 'wali_kelas' => 'Wali Kelas'],
 
-    // Peran yang dapat diubah admin.
-    'editable_roles' => ['bk', 'wali_kelas'],
+    // A1: semua peran dapat diatur admin (per peran dapat dikunci). Role dan akses sendiri tidak pernah dikunci oleh matriks.
 
     // Fitur yang boleh DIBERIKAN walau default 'n' (sudah didukung kode untuk peran itu).
     'grantable' => [
@@ -31,7 +30,7 @@ return [
         'ringkasan' => 'analitik.ringkasan', 'ringkasan.unduh' => 'analitik.ringkasan',
         'analitik.kata' => 'analitik.kata', 'analitik.kata.detail' => 'analitik.kata', 'analitik.orang' => 'analitik.kata',
         'analitik.profil' => 'analitik.kata', 'analitik.profil.unduh' => 'analitik.kata', 'analitik.lokasi' => 'analitik.kata',
-        'analitik.tren' => 'analitik.kata', 'analitik.semua' => 'analitik.kata',
+        'analitik.tren' => 'analitik.kata',
         'analitik.watchlist' => 'analitik.watchlist', 'watchlist.store' => 'analitik.watchlist', 'watchlist.destroy' => 'analitik.watchlist',
         'pengaturan.index' => 'analitik.pengaturan', 'alias.store' => 'analitik.pengaturan', 'alias.destroy' => 'analitik.pengaturan',
         'stopword.store' => 'analitik.pengaturan', 'stopword.destroy' => 'analitik.pengaturan', 'stopword.reset' => 'analitik.pengaturan',
@@ -41,6 +40,27 @@ return [
         'informasi.index' => 'info.kelola', 'informasi.create' => 'info.kelola', 'informasi.store' => 'info.kelola',
         'informasi.edit' => 'info.kelola', 'informasi.update' => 'info.kelola', 'informasi.destroy' => 'info.kelola',
         'arsip.index' => 'arsip.lihat',
+
+        // Siswa dan anonim (nama rute lengkap).
+        'siswa.laporan.create' => 'laporan.buat', 'siswa.laporan.store' => 'laporan.buat',
+        'siswa.laporan.index' => 'laporan.lihat_sendiri', 'siswa.laporan.show' => 'laporan.lihat_sendiri', 'siswa.laporan.sent' => 'laporan.lihat_sendiri',
+        'siswa.cekstatus' => 'laporan.lihat_sendiri', 'siswa.cekstatus.hasil' => 'laporan.lihat_sendiri',
+        'siswa.laporan.chat' => 'chat.insiden', 'siswa.laporan.chat.send' => 'chat.insiden', 'siswa.laporan.chat.mulai' => 'chat.insiden',
+        'siswa.informasi.index' => 'info.baca', 'siswa.informasi.show' => 'info.baca',
+        'siswa.karir.index' => 'karir.chat', 'siswa.karir.create' => 'karir.chat', 'siswa.karir.store' => 'karir.chat',
+        'siswa.karir.show' => 'karir.chat', 'siswa.karir.send' => 'karir.chat',
+        'siswa.kredit' => 'skor.lihat', 'siswa.kredit.show' => 'skor.lihat',
+
+        // Admin (halaman Role dan akses sengaja tidak dipetakan agar admin tidak bisa mengunci dirinya sendiri).
+        'admin.siswa.index' => 'akun.kelola', 'admin.siswa.store' => 'akun.kelola', 'admin.siswa.bulk' => 'akun.kelola', 'admin.siswa.show' => 'akun.kelola',
+        'admin.siswa.update' => 'akun.kelola', 'admin.siswa.reset' => 'akun.kelola', 'admin.siswa.toggle' => 'akun.kelola', 'admin.siswa.destroy' => 'akun.kelola',
+        'admin.staf.index' => 'akun.kelola', 'admin.staf.store' => 'akun.kelola', 'admin.staf.show' => 'akun.kelola', 'admin.staf.update' => 'akun.kelola',
+        'admin.staf.reset' => 'akun.kelola', 'admin.staf.toggle' => 'akun.kelola', 'admin.staf.destroy' => 'akun.kelola',
+        'admin.kelas.index' => 'akun.kelola', 'admin.kelas.store' => 'akun.kelola', 'admin.kelas.destroy' => 'akun.kelola',
+        'admin.impor.index' => 'akun.impor', 'admin.impor.template' => 'akun.impor', 'admin.impor.preview' => 'akun.impor', 'admin.impor.sandi' => 'akun.impor', 'admin.impor.commit' => 'akun.impor',
+        'admin.kelas.naik' => 'akun.naik_kelas', 'admin.kelas.naik.proses' => 'akun.naik_kelas',
+        'admin.pengaturan.index' => 'akun.pengaturan', 'admin.pengaturan.update' => 'akun.pengaturan',
+        'admin.kategori.index' => 'akun.pengaturan', 'admin.kategori.store' => 'akun.pengaturan', 'admin.kategori.update' => 'akun.pengaturan', 'admin.kategori.destroy' => 'akun.pengaturan',
     ],
 
     // fitur => [label, siswa, anonim, admin, bk, wali_kelas]

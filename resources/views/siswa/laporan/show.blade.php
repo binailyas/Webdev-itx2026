@@ -12,6 +12,7 @@
     $steps = [['baru', 'Dikirim'], ['ditinjau', 'Ditinjau'], ['diproses', 'Diproses'], [$closed && $r->status === 'ditolak' ? 'ditolak' : 'selesai', $r->status === 'ditolak' ? 'Ditolak' : 'Selesai']];
     $byStatus = $r->histories->groupBy('status_to')->map->last();
 @endphp
+<div class="mb-2 flex items-center gap-2 text-sm"><span class="text-xs font-bold tracking-wider text-muted uppercase">Kode tiket</span><span class="font-mono font-bold text-primary-dark">{{ $r->ticket_code }}</span><x-copy-button :text="$r->ticket_code" label="Salin kode tiket" /></div>
 <div class="mb-4 flex items-center justify-between"><x-status-chip :status="$r->status" /><span class="text-xs text-muted">Dikirim {{ $r->created_at->translatedFormat('d M Y, H:i') }}</span></div>
 
 <section class="card card-pad">

@@ -4,7 +4,7 @@
 @section('back', request('dari') === 'beranda' ? route('siswa.beranda') : route('siswa.karir.index'))
 
 @section('content')
-<form method="post" action="{{ route('siswa.karir.store') }}" class="space-y-5" x-data="{ topik: @js(old('topik', $topic ?? '')) }">
+<form method="post" action="{{ route('siswa.karir.store') }}" class="space-y-5" data-confirm="Kirim permintaan konsultasi karier ke guru BK? Sesi baru akan dibuat." data-confirm-title="Mulai sesi konsultasi?" data-confirm-label="Kirim" x-data="{ topik: @js(old('topik', $topic ?? '')) }">
     @csrf
     <input type="hidden" name="dari" value="{{ request('dari') }}">
     <fieldset>

@@ -26,7 +26,7 @@ class ReportController extends Controller
             default => null,
         };
         $reports = $q->with('chatRoom')->get();
-        $reports->each(fn ($r) => $r->setAttribute('unread', $r->chatRoom ? $r->chatRoom->messages()->where('is_read', false)->whereNotNull('sender_user_id')->count() : 0));
+        $reports->each(fn ($r) => $r->setAttribute('unread', $r->chatRoom ? $r->chatRoom->messages()->unreadForStudent()->count() : 0));
 
         return view('siswa.laporan.index', ['reports' => $reports, 'filter' => $filter]);
     }
@@ -44,6 +44,7 @@ class ReportController extends Controller
             'kronologi' => 'required|string|min:10|max:5000',
             'tanggal_kejadian' => 'nullable|date|before_or_equal:today',
             'lokasi' => 'nullable|string|max:80',
+            'prioritas' => 'nullable|in:rendah,sedang,tinggi',
             'pihak' => 'nullable|array|max:10',
             'pihak.*.nama' => 'nullable|string|max:80',
             'pihak.*.peran' => 'nullable|in:korban,terlapor,saksi,lainnya',
@@ -103,7 +104,7 @@ class ReportController extends Controller
         $report = $this->owned($request, $ticket)->load(['category', 'histories', 'chatRoom']);
 
         // Catatan: saran AI sengaja tidak dikirim ke tampilan siswa.
-        $unread = $report->chatRoom ? $report->chatRoom->messages()->where('is_read', false)->whereNotNull('sender_user_id')->count() : 0;
+        $unread = $report->chatRoom ? $report->chatRoom->messages()->unreadForStudent()->count() : 0;
         return view('siswa.laporan.show', ['r' => $report, 'unread' => $unread]);
     }
 }

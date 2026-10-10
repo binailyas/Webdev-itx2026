@@ -24,9 +24,7 @@ class ChatController extends Controller
         $actor = $request->attributes->get('actor');
 
         if ($room) {
-            $room->messages()->where('is_read', false)->whereNotNull('sender_user_id')
-                ->when(! $actor instanceof AnonymousAccount, fn ($q) => $q->where('sender_user_id', '!=', $actor->id))
-                ->update(['is_read' => true]);
+            $room->messages()->unreadForStudent()->update(['is_read' => true]);
         }
 
         $messages = $room ? $room->messages()->with('senderUser.role')->get() : collect();

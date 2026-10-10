@@ -14,12 +14,10 @@
                     <p class="text-[11px] font-bold tracking-wider text-muted uppercase">{{ $l }}</p>
                     <p class="truncate font-mono text-lg font-bold">{{ $v }}</p>
                 </div>
-                <button type="button" class="btn-icon bg-primary" aria-label="Salin {{ strtolower($l) }}"
-                        @click="navigator.clipboard.writeText(@js($v)); copied = '{{ $l }}'; setTimeout(() => copied = '', 2000)"><x-icon name="copy" :size="18" /></button>
+                <x-copy-button :text="$v" label="Salin {{ strtolower($l) }}" />
             </div>
         @endforeach
     </div>
-    <p x-show="copied" x-cloak class="mt-2 text-sm font-semibold text-accent-text" role="status">Tersalin</p>
 
     <div class="mt-4 flex gap-3 rounded-xl border-2 border-danger/40 bg-danger-soft p-4 text-sm font-semibold text-danger-dark">
         <x-icon name="alert-triangle" :size="20" />Kata sandi hanya muncul sekarang.

@@ -2,7 +2,7 @@
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ERD · RuangDengar</title>
 <style>body{font-family:system-ui,sans-serif;margin:0;background:#FAF9FF;color:#26214A}header{padding:16px 24px;border-bottom:2px solid #DAD6F2;background:#fff}h1{margin:0;font-size:20px}p{margin:4px 0 0;color:#625E85;font-size:13px}main{padding:16px;overflow:auto}.mermaid{min-width:1400px}</style></head>
-<body><header><h1>ERD — Sistem Layanan Terpadu BK Sekolah</h1><p>29 tabel · dihasilkan dari skema database (php artisan docs:erd) · butuh internet untuk memuat Mermaid</p></header>
+<body><header><h1>ERD — Sistem Layanan Terpadu BK Sekolah</h1><p>30 tabel · dihasilkan dari skema database (php artisan docs:erd) · butuh internet untuk memuat Mermaid</p></header>
 <main><pre class="mermaid">erDiagram
     ai_model_versions {
         bigint id PK
@@ -151,6 +151,7 @@
         string lokasi
         text pihak_terlibat
         enum prioritas
+        string prioritas_siswa
         tinyint risk_flagged
         enum status
         bigint assigned_to FK
@@ -254,6 +255,11 @@
         timestamp created_at
         timestamp updated_at
     }
+    role_locks {
+        string role
+        bigint locked_by FK
+        timestamp locked_at
+    }
     role_permissions {
         bigint id PK
         string role
@@ -351,6 +357,7 @@
     users ||--o{ report_notes : &quot;user_id&quot;
     incident_reports ||--o{ report_status_histories : &quot;report_id&quot;
     users |o--o{ report_status_histories : &quot;user_id&quot;
+    users |o--o{ role_locks : &quot;locked_by&quot;
     classrooms |o--o{ student_profiles : &quot;classroom_id&quot;
     users ||--o{ student_profiles : &quot;user_id&quot;
     roles |o--o{ users : &quot;role_id&quot;

@@ -83,6 +83,7 @@
                     </button>
                     <div x-show="open" x-cloak class="absolute right-0 mt-3 w-52 rounded-xl border-2 border-b-4 border-line bg-white p-2">
                         <p class="px-3 py-2 text-xs font-semibold break-all text-muted">{{ $user->email }}</p>
+                        <a href="{{ route('akun.sandi') }}" class="nav-item w-full"><x-icon name="lock" :size="18" />Ubah kata sandi</a>
                         <form method="post" action="{{ route('logout') }}">@csrf
                             <button class="nav-item w-full"><x-icon name="log-out" :size="18" />Keluar</button>
                         </form>

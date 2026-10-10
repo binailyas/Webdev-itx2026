@@ -78,8 +78,8 @@ class CreditController extends Controller
             'category_id' => 'required|exists:credit_categories,id',
             'alasan' => 'required|string|max:500',
             'tanggal' => 'required|date|before_or_equal:today',
-            'report_id' => [$wk ? 'required' : 'nullable', 'exists:incident_reports,id'],
-        ], ['report_id.required' => 'Pilih laporan terkait. Wali Kelas wajib menautkan pengurangan ke laporan kasus.']);
+            'report_id' => ['nullable', 'exists:incident_reports,id'],   // W4: tautan laporan opsional untuk semua peran
+        ]);
 
         if (! empty($data['report_id'])) {
             $involves = IncidentReport::whereKey($data['report_id'])->whereHas('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($w) => $w->where('user_id_terkait', $student->id)->orWhere('kandidat_user_id', $student->id)))->exists();

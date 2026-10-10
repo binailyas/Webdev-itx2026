@@ -7,7 +7,7 @@ use App\Support\Perm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/** A2: matriks hak akses yang dapat diedit; tersimpan di role_permissions saat klik "Simpan perubahan". */
+/** A2/A1: matriks hak akses semua peran; tersimpan di role_permissions saat klik "Simpan perubahan". Kolom peran dapat dikunci. */
 class RoleController extends Controller
 {
     public function index()
@@ -23,7 +23,17 @@ class RoleController extends Controller
                 }
             }
         }
-        return view('admin.role', ['cfg' => $cfg, 'values' => $values, 'editable' => $editable]);
+        $locked = [];
+        $applicable = [];
+        foreach (array_keys($cfg['roles']) as $role) {
+            $locked[$role] = Perm::locked($role);
+            foreach ($cfg['groups'] as $features) {
+                foreach (array_keys($features) as $feature) {
+                    $applicable[$feature][$role] = Perm::applicable($role, $feature);
+                }
+            }
+        }
+        return view('admin.role', ['cfg' => $cfg, 'values' => $values, 'editable' => $editable, 'locked' => $locked, 'applicable' => $applicable]);
     }
 
     public function update(Request $request)
@@ -32,7 +42,7 @@ class RoleController extends Controller
         DB::transaction(function () use ($request, &$changes) {
             foreach (config('permissions.groups') as $features) {
                 foreach (array_keys($features) as $feature) {
-                    foreach (config('permissions.editable_roles') as $role) {
+                    foreach (array_keys(config('permissions.roles')) as $role) {
                         if (! Perm::editable($role, $feature)) {
                             continue;   // sel terkunci tidak bisa diubah lewat permintaan manual
                         }
@@ -56,5 +66,20 @@ class RoleController extends Controller
             audit('role.diubah', null, ['perubahan' => $changes]);
         }
         return back()->with('status', $changes ? count($changes) . ' perubahan akses disimpan.' : 'Tidak ada perubahan.');
+    }
+
+    /** A1: kunci atau buka kunci seluruh kolom satu peran. Peran terkunci tidak dapat diubah lewat matriks. */
+    public function lock(Request $request)
+    {
+        $data = $request->validate(['role' => 'required|in:' . implode(',', array_keys(config('permissions.roles'))), 'kunci' => 'required|boolean']);
+        if ($data['kunci']) {
+            DB::table('role_locks')->updateOrInsert(['role' => $data['role']], ['locked_by' => $request->user()->id, 'locked_at' => now()]);
+        } else {
+            DB::table('role_locks')->where('role', $data['role'])->delete();
+        }
+        Perm::flush();
+        audit($data['kunci'] ? 'role.dikunci' : 'role.dibuka', null, ['peran' => $data['role']]);
+
+        return back()->with('status', 'Peran ' . config('permissions.roles')[$data['role']] . ($data['kunci'] ? ' dikunci.' : ' dibuka kuncinya.'));
     }
 }

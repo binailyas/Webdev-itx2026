@@ -4,6 +4,9 @@
     $has = $report->ai_priority_suggestion !== null;
     $pct = $has ? (int) round(($report->ai_priority_confidence ?? 0) * 100) : 0;
     [$label, $cls] = \App\Support\Ui::ai($report->ai_priority_suggestion);
+    // W3: Wali Kelas hanya boleh mengubah prioritas selama status Baru; BK tidak dibatasi.
+    $locked = auth()->user()?->hasRole('wali_kelas') && $report->status !== 'baru';
+    $lockMsg = 'Prioritas hanya bisa diubah Wali Kelas saat status Baru. Hubungi guru BK bila perlu mengubahnya.';
     $bar = match ($report->ai_priority_suggestion) { 'tinggi' => 'bg-warning', 'sedang' => 'bg-accent', default => 'bg-primary' };
 @endphp
 <section {{ $attributes->merge(['class' => 'card card-pad ' . ($report->ai_flagged ? 'border-danger' : '')]) }} x-data="{ open: false }" aria-labelledby="ai-title">
@@ -11,6 +14,12 @@
         <span class="inline-flex size-8 items-center justify-center rounded-lg bg-soft text-primary"><x-icon name="bot" :size="18" /></span>
         <h3 id="ai-title" class="text-base font-bold">Saran prioritas otomatis</h3>
     </div>
+
+    {{-- S5: pilihan siswa, saran AI, dan prioritas akhir ditampilkan terpisah --}}
+    <dl class="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <div class="rounded-xl border-2 border-line bg-bg p-2.5"><dt class="font-bold tracking-wider text-muted uppercase">Pilihan siswa</dt><dd class="mt-1"><x-priority-chip :priority="$report->prioritas_siswa ?? 'rendah'" /></dd></div>
+        <div class="rounded-xl border-2 border-primary bg-soft p-2.5"><dt class="font-bold tracking-wider text-muted uppercase">Prioritas akhir</dt><dd class="mt-1"><x-priority-chip :priority="$report->prioritas" /></dd></div>
+    </dl>
 
     @if ($has)
         <div class="mt-4 flex items-center gap-2">
@@ -24,8 +33,9 @@
         <p class="mt-3 text-xs text-muted">Berdasarkan analisis teks laporan · Indikasi, bukan keputusan.</p>
         @if ($report->aiModel)<p class="mt-1 text-[11px] text-muted">Model {{ $report->aiModel->versi }}</p>@endif
 
-        <button type="button" class="btn btn-outline btn-sm mt-4" @click="open = ! open" :aria-expanded="open">Timpa saran</button>
-        <form x-show="open" x-cloak method="post" action="{{ sroute('laporan.override', $report) }}" class="mt-4 space-y-3 border-t-2 border-line pt-4">
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="open = ! open" :aria-expanded="open" @disabled($locked) @if ($locked) title="{{ $lockMsg }}" @endif>Ubah prioritas akhir</button>
+        @if ($locked)<p class="help">{{ $lockMsg }}</p>@endif
+        <form x-show="open && ! @js($locked)" x-cloak method="post" action="{{ sroute('laporan.override', $report) }}" class="mt-4 space-y-3 border-t-2 border-line pt-4">
             @csrf
             <div>
                 <label class="label" for="priority_set">Prioritas baru</label>
@@ -45,8 +55,9 @@
     @else
         <p class="mt-4 rounded-xl border-2 border-line bg-gray-soft px-4 py-3 text-sm font-semibold text-muted">Analisis belum tersedia</p>
         <p class="mt-3 text-xs text-muted">Alur laporan tetap berjalan normal. Tentukan prioritas secara manual.</p>
-        <button type="button" class="btn btn-outline btn-sm mt-4" @click="open = ! open">Atur prioritas</button>
-        <form x-show="open" x-cloak method="post" action="{{ sroute('laporan.override', $report) }}" class="mt-4 space-y-3 border-t-2 border-line pt-4">
+        <button type="button" class="btn btn-outline btn-sm mt-4" @click="open = ! open" @disabled($locked) @if ($locked) title="{{ $lockMsg }}" @endif>Atur prioritas</button>
+        @if ($locked)<p class="help">{{ $lockMsg }}</p>@endif
+        <form x-show="open && ! @js($locked)" x-cloak method="post" action="{{ sroute('laporan.override', $report) }}" class="mt-4 space-y-3 border-t-2 border-line pt-4">
             @csrf
             <select name="priority_set" class="select" aria-label="Prioritas">
                 @foreach (\App\Models\IncidentReport::PRIORITIES as $p)<option value="{{ $p }}" @selected($report->prioritas === $p)>{{ ucfirst($p) }}</option>@endforeach

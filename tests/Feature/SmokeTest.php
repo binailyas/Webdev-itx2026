@@ -111,8 +111,8 @@ class SmokeTest extends TestCase
         $this->get("/wali-kelas/skor/{$outClass->id}")->assertForbidden();
 
         $cat = \App\Models\CreditCategory::first();
-        // Tanpa laporan terkait ditolak.
-        $this->post("/wali-kelas/skor/{$inClass->id}", ['category_id' => $cat->id, 'alasan' => 'x', 'tanggal' => now()->toDateString()])->assertSessionHasErrors('report_id');
+        // v1.2 W4: tautan laporan opsional untuk Wali Kelas.
+        $this->post("/wali-kelas/skor/{$inClass->id}", ['category_id' => $cat->id, 'alasan' => 'x', 'tanggal' => now()->toDateString()])->assertSessionHasNoErrors();
         // Siswa di luar kelas ditolak.
         $this->post("/wali-kelas/skor/{$outClass->id}", ['category_id' => $cat->id, 'alasan' => 'x', 'tanggal' => now()->toDateString(), 'report_id' => 1])->assertForbidden();
     }
@@ -211,9 +211,14 @@ class SmokeTest extends TestCase
         $this->get('/siswa')->assertSee('Butuh bantuan sekarang');
         $this->get('/siswa/laporan/buat')->assertDontSee('Darurat');
         $cat = \App\Models\IncidentCategory::first();
-        // S3: siswa tidak lagi memilih prioritas; nilai kiriman diabaikan dan nilai awal "rendah".
-        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Biasa', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.', 'prioritas' => 'tinggi'])->assertRedirect();
-        $this->assertSame('rendah', IncidentReport::latest('id')->first()->prioritas);
+        // v1.2 S5: siswa memilih prioritas (3 level); tanpa pilihan bawaannya rendah.
+        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Biasa', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.', 'prioritas' => 'sedang'])->assertRedirect();
+        $x = IncidentReport::latest('id')->first();
+        $this->assertSame('sedang', $x->prioritas_siswa);
+        $this->assertSame('sedang', $x->prioritas);
+        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Tanpa', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.'])->assertRedirect();
+        $this->assertSame('rendah', IncidentReport::latest('id')->first()->prioritas_siswa);
+        $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Salah', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.', 'prioritas' => 'darurat'])->assertSessionHasErrors('prioritas');
         $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Curhat', 'kronologi' => 'Aku ingin mati rasanya, tolong aku.', 'prioritas' => 'rendah'])->assertRedirect();
         $r = IncidentReport::latest('id')->first();
         $this->assertSame('tinggi', $r->prioritas);   // kata berisiko menaikkan ke Tinggi

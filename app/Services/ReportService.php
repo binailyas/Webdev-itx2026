@@ -39,7 +39,8 @@ class ReportService
                 'tanggal_kejadian' => $data['tanggal_kejadian'] ?? null,
                 'lokasi' => $data['lokasi'] ?? null,
                 'pihak_terlibat' => $data['pihak_terlibat'] ?? null,
-                'prioritas' => $data['prioritas'] ?? 'rendah',   // nilai awal; AI lalu wali kelas/BK menyesuaikan
+                'prioritas_siswa' => $data['prioritas'] ?? 'rendah',  // pilihan siswa (D1), bawaan rendah (D2)
+                'prioritas' => $data['prioritas'] ?? 'rendah',         // prioritas akhir; diubah petugas, bukan AI
                 'status' => 'baru',
             ]);
 
@@ -95,16 +96,22 @@ class ReportService
     {
         $payload = ['report_id' => $report->id, 'ticket' => $report->ticket_code];
 
-        // B2: laporan baru ditinjau Wali Kelas dulu; BK hanya diberi tahu langsung bila berisiko.
-        Notifier::toRole('wali_kelas', 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} menunggu tinjauan."]);
+        // B2/W1: laporan baru ditinjau Wali Kelas dulu. Bila sudah terkait siswa tertentu, hanya wali kelas
+        // kelas itu yang diberi tahu; bila belum ada pihak bersiswa, semua wali kelas.
+        $classIds = $report->entities()->where('status', '!=', 'ditolak')->get()
+            ->flatMap(fn ($e) => [$e->candidate?->studentProfile?->classroom_id, $e->student?->studentProfile?->classroom_id])->filter()->unique()->values();
+        $linked = $report->entities()->where('status', '!=', 'ditolak')->where(fn ($q) => $q->whereNotNull('user_id_terkait')->orWhereNotNull('kandidat_user_id'))->exists();
+        if (! $linked) {
+            Notifier::toRole('wali_kelas', 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} menunggu tinjauan."]);
+        } elseif ($classIds->isNotEmpty()) {
+            Notifier::toWaliKelasOf($classIds, 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} menunggu tinjauan."]);
+        }
         if ($report->risk_flagged) {
             Notifier::toRole('bk', 'darurat', $payload + ['pesan' => "Kata berisiko terdeteksi pada laporan {$report->ticket_code}."]);
         }
 
         // Wali Kelas kelas asuhan siswa yang disebut mendapat notifikasi khusus.
-        $classIds = $report->entities()->whereNotNull('kandidat_user_id')->get()
-            ->map(fn ($e) => $e->candidate?->studentProfile?->classroom_id)->filter()->unique()->values();
-        if ($classIds->isNotEmpty()) {
+        if ($linked && $classIds->isNotEmpty()) {
             Notifier::toWaliKelasOf($classIds, $report->risk_flagged ? 'darurat' : 'kelas_saya',
                 $payload + ['pesan' => "Siswa kelas asuhanmu mungkin terlibat dalam laporan {$report->ticket_code}."]);
         }

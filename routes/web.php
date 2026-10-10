@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PublicController;
@@ -15,6 +16,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicController::class, 'welcome'])->name('welcome');
 Route::get('/darurat', [PublicController::class, 'darurat'])->name('darurat');
 Route::get('/media/informasi/{file}', [PublicController::class, 'informationImage'])->where('file', '[A-Za-z0-9._-]+')->name('media.informasi');
+Route::middleware('auth')->group(function () {
+    Route::get('/akun/kata-sandi', [AccountController::class, 'form'])->name('akun.sandi');
+    Route::post('/akun/kata-sandi', [AccountController::class, 'update'])->name('akun.sandi.update');
+});
 Route::get('/lupa-password', [PublicController::class, 'forgot'])->name('forgot');
 Route::redirect('/admin/masuk', '/masuk');   // G6: tidak ada lagi login admin terpisah
 
@@ -41,7 +46,7 @@ Route::get('/badges', [Staff\NotificationController::class, 'badges'])->name('ba
 | Siswa & anonim
 |--------------------------------------------------------------------------
 */
-Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function () {
+Route::prefix('siswa')->name('siswa.')->middleware(['student', 'feature'])->group(function () {
     Route::get('/', [Student\HomeController::class, 'index'])->name('beranda');
     Route::get('/informasi', [Student\InfoController::class, 'index'])->name('informasi.index');
     Route::get('/informasi/{slug}', [Student\InfoController::class, 'show'])->name('informasi.show');
@@ -49,7 +54,7 @@ Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function ()
     Route::get('/notifikasi', [Student\HomeController::class, 'notifications'])->name('notifikasi');
     Route::post('/notifikasi/baca', [Student\HomeController::class, 'readAll'])->name('notifikasi.baca');
     Route::get('/profil', [Student\HomeController::class, 'profile'])->name('profil');
-    Route::post('/profil/kata-sandi', [Student\HomeController::class, 'password'])->name('profil.password');
+    Route::post('/profil/kata-sandi', [AccountController::class, 'update'])->name('profil.password');
     Route::delete('/profil', [Student\HomeController::class, 'destroyAnon'])->name('profil.hapus');
 
     Route::get('/laporan', [Student\ReportController::class, 'index'])->name('laporan.index');
@@ -103,7 +108,6 @@ $staffRoutes = function () {
     Route::get('/analitik/lokasi', [Staff\AnalyticsController::class, 'locations'])->name('analitik.lokasi');
     Route::get('/analitik/tren', [Staff\AnalyticsController::class, 'trends'])->name('analitik.tren');
     Route::get('/analitik/watchlist', [Staff\AnalyticsController::class, 'watchlist'])->name('analitik.watchlist');
-    Route::post('/analitik/semua-kelas', [Staff\AnalyticsController::class, 'allClasses'])->name('analitik.semua');
     Route::post('/analitik/watchlist', [Staff\AnalyticsController::class, 'watchStore'])->name('watchlist.store');
     Route::post('/analitik/watchlist/{term}/hapus', [Staff\AnalyticsController::class, 'watchDestroy'])->name('watchlist.destroy');
 
@@ -157,7 +161,7 @@ Route::prefix('wali-kelas')->name('wk.')->middleware(['role:wali_kelas', 'featur
 | Admin
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['role:admin', 'feature'])->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/siswa', [Admin\StudentController::class, 'index'])->name('siswa.index');
@@ -191,6 +195,7 @@ Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function
 
     Route::get('/role', [Admin\RoleController::class, 'index'])->name('role.index');
     Route::post('/role', [Admin\RoleController::class, 'update'])->name('role.update');
+    Route::post('/role/kunci', [Admin\RoleController::class, 'lock'])->name('role.kunci');
 
     Route::get('/kategori', [Admin\CategoryController::class, 'index'])->name('kategori.index');
     Route::post('/kategori', [Admin\CategoryController::class, 'store'])->name('kategori.store');

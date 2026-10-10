@@ -37,6 +37,9 @@
     body { background: var(--color-bg); color: var(--color-ink); font-weight: 500; line-height: 1.5; }
     h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; }
     :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    /* Tailwind v4 mereset kursor tombol: kembalikan pointer pada elemen yang dapat diklik. */
+    button:not(:disabled), [role="button"], summary, label:has(input[type="checkbox"]), label:has(input[type="radio"]), select { cursor: pointer; }
+    button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
     [x-cloak] { display: none !important; }
     ::selection { background: var(--color-soft); }
 }
@@ -104,8 +107,8 @@
     .bar > span { @apply block h-full rounded-full bg-primary; }
 
     /* ---------- Tab ---------- */
-    .tabs { @apply inline-flex gap-1 rounded-xl border-2 border-b-4 border-line bg-white p-1; }
-    .tab { @apply inline-flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-bold text-muted hover:text-ink; }
+    .tabs { @apply inline-flex gap-1 rounded-xl border-2 border-b-4 border-line bg-white p-1.5; }
+    .tab { @apply inline-flex h-8 items-center gap-2 rounded-lg px-4 text-[13px] font-bold whitespace-nowrap text-muted transition-colors hover:bg-soft hover:text-ink; }
     .tab[aria-current="page"], .tab.is-active { @apply bg-primary text-white; }
 
     /* ---------- Gelembung chat ---------- */
@@ -114,9 +117,18 @@
     .bubble-them { @apply mr-auto rounded-bl-sm bg-soft text-ink; }
 
     /* ---------- Bottom nav pil (siswa) ---------- */
-    .pill-nav { @apply fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-[420px] items-center justify-around rounded-full border-2 border-b-4 border-line bg-white p-1.5; }
-    .pill-item { @apply flex size-12 flex-col items-center justify-center rounded-full text-muted; }
-    .pill-item[aria-current="page"] { @apply bg-primary text-white; }
+    .pill-nav { @apply fixed inset-x-4 z-30 mx-auto flex max-w-[420px] items-center justify-around rounded-full border-2 border-b-4 border-line bg-white p-1.5; bottom: max(1rem, env(safe-area-inset-bottom)); }
+    /* S3: bentuk kapsul (bukan lingkaran) supaya teks tidak menempel ke sudut border; tinggi tetap 48px. */
+    .pill-item { @apply flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2.5 text-muted transition-colors hover:bg-soft hover:text-ink; }
+    .pill-item[aria-current="page"] { @apply bg-primary text-white hover:bg-primary-dark hover:text-white; }
+
+    /* S1: tombol mengambang: jauh dari tepi layar dan dari bottom-nav, aman untuk layar bertakik. */
+    .fab { @apply fixed z-30 inline-flex size-14 items-center justify-center rounded-full border-2 border-b-4 border-primary-dark bg-primary text-white transition duration-150 hover:-translate-y-0.5 hover:bg-primary-dark active:translate-y-0; bottom: calc(6.75rem + env(safe-area-inset-bottom)); }
+    .fab-left { left: max(1.25rem, env(safe-area-inset-left)); }
+    .fab-right { right: max(1.25rem, env(safe-area-inset-right)); }
+
+    /* S2: bagian form tampil sebagai lapisan edit (modal layar penuh) tanpa memindahkan posisi halaman. */
+    .edit-overlay { @apply fixed inset-0 z-[55] overflow-y-auto bg-bg px-4 pt-5 pb-10; }
 }
 
 /* Gambar/ikon tidak ikut menyusut di flex */

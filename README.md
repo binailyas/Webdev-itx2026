@@ -76,6 +76,10 @@ saran AI tak bocor ke siswa, 2FA, akun anonim).
 * Skor kredit tidak direset saat naik kelas (saldo bawaan).
 * Gambar informasi BK disajikan lewat `/media/informasi/...` (tanpa `storage:link`).
 * Login satu form (`/masuk`): nama lengkap (hanya bila unik), NIS, atau email; peran dikenali otomatis.
+* Prioritas laporan: siswa memilih 3 level (bawaan Rendah, kolom `prioritas_siswa`); AI hanya memberi saran (`ai_priority_suggestion`); prioritas akhir diubah petugas. Wali Kelas hanya boleh mengubahnya saat status Baru.
+* Wali Kelas hanya melihat laporan yang melibatkan kelas asuhannya atau yang belum punya pihak bersiswa; tidak ada mode "semua kelas".
+* Role dan akses: semua peran dapat diatur dan dikunci per peran (`role_locks`); izin siswa/anonim/admin ikut ditegakkan di rute.
+* Ubah kata sandi untuk semua peran berakun: `/akun/kata-sandi` (staf/admin) dan Profil (siswa).
 * Alur laporan: Baru → Wali Kelas menandai Ditinjau (satu-satunya perubahan status untuk WK) → BK memproses sampai diarsipkan. Laporan berisiko (kata berisiko / AI ≥ 90% Tinggi) langsung terlihat BK.
 * Asisten chat di beranda siswa berbasis aturan (bukan LLM).
 * Impor massal: **CSV** saja (XLSX butuh PhpSpreadsheet + ekstensi gd).

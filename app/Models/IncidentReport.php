@@ -86,6 +86,25 @@ class IncidentReport extends Model
         });
     }
 
+    /**
+     * W1: laporan yang boleh dilihat Wali Kelas = melibatkan siswa kelas asuhannya, ATAU belum ada pihak
+     * bersiswa yang teridentifikasi (supaya laporan baru tetap bisa ditinjau sebelum diklasifikasi).
+     */
+    public function scopeVisibleToWk(Builder $q, array $classroomIds): Builder
+    {
+        return $q->where(function ($w) use ($classroomIds) {
+            $w->whereDoesntHave('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($x) => $x->whereNotNull('user_id_terkait')->orWhereNotNull('kandidat_user_id')));
+            if ($classroomIds) {
+                $w->orWhere(fn ($m) => $m->involvingClassrooms($classroomIds));
+            }
+        });
+    }
+
+    public function isVisibleToWk(array $classroomIds): bool
+    {
+        return static::query()->whereKey($this->id)->visibleToWk($classroomIds)->exists();
+    }
+
     public function involvesClassrooms(array $classroomIds): bool
     {
         return $classroomIds && static::query()->whereKey($this->id)->involvingClassrooms($classroomIds)->exists();

@@ -1,6 +1,6 @@
 # ERD — Sistem Layanan Terpadu BK Sekolah
 
-> Dihasilkan otomatis dari skema database (`php artisan docs:erd`) — 29 tabel aplikasi. Tabel bawaan framework (`cache`, `jobs`, `sessions`, dst.) tidak digambar.
+> Dihasilkan otomatis dari skema database (`php artisan docs:erd`) — 30 tabel aplikasi. Tabel bawaan framework (`cache`, `jobs`, `sessions`, dst.) tidak digambar.
 
 Legenda: **PK** primary key · **FK** foreign key · **UK** unique. Relasi `||--o{` = satu-ke-banyak, `}o--o|` = banyak-ke-satu opsional.
 
@@ -31,6 +31,7 @@ erDiagram
     report_keywords
     report_notes
     report_status_histories
+    role_locks
     role_permissions
     roles
     student_profiles
@@ -75,6 +76,7 @@ erDiagram
     users ||--o{ report_notes : "user_id"
     incident_reports ||--o{ report_status_histories : "report_id"
     users |o--o{ report_status_histories : "user_id"
+    users |o--o{ role_locks : "locked_by"
     classrooms |o--o{ student_profiles : "classroom_id"
     users ||--o{ student_profiles : "user_id"
     roles |o--o{ users : "role_id"
@@ -177,6 +179,7 @@ erDiagram
         string lokasi
         text pihak_terlibat
         enum prioritas
+        string prioritas_siswa
         tinyint risk_flagged
         enum status
         bigint assigned_to FK
@@ -699,6 +702,7 @@ erDiagram
 | lokasi | string |  | ya |
 | pihak_terlibat | text |  | ya |
 | prioritas | enum |  |  |
+| prioritas_siswa | string |  |  |
 | risk_flagged | tinyint |  |  |
 | status | enum |  |  |
 | assigned_to | bigint | FK | ya |
@@ -828,6 +832,14 @@ erDiagram
 | alasan | text |  | ya |
 | created_at | timestamp |  | ya |
 | updated_at | timestamp |  | ya |
+
+### `role_locks`
+
+| Kolom | Tipe | Kunci | Null |
+|---|---|---|---|
+| role | string |  |  |
+| locked_by | bigint | FK | ya |
+| locked_at | timestamp |  | ya |
 
 ### `role_permissions`
 

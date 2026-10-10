@@ -15,9 +15,36 @@ class Perm
     /** @var array<string, array<string, string>>|null  [role => [feature => y|n|r]] */
     private static ?array $cache = null;
 
+    /** @var array<string, true>|null  peran yang matriksnya dikunci */
+    private static ?array $locks = null;
+
     public static function flush(): void
     {
         self::$cache = null;
+        self::$locks = null;
+    }
+
+    /** A1: apakah kolom peran ini dikunci (tidak bisa diubah di matriks)? */
+    public static function locked(string $role): bool
+    {
+        if (self::$locks === null) {
+            self::$locks = [];
+            try {
+                if (Schema::hasTable('role_locks')) {
+                    foreach (DB::table('role_locks')->pluck('role') as $r) {
+                        self::$locks[$r] = true;
+                    }
+                }
+            } catch (\Throwable) {
+            }
+        }
+        return isset(self::$locks[$role]);
+    }
+
+    /** Izin untuk nama peran (termasuk "anonim" bagi akun anonim). */
+    public static function allowsRole(string $role, string $feature): bool
+    {
+        return self::value($role, $feature) !== 'n';
     }
 
     /** Nilai default dari konfigurasi. */
@@ -70,13 +97,19 @@ class Perm
         return $user && $user->role && self::value($user->role->name, $feature) === 'y';
     }
 
+    /** Sel bermakna bagi peran ini (fitur memang tersedia untuknya), terlepas dari kunci? */
+    public static function applicable(string $role, string $feature): bool
+    {
+        $default = self::defaults()[$role][$feature] ?? 'n';
+        return $default !== 'n' || in_array($role, (config('permissions.grantable') ?? [])[$feature] ?? [], true);
+    }
+
     /** Apakah sel [peran, fitur] boleh diubah admin? */
     public static function editable(string $role, string $feature): bool
     {
-        if (! in_array($role, config('permissions.editable_roles'), true)) {
+        if (! array_key_exists($role, config('permissions.roles')) || self::locked($role)) {
             return false;
         }
-        $default = self::defaults()[$role][$feature] ?? 'n';
-        return $default !== 'n' || in_array($role, (config('permissions.grantable') ?? [])[$feature] ?? [], true);
+        return self::applicable($role, $feature);
     }
 }

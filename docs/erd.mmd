@@ -146,6 +146,7 @@ erDiagram
         string lokasi
         text pihak_terlibat
         enum prioritas
+        string prioritas_siswa
         tinyint risk_flagged
         enum status
         bigint assigned_to FK
@@ -249,6 +250,11 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
+    role_locks {
+        string role
+        bigint locked_by FK
+        timestamp locked_at
+    }
     role_permissions {
         bigint id PK
         string role
@@ -346,6 +352,7 @@ erDiagram
     users ||--o{ report_notes : "user_id"
     incident_reports ||--o{ report_status_histories : "report_id"
     users |o--o{ report_status_histories : "user_id"
+    users |o--o{ role_locks : "locked_by"
     classrooms |o--o{ student_profiles : "classroom_id"
     users ||--o{ student_profiles : "user_id"
     roles |o--o{ users : "role_id"

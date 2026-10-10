@@ -38,7 +38,7 @@
 <nav class="pill-nav" aria-label="Navigasi utama">
     @foreach ($nav as [$label, $routeName, $icon, $match])
         <a href="{{ route($routeName) }}" class="pill-item" @if (request()->routeIs($match)) aria-current="page" @endif aria-label="{{ $label }}">
-            <x-icon :name="$icon" :size="20" /><span class="text-[10px] leading-none font-bold">{{ $label }}</span>
+            <x-icon :name="$icon" :size="18" /><span class="text-[10px] leading-none font-bold">{{ $label }}</span>
         </a>
     @endforeach
 </nav>

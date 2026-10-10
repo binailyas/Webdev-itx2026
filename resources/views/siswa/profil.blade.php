@@ -18,7 +18,7 @@
         <details class="group p-4"><summary class="flex cursor-pointer list-none items-center justify-between font-bold">Ubah kata sandi<x-icon name="chevron-right" :size="18" class="group-open:rotate-90" /></summary>
             <form method="post" action="{{ route('siswa.profil.password') }}" class="mt-4 space-y-3">@csrf
                 <x-field name="current" label="Kata sandi saat ini"><input id="current" name="current" type="password" class="input" required></x-field>
-                <x-field name="password" label="Kata sandi baru"><input id="password" name="password" type="password" class="input" minlength="6" required></x-field>
+                <x-field name="password" label="Kata sandi baru"><input id="password" name="password" type="password" class="input" minlength="8" required></x-field>
                 <x-field name="password_confirmation" label="Ulangi kata sandi baru"><input id="password_confirmation" name="password_confirmation" type="password" class="input" required></x-field>
                 <button class="btn btn-primary btn-block">Simpan</button></form></details>
         <a href="{{ route('siswa.notifikasi') }}" class="flex items-center justify-between p-4 font-bold">Notifikasi<x-icon name="chevron-right" :size="18" /></a>

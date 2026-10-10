@@ -21,27 +21,24 @@ trait ScopesReports
         return $this->isWk() ? auth()->user()->classroomIds() : [];
     }
 
-    /** Wali Kelas sedang dalam mode "semua kelas" (setelah memberi alasan)? */
-    protected function allClassesMode(): bool
-    {
-        return $this->isWk() && session()->has('wk_semua_kelas');
-    }
-
-    /** Apakah analitik/ringkasan dibatasi ke kelas asuhan? */
+    /** W1: Wali Kelas selalu dibatasi ke kelas asuhannya (tidak ada mode lintas kelas). */
     protected function scoped(): bool
     {
-        return $this->isWk() && ! $this->allClassesMode();
+        return $this->isWk();
     }
 
-    /** Terapkan cakupan kelas pada query laporan (analitik/ringkasan). */
+    /** Terapkan cakupan kelas pada query laporan. */
     protected function scopeQuery(Builder $q): Builder
     {
-        if ($this->scoped()) {
-            $ids = $this->myClassIds();
-            // Tanpa kelas asuhan => tidak ada data (bukan semua data).
-            $ids ? $q->involvingClassrooms($ids) : $q->whereRaw('1 = 0');
+        return $this->isWk() ? $q->visibleToWk($this->myClassIds()) : $q;
+    }
+
+    /** 403 bila Wali Kelas membuka laporan di luar cakupannya. */
+    protected function authorizeReport(IncidentReport $report): void
+    {
+        if ($this->isWk()) {
+            abort_unless($report->isVisibleToWk($this->myClassIds()), 403, 'Laporan ini di luar kelas asuhanmu.');
         }
-        return $q;
     }
 
     protected function classChips()

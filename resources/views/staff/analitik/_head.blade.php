@@ -12,15 +12,10 @@
             @if ($scoped)
                 @foreach ($myClasses as $c)<span class="chip border-primary bg-soft text-primary-dark">{{ $c->nama_kelas }}</span>@endforeach
                 @if ($myClasses->isEmpty())<span class="chip chip-warn">Belum ada kelas asuhan</span>@endif
-                <button type="button" class="btn btn-outline btn-sm" @click="$dispatch('semua-kelas')">Semua kelas</button>
-            @else
-                <span class="chip chip-warn"><x-icon name="eye" :size="14" />Semua kelas (dicatat)</span>
-                <form method="post" action="{{ route('wk.analitik.semua') }}">@csrf<input type="hidden" name="reset" value="1"><button class="btn btn-secondary btn-sm">Kembali ke kelas asuhan</button></form>
             @endif
         </div>
     @endif
 </div>
-@if ($wk)@include('staff.analitik._semua-kelas-dialog')@endif
 
 <form method="get" class="card card-pad mb-4 flex flex-wrap items-center gap-3 !py-3">
     <select name="periode" class="select !w-auto" onchange="this.form.submit()" aria-label="Periode">@foreach ([7 => '7 hari', 30 => '30 hari', 90 => '90 hari', 365 => '1 tahun', 0 => 'Semua waktu'] as $v => $l)<option value="{{ $v }}" @selected($periode === $v)>{{ $l }}</option>@endforeach</select>

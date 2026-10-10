@@ -20,8 +20,8 @@ class DashboardController extends Controller
         $since = now()->subDays($days)->startOfDay();
 
         // B2: BK hanya melihat laporan yang sudah ditinjau Wali Kelas (kecuali berisiko).
-        $all = $wk ? IncidentReport::query() : IncidentReport::visibleToBk();
         $classIds = $this->myClassIds();
+        $all = $wk ? IncidentReport::visibleToWk($classIds) : IncidentReport::visibleToBk();
         $mine = $wk && $classIds ? IncidentReport::involvingClassrooms($classIds)->pluck('id') : collect();
 
         $baru = $wk ? (clone $all)->where('status', 'baru') : (clone $all)->whereIn('status', ['baru', 'ditinjau']);

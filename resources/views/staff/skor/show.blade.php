@@ -22,7 +22,7 @@
                     <td><span class="chip {{ $r->isVoided() ? 'chip-gray line-through' : 'chip-danger' }}">−{{ $r->poin_dikurangi }}</span></td>
                     <td class="max-w-64">{{ $r->alasan }}@if ($r->isVoided())<p class="mt-1 text-xs"><span class="chip chip-gray">Dibatalkan</span> {{ $r->void_reason }}</p>@endif</td>
                     <td class="whitespace-nowrap text-muted">{{ $r->recorder->name }}</td>
-                    <td class="font-mono text-xs">{{ $r->report?->ticket_code ?? '—' }}</td>
+                    <td class="font-mono text-xs">{{ $r->report?->ticket_code ?? 'Tanpa laporan' }}</td>
                     @unless ($wk)<td class="text-right">@unless ($r->isVoided())<button type="button" class="btn btn-secondary btn-sm" @click="void_ = {{ $r->id }}">Batalkan</button>@endunless</td>@endunless
                 </tr>
             @empty<tr><td colspan="7"><x-empty icon="check-circle" title="Belum ada catatan" text="Skor masih 100." /></td></tr>@endforelse
@@ -37,9 +37,9 @@
                 <x-field name="alasan" label="Alasan (wajib)"><textarea id="alasan" name="alasan" rows="3" class="textarea min-h-20" required>{{ old('alasan') }}</textarea></x-field>
                 <div class="grid grid-cols-2 gap-3">
                     <x-field name="tanggal" label="Tanggal"><input id="tanggal" name="tanggal" type="date" value="{{ old('tanggal', now()->toDateString()) }}" max="{{ now()->toDateString() }}" class="input" required></x-field>
-                    <x-field name="report_id" :label="$wk ? 'Laporan terkait (wajib)' : 'Tautan laporan (opsional)'"><select id="report_id" name="report_id" class="select" @required($wk)><option value="">{{ $wk ? 'Pilih laporan' : 'Tanpa laporan' }}</option>@foreach ($related as $rp)<option value="{{ $rp->id }}">{{ $rp->ticket_code }} · {{ \Illuminate\Support\Str::limit($rp->judul, 24) }}</option>@endforeach</select></x-field>
+                    <x-field name="report_id" label="Tautan laporan (opsional)"><select id="report_id" name="report_id" class="select"><option value="">Tanpa laporan</option>@foreach ($related as $rp)<option value="{{ $rp->id }}">{{ $rp->ticket_code }} · {{ \Illuminate\Support\Str::limit($rp->judul, 24) }}</option>@endforeach</select></x-field>
                 </div>
-                @if ($wk && $related->isEmpty())<p class="rounded-xl border-2 border-warning bg-warning/15 p-3 text-xs font-semibold">Belum ada laporan yang melibatkan siswa ini. Minta BK atau konfirmasi pihak terlibat dulu.</p>@endif
+                @if ($related->isEmpty())<p class="text-xs font-semibold text-muted">Belum ada laporan yang melibatkan siswa ini; catatan boleh disimpan tanpa tautan laporan.</p>@endif
                 <div class="rounded-xl border-2 border-line bg-soft p-3 text-sm font-bold" x-show="cat" x-cloak>Pratinjau: skor menjadi <span x-text="preview()"></span></div>
             </div>
             <div class="mt-5 flex justify-end gap-3"><button type="button" class="btn btn-secondary" @click="modal = false">Batal</button><button class="btn btn-primary">Simpan catatan</button></div>

@@ -39,7 +39,7 @@ class AnalyticsController extends Controller
         return [
             'categories' => IncidentCategory::orderBy('urutan')->get(),
             'allClasses' => Classroom::where('tahun_ajaran', setting('tahun_ajaran', Classroom::currentYear()))->orderBy('nama_kelas')->get(),
-            'myClasses' => $this->classChips(), 'scoped' => $this->scoped(), 'wk' => $this->isWk(), 'allMode' => $this->allClassesMode(),
+            'myClasses' => $this->classChips(), 'scoped' => $this->scoped(), 'wk' => $this->isWk(),
             'periode' => (int) $request->query('periode', 30),
         ];
     }
@@ -194,19 +194,5 @@ class AnalyticsController extends Controller
         abort_unless($term->user_id === $request->user()->id, 403);
         $term->delete();
         return back()->with('status', 'Pantauan dihapus.');
-    }
-
-    /** Wali Kelas: lihat data semua kelas setelah memberi alasan (dicatat), atau kembali ke kelas asuhan. */
-    public function allClasses(Request $request)
-    {
-        abort_unless($this->isWk(), 403);
-        if ($request->boolean('reset')) {
-            session()->forget('wk_semua_kelas');
-            return back()->with('status', 'Kembali ke kelas asuhan.');
-        }
-        $d = $request->validate(['alasan' => 'required|string|min:5|max:300'], ['alasan.required' => 'Tulis alasanmu.']);
-        session()->put('wk_semua_kelas', $d['alasan']);
-        audit('analitik.semua_kelas', null, ['alasan' => $d['alasan']]);
-        return back()->with('status', 'Menampilkan semua kelas. Akses ini dicatat di audit log.');
     }
 }

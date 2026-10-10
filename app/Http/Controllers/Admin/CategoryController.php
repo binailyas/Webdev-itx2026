@@ -8,6 +8,7 @@ use App\Models\CreditRecord;
 use App\Models\IncidentCategory;
 use App\Models\IncidentReport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /** A11 — kategori insiden dan kategori pelanggaran skor (hanya pengurangan). */
 class CategoryController extends Controller
@@ -15,6 +16,21 @@ class CategoryController extends Controller
     private function model(string $type): string
     {
         return match ($type) { 'insiden' => IncidentCategory::class, 'skor' => CreditCategory::class, default => abort(404) };
+    }
+
+    /** A2: urutan selalu 1..n tanpa duplikat; kategori $moved dipindah ke posisi $position (1-based) bila diberikan. */
+    public static function normalizeOrder(?IncidentCategory $moved = null, ?int $position = null): void
+    {
+        DB::transaction(function () use ($moved, $position) {
+            $ids = IncidentCategory::orderBy('urutan')->orderBy('id')->lockForUpdate()->pluck('id')->all();
+            if ($moved && $position !== null) {
+                $ids = array_values(array_diff($ids, [$moved->id]));
+                array_splice($ids, max(0, min($position - 1, count($ids))), 0, [$moved->id]);
+            }
+            foreach ($ids as $i => $id) {
+                IncidentCategory::whereKey($id)->update(['urutan' => $i + 1]);
+            }
+        });
     }
 
     public function index(Request $request)
@@ -32,7 +48,8 @@ class CategoryController extends Controller
         $type = $request->validate(['type' => 'required|in:insiden,skor'])['type'];
         if ($type === 'insiden') {
             $d = $request->validate(['name' => 'required|string|max:80', 'description' => 'nullable|string|max:255']);
-            IncidentCategory::create($d + ['urutan' => IncidentCategory::max('urutan') + 1]);
+            $new = IncidentCategory::create($d + ['urutan' => (int) IncidentCategory::max('urutan') + 1]);
+            self::normalizeOrder($new, $request->integer('urutan') ?: null);
         } else {
             $d = $request->validate(['name' => 'required|string|max:80', 'poin' => 'required|integer|min:1|max:100']);
             CreditCategory::create(['name' => $d['name'], 'poin_pengurangan_default' => $d['poin']]);
@@ -45,8 +62,9 @@ class CategoryController extends Controller
     {
         $m = $this->model($type)::findOrFail($id);
         if ($type === 'insiden') {
-            $d = $request->validate(['name' => 'required|string|max:80', 'description' => 'nullable|string|max:255', 'urutan' => 'nullable|integer|min:0']);
-            $m->update($d + ['is_active' => $request->boolean('is_active')]);
+            $d = $request->validate(['name' => 'required|string|max:80', 'description' => 'nullable|string|max:255', 'urutan' => 'nullable|integer|min:1']);
+            $m->update(['name' => $d['name'], 'description' => $d['description'] ?? null, 'is_active' => $request->boolean('is_active')]);
+            self::normalizeOrder($m, isset($d['urutan']) ? (int) $d['urutan'] : null);
         } else {
             $d = $request->validate(['name' => 'required|string|max:80', 'poin' => 'required|integer|min:1|max:100']);
             $m->update(['name' => $d['name'], 'poin_pengurangan_default' => $d['poin'], 'is_active' => $request->boolean('is_active')]);
@@ -65,6 +83,9 @@ class CategoryController extends Controller
         }
         audit('kategori.dihapus', $m);
         $m->delete();
+        if ($type === 'insiden') {
+            self::normalizeOrder();
+        }
         return back()->with('status', 'Kategori dihapus.');
     }
 }

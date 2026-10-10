@@ -15,9 +15,7 @@
         <x-icon name="school" :size="20" class="text-primary-dark" />
         <span class="text-sm font-bold">Kelas asuhan:</span>
         @forelse ($classes as $c)<span class="chip border-primary bg-white text-primary-dark">{{ $c->nama_kelas }}</span>@empty<span class="chip chip-warn">Belum ditetapkan. Hubungi admin.</span>@endforelse
-        <button type="button" class="ml-auto text-xs font-bold text-primary-dark hover:underline" @click="$dispatch('semua-kelas')">Lihat semua kelas</button>
     </div>
-    @include('staff.analitik._semua-kelas-dialog')
 @endif
 
 <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

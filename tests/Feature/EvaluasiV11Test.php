@@ -72,7 +72,7 @@ class EvaluasiV11Test extends TestCase
         $payload = [];
         foreach (config('permissions.groups') as $features) {
             foreach (array_keys($features) as $feature) {
-                foreach (config('permissions.editable_roles') as $role) {
+                foreach (array_keys(config('permissions.roles')) as $role) {
                     if (Perm::editable($role, $feature) && ! ($role === 'bk' && $feature === 'laporan.baca')) {
                         $payload['p'][$feature][$role] = '1';
                     }
@@ -108,7 +108,7 @@ class EvaluasiV11Test extends TestCase
         // Kirim seluruh sel lain tetap tercentang agar tidak tercabut.
         foreach (config('permissions.groups') as $features) {
             foreach (array_keys($features) as $feature) {
-                foreach (config('permissions.editable_roles') as $role) {
+                foreach (array_keys(config('permissions.roles')) as $role) {
                     if (Perm::editable($role, $feature) && Perm::value($role, $feature) !== 'n') {
                         $payload['p'][$feature][$role] = '1';
                     }
@@ -155,7 +155,7 @@ class EvaluasiV11Test extends TestCase
     public function test_involved_people_roles_and_self_option(): void
     {
         $this->actingAs($this->user('rani.putri@siswa.sekolah.sch.id'));
-        $this->get('/siswa/laporan/buat')->assertOk()->assertSee('Saya sendiri')->assertSee('Terduga pelaku')->assertDontSee('Seberapa mendesak');
+        $this->get('/siswa/laporan/buat')->assertOk()->assertSee('Saya sendiri')->assertSee('Terduga pelaku')->assertSee('Seberapa mendesak');
         $cat = IncidentCategory::first();
         $this->post('/siswa/laporan', [
             'category_id' => $cat->id, 'judul' => 'Peran', 'kronologi' => 'Dimas mengejek saya dan Salsa melihatnya di kantin.',
@@ -220,7 +220,8 @@ class EvaluasiV11Test extends TestCase
         $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Uji AI', 'kronologi' => 'Ada yang mengejek penampilanku setiap hari.'])->assertRedirect();
         $r = IncidentReport::latest('id')->first();
         $this->assertSame('tinggi', $r->ai_priority_suggestion);
-        $this->assertSame('tinggi', $r->prioritas);   // saran AI menjadi prioritas awal
+        $this->assertSame('rendah', $r->prioritas);         // v1.2 S5: AI hanya menyarankan, tidak mengubah prioritas
+        $this->assertSame('rendah', $r->prioritas_siswa);
         $this->assertTrue($r->ai_flagged);
         $this->assertSame('uji-1', $r->aiModel->versi);
     }

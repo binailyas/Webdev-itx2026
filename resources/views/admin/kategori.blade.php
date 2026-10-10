@@ -58,7 +58,7 @@
                 <x-field name="name" label="Nama"><input id="name" name="name" class="input" :value="edit?.name" required></x-field>
                 @if ($tab === 'insiden')
                     <x-field name="description" label="Deskripsi"><input id="description" name="description" class="input" :value="edit?.description"></x-field>
-                    <template x-if="edit"><x-field name="urutan" label="Urutan"><input id="urutan" name="urutan" type="number" min="0" class="input" :value="edit.urutan"></x-field></template>
+                    <x-field name="urutan" label="Urutan" help="Kosongkan untuk menaruh di akhir. Urutan lain bergeser otomatis."><input id="urutan" name="urutan" type="number" min="1" max="{{ $insiden->count() + 1 }}" class="input" :value="edit?.urutan"></x-field>
                 @else
                     <x-field name="poin" label="Pengurangan poin" help="Skor siswa hanya berkurang. Tidak ada poin positif."><input id="poin" name="poin" type="number" min="1" max="100" class="input" :value="edit?.poin" required></x-field>
                 @endif

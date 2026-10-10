@@ -31,12 +31,10 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $q = IncidentReport::with(['category', 'pic', 'reporterAnon', 'chatRoom'])->withCount([
-            'chatRoom as unread' => fn ($c) => $c->whereHas('messages', fn ($m) => $m->where('is_read', false)->where(fn ($w) => $w->whereNotNull('sender_anon_id')->orWhereHas('senderUser.role', fn ($r) => $r->where('name', 'siswa')))),
+            'chatRoom as unread' => fn ($c) => $c->whereHas('messages', fn ($m) => $m->unreadForStaff()),
         ]);
 
-        if (! $this->isWk()) {
-            $q->visibleToBk();   // B2
-        }
+        $this->isWk() ? $q->visibleToWk($this->myClassIds()) : $q->visibleToBk();   // W1 / B2
         if ($s = trim((string) $request->query('q'))) {
             $q->where(fn ($w) => $w->where('ticket_code', 'like', "%$s%")->orWhere('judul', 'like', "%$s%"));
         }
@@ -70,6 +68,7 @@ class ReportController extends Controller
     public function show(Request $request, IncidentReport $report)
     {
         $user = $request->user();
+        $this->authorizeReport($report);
 
         // B2: BK hanya boleh membuka laporan yang sudah ditinjau Wali Kelas (atau berisiko).
         if ($user->hasRole('bk') && ! $report->isVisibleToBk()) {
@@ -113,6 +112,7 @@ class ReportController extends Controller
     public static function wkMayReadChat(IncidentReport $r, $user): bool
     {
         return \App\Support\Perm::allows($user, 'chat.baca')
+            && $r->isVisibleToWk($user->classroomIds())
             && ($r->chatRoom?->wk_diizinkan || $r->involvesClassrooms($user->classroomIds()));
     }
 
@@ -123,6 +123,7 @@ class ReportController extends Controller
 
     public function status(Request $request, IncidentReport $report, ReportService $service)
     {
+        $this->authorizeReport($report);
         $allowed = $this->allowedNext($report);
         $data = $request->validate([
             'status' => 'required|in:' . implode(',', $allowed ?: ['-']),
@@ -140,6 +141,7 @@ class ReportController extends Controller
     /** Arsipkan langsung (BK) dari status Selesai/Ditolak. */
     public function archive(Request $request, IncidentReport $report, ReportService $service)
     {
+        $this->authorizeReport($report);
         abort_unless(in_array($report->status, ['selesai', 'ditolak'], true), 422, 'Hanya laporan Selesai atau Ditolak yang bisa diarsipkan.');
         $service->changeStatus($report, $request->user(), 'diarsipkan', $request->input('alasan', 'Disimpan.'));
         return back()->with('status', 'Laporan diarsipkan.');
@@ -148,6 +150,8 @@ class ReportController extends Controller
     /** Timpa saran AI / ubah prioritas manual. */
     public function override(Request $request, IncidentReport $report)
     {
+        $this->authorizeReport($report);
+        abort_if($request->user()->hasRole('wali_kelas') && $report->status !== 'baru', 403, 'Wali Kelas hanya dapat mengubah prioritas saat status Baru.');
         $data = $request->validate(['priority_set' => 'required|in:rendah,sedang,tinggi', 'alasan' => 'nullable|string|max:500']);
         $old = $report->prioritas;
 
@@ -159,9 +163,8 @@ class ReportController extends Controller
                 'ai_suggestion' => $report->ai_priority_suggestion, 'priority_set' => $data['priority_set'], 'alasan' => $data['alasan'] ?? null,
             ]);
             audit('ai.timpa', $report, ['saran' => $report->ai_priority_suggestion, 'baru' => $data['priority_set']]);
-        } else {
-            audit('laporan.prioritas', $report, ['dari' => $old, 'ke' => $data['priority_set']]);
         }
+        audit('laporan.prioritas', $report, ['dari' => $old, 'ke' => $data['priority_set'], 'oleh_peran' => $request->user()->role?->name]);   // W3: riwayat dari/ke
 
         $msg = 'Prioritas diubah ke ' . ucfirst($data['priority_set']) . '.';
         if ($data['priority_set'] === 'tinggi' && $old !== 'tinggi') {
@@ -175,6 +178,7 @@ class ReportController extends Controller
     /** Catatan internal: Wali Kelas menulis untuk BK; BK dapat membalas. Tak terlihat siswa. */
     public function note(Request $request, IncidentReport $report)
     {
+        $this->authorizeReport($report);
         $data = $request->validate(['isi' => 'required|string|max:2000', 'penting' => 'nullable|boolean']);
         $report->notes()->create(['user_id' => $request->user()->id, 'isi' => $data['isi'], 'penting' => $request->boolean('penting')]);
 
@@ -189,6 +193,7 @@ class ReportController extends Controller
     public function attachment(Request $request, IncidentReport $report, \App\Models\ReportAttachment $attachment)
     {
         abort_unless($attachment->report_id === $report->id, 404);
+        $this->authorizeReport($report);
         if ($request->user()->hasRole('bk') && ! $report->isVisibleToBk()) {
             abort(403);
         }
@@ -205,9 +210,7 @@ class ReportController extends Controller
     public function archived(Request $request)
     {
         $q = IncidentReport::with(['category', 'pic'])->where('status', 'diarsipkan');
-        if (! $this->isWk()) {
-            $q->visibleToBk();
-        }
+        $this->isWk() ? $q->visibleToWk($this->myClassIds()) : $q->visibleToBk();
         if ($s = trim((string) $request->query('q'))) {
             $q->where(fn ($w) => $w->where('ticket_code', 'like', "%$s%")->orWhere('judul', 'like', "%$s%"));
         }
@@ -226,6 +229,7 @@ class ReportController extends Controller
     public function entity(Request $request, IncidentReport $report, ReportEntity $entity)
     {
         abort_unless($entity->report_id === $report->id, 404);
+        $this->authorizeReport($report);
 
         if ($request->input('aksi') === 'tolak') {
             $entity->update(['status' => 'ditolak', 'confirmed_by' => $request->user()->id, 'confirmed_at' => now()]);

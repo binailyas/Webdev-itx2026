@@ -22,5 +22,5 @@
     @endforelse
 </div>
 
-<a href="{{ route('siswa.laporan.create') }}" class="btn-icon fixed right-5 bottom-28 z-20 !size-14 border-2 border-b-4 border-primary-dark bg-primary" aria-label="Buat laporan"><x-icon name="plus" :size="26" /></a>
+<a href="{{ route('siswa.laporan.create') }}" class="fab fab-right" aria-label="Buat laporan"><x-icon name="plus" :size="26" /></a>
 @endsection
