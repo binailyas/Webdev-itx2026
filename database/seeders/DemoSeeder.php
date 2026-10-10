@@ -35,13 +35,13 @@ class DemoSeeder extends Seeder
         $ta = Classroom::currentYear();
         $hash = Hash::make('password');
 
-        // ---- Kelas ----
+        // Kelas
         $kelas = [];
         foreach ([['X-1', 'X'], ['X-2', 'X'], ['X-3', 'X'], ['XI-1', 'XI'], ['XI-2', 'XI'], ['XII-1', 'XII']] as [$n, $t]) {
             $kelas[$n] = Classroom::create(['nama_kelas' => $n, 'tingkat' => $t, 'tahun_ajaran' => $ta]);
         }
 
-        // ---- Staf ----
+        // Staf
         $mk = fn (string $name, string $email, string $role) => User::create([
             'name' => $name, 'email' => $email, 'password' => $hash,
             'role_id' => Role::idOf($role), 'two_factor_enabled' => true, 'is_active' => true,
@@ -58,7 +58,7 @@ class DemoSeeder extends Seeder
             }
         }
 
-        // ---- Siswa ----
+        // Siswa
         $roster = [
             ['Rani Putri', 'X-3'], ['Dimas Pratama', 'X-3'], ['Salsa Maharani', 'X-3'], ['Rafi Ramadhan', 'X-3'],
             ['Farhan Pratama', 'X-1'], ['Ahmad Fauzi', 'X-1'], ['Dimas Setiawan', 'X-1'], ['Nadia Safitri', 'X-1'],
@@ -85,10 +85,10 @@ class DemoSeeder extends Seeder
         }
         $rani = $students['Rani Putri'];
 
-        // ---- Alias ----
+        // Alias
         KeywordAlias::create(['alias' => 'Dimz', 'canonical' => 'dimas', 'student_user_id' => $students['Dimas Pratama']->id, 'dibuat_oleh' => $bk1->id]);
 
-        // ---- Informasi BK ----
+        // Informasi BK
         foreach ([
             ['Cara memilih jurusan kuliah yang sesuai minat', 'karir', 'Mulailah dari mengenali minat, kekuatan, dan nilai yang kamu pegang. Lalu bandingkan program studi, prospek kerja, dan biaya. Jangan ragu berkonsultasi dengan guru BK.'],
             ['Mengelola stres menjelang ujian', 'kesehatan-mental', 'Atur jadwal belajar pendek, tidur cukup, dan bergerak setiap hari. Bila terasa berat, ceritakan kepada orang yang kamu percaya atau guru BK.'],
@@ -99,7 +99,7 @@ class DemoSeeder extends Seeder
         }
         Announcement::create(['user_id' => $bk1->id, 'judul' => 'Draf: jadwal konseling kelompok', 'slug' => 'draf-jadwal-konseling', 'kategori' => 'karir', 'isi' => 'Jadwal masih disusun.', 'status' => 'draf']);
 
-        // ---- Model AI demo + laporan ----
+        // Model AI demo + laporan
         $model = AiModelVersion::updateOrCreate(['versi' => 'demo-seed'], [
             'deployed_at' => now()->subWeeks(2), 'f1_score' => 0.87, 'precision_score' => 0.88, 'recall_score' => 0.86,
             'catatan' => 'Versi contoh untuk data demo. Ganti dengan model .pkl asli di ai-service/.',

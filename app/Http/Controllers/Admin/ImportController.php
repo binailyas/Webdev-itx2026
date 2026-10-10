@@ -96,7 +96,6 @@ class ImportController extends Controller
         return response($csv, 200, ['Content-Type' => 'text/csv; charset=utf-8', 'Content-Disposition' => 'attachment; filename="kata-sandi-awal.csv"']);
     }
 
-    // ---------------------------------------------------------------
 
     private function read(string $token): array
     {

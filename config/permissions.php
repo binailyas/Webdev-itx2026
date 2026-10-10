@@ -1,16 +1,12 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Hak akses per peran (rancangan 2.1) — DEFAULT. Nilai aktif disimpan di tabel
-| `role_permissions` dan diedit admin di Role dan akses (A2).
-|--------------------------------------------------------------------------
-| Nilai sel default: y = boleh · n = tidak · r = baca saja.
-| Kolom: siswa, anonim, admin, bk, wali_kelas.
-| Sel dapat diedit hanya untuk kolom BK dan Wali Kelas pada fitur yang memang
-| bisa dicabut/diberikan ('editable'/'grantable'). Sisanya dikunci sistem
-| (struktur privasi, kolom Admin agar admin tidak mengunci dirinya sendiri).
-*/
+// Hak akses per peran (rancangan 2.1) — DEFAULT. Nilai aktif disimpan di tabel
+// `role_permissions` dan diedit admin di Role dan akses (A2).
+// Nilai sel default: y = boleh · n = tidak · r = baca saja.
+// Kolom: siswa, anonim, admin, bk, wali_kelas.
+// Sel dapat diedit hanya untuk kolom BK dan Wali Kelas pada fitur yang memang
+// bisa dicabut/diberikan ('editable'/'grantable'). Sisanya dikunci sistem
+// (struktur privasi, kolom Admin agar admin tidak mengunci dirinya sendiri).
 return [
     'roles' => ['siswa' => 'Siswa', 'anonim' => 'Anonim', 'admin' => 'Admin', 'bk' => 'BK', 'wali_kelas' => 'Wali Kelas'],
 

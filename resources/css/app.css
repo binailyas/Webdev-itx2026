@@ -51,7 +51,7 @@
 }
 
 @layer components {
-    /* ---------- Tombol (tactile: garis bawah tebal) ---------- */
+    /* Tombol (tactile: garis bawah tebal) */
     .btn {
         @apply inline-flex h-12 cursor-pointer select-none items-center justify-center gap-2 rounded-xl border-2 border-b-4 px-5 text-sm font-bold whitespace-nowrap transition-[transform,border-width] duration-75;
     }
@@ -68,13 +68,13 @@
     .btn-ghost { @apply border-transparent bg-transparent text-primary-dark hover:bg-soft; border-bottom-width: 2px; }
     .btn-icon { @apply inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-white; }
 
-    /* ---------- Kartu & panel ---------- */
+    /* Kartu & panel */
     .card { @apply rounded-xl border-2 border-b-4 border-line bg-surface; }
     .card-pad { @apply p-5 md:p-6; }
     .card-flat { @apply rounded-xl border-2 border-line bg-surface; }
     .card-select { @apply border-primary bg-soft; }
 
-    /* ---------- Form ---------- */
+    /* Form */
     .label { @apply mb-1.5 block text-[13px] font-bold text-ink; }
     .input, .select, .textarea {
         @apply w-full rounded-xl border-2 border-line bg-surface px-4 text-sm font-medium text-ink placeholder:text-muted/70 focus:border-primary focus:outline-none;
@@ -87,7 +87,7 @@
     .error-text { @apply mt-1.5 text-xs font-semibold text-danger-dark; }
     .check { @apply size-5 cursor-pointer rounded-md border-2 border-line accent-primary; }
 
-    /* ---------- Chip & badge ---------- */
+    /* Chip & badge */
     .chip { @apply inline-flex h-7 items-center gap-1.5 rounded-xl border-2 px-2.5 text-xs font-bold whitespace-nowrap; }
     .chip-soft { @apply border-line bg-soft text-primary-dark; }
     .chip-mint { @apply border-accent/40 bg-mint text-accent-text; }
@@ -97,32 +97,32 @@
     .num-badge { @apply inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs leading-5 font-bold text-white; }
     .num-badge-danger { @apply bg-danger; }
 
-    /* ---------- Navigasi ---------- */
+    /* Navigasi */
     .nav-item { @apply flex h-11 items-center gap-3 rounded-xl border-2 border-transparent px-3 text-sm font-semibold text-ink transition-colors hover:bg-soft; }
     .nav-item[aria-current="page"] { @apply border-primary border-b-4 border-b-primary-dark bg-primary text-white; }
 
-    /* ---------- Tabel ---------- */
+    /* Tabel */
     .tbl { @apply w-full text-left text-sm; }
     .tbl thead th { @apply border-b-2 border-line bg-gray-soft/60 px-4 py-3 text-[11px] font-bold tracking-wider text-muted uppercase; }
     .tbl tbody td { @apply border-b-2 border-line/60 px-4 py-3 align-middle; }
     .tbl tbody tr:hover { @apply bg-bg; }
     .tbl tbody tr:last-child td { @apply border-b-0; }
 
-    /* ---------- Progres ---------- */
+    /* Progres */
     .bar { @apply h-2 w-full overflow-hidden rounded-full bg-soft; }
     .bar > span { @apply block h-full rounded-full bg-primary; }
 
-    /* ---------- Tab ---------- */
+    /* Tab */
     .tabs { @apply inline-flex gap-1 rounded-xl border-2 border-b-4 border-line bg-white p-1.5; }
     .tab { @apply inline-flex h-8 items-center gap-2 rounded-lg px-4 text-[13px] font-bold whitespace-nowrap text-muted transition-colors hover:bg-soft hover:text-ink; }
     .tab[aria-current="page"], .tab.is-active { @apply bg-primary text-white; }
 
-    /* ---------- Gelembung chat ---------- */
+    /* Gelembung chat */
     .bubble { @apply max-w-[82%] rounded-xl px-4 py-2.5 text-sm leading-relaxed; }
     .bubble-me { @apply ml-auto rounded-br-sm bg-primary text-white; }
     .bubble-them { @apply mr-auto rounded-bl-sm bg-soft text-ink; }
 
-    /* ---------- Bottom nav pil (siswa) ---------- */
+    /* Bottom nav pil (siswa) */
     .pill-nav { @apply fixed inset-x-4 z-30 mx-auto flex max-w-[420px] items-center justify-around rounded-full border-2 border-b-4 border-line bg-white p-1.5; bottom: max(1rem, env(safe-area-inset-bottom)); }
     /* S3: bentuk kapsul (bukan lingkaran) supaya teks tidak menempel ke sudut border; tinggi tetap 48px. */
     .pill-item { @apply flex h-12 min-w-14 flex-col items-center justify-center gap-0.5 rounded-full px-2.5 text-muted transition-colors hover:bg-soft hover:text-ink; }

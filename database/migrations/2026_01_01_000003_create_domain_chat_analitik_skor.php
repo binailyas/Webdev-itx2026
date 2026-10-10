@@ -11,7 +11,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // ---------- Domain 4: Chat ----------
+        // Domain 4: Chat
         Schema::create('chat_rooms', function (Blueprint $t) {
             $t->id();
             $t->enum('type', ['insiden', 'karir']);
@@ -47,7 +47,7 @@ return new class extends Migration
             $t->timestamps();
         });
 
-        // ---------- Domain 5: Analitik ----------
+        // Domain 5: Analitik
         Schema::create('keyword_aliases', function (Blueprint $t) {
             $t->id();
             $t->string('alias');
@@ -85,7 +85,7 @@ return new class extends Migration
             $t->timestamps();
         });
 
-        // ---------- Domain 6: Skor, Konten, Sistem ----------
+        // Domain 6: Skor, Konten, Sistem
         Schema::create('credit_categories', function (Blueprint $t) {
             $t->id();
             $t->string('name');

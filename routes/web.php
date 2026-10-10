@@ -8,11 +8,7 @@ use App\Http\Controllers\Staff;
 use App\Http\Controllers\Student;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Publik & autentikasi
-|--------------------------------------------------------------------------
-*/
+// Publik & autentikasi
 Route::get('/', [PublicController::class, 'welcome'])->name('welcome');
 Route::get('/darurat', [PublicController::class, 'darurat'])->name('darurat');
 Route::get('/media/informasi/{file}', [PublicController::class, 'informationImage'])->where('file', '[A-Za-z0-9._-]+')->name('media.informasi');
@@ -41,11 +37,7 @@ Route::post('/keluar-cepat', [AuthController::class, 'quickExit'])->name('keluar
 
 Route::get('/badges', [Staff\NotificationController::class, 'badges'])->name('badges')->middleware('role:bk,wali_kelas');
 
-/*
-|--------------------------------------------------------------------------
-| Siswa & anonim
-|--------------------------------------------------------------------------
-*/
+// Siswa & anonim
 Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function () {
     Route::get('/', [Student\HomeController::class, 'index'])->name('beranda');
     Route::get('/informasi', [Student\InfoController::class, 'index'])->name('informasi.index');
@@ -79,11 +71,7 @@ Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function ()
     });
 });
 
-/*
-|--------------------------------------------------------------------------
-| Guru BK & Wali Kelas (controller dipakai bersama; perilaku mengikuti peran)
-|--------------------------------------------------------------------------
-*/
+// Guru BK & Wali Kelas (controller dipakai bersama; perilaku mengikuti peran)
 $staffRoutes = function () {
     Route::get('/', [Staff\DashboardController::class, 'index'])->name('dashboard');
 
@@ -156,11 +144,7 @@ Route::prefix('wali-kelas')->name('wk.')->middleware(['role:wali_kelas', 'featur
     $staffRoutes();
 });
 
-/*
-|--------------------------------------------------------------------------
-| Admin
-|--------------------------------------------------------------------------
-*/
+// Admin
 Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
