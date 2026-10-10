@@ -118,8 +118,11 @@ class DemoSeeder extends Seeder
             ['Teman dipukul di lapangan', 'Kekerasan fisik', 'Saat jam olahraga Dimas memukul temannya sampai jatuh. Guru olahraga sudah melerai dan korban dibawa ke UKS.', 'Lapangan', 'Dimas', 'sedang', 'selesai', ['sedang', 0.71, false], 'rani', 12],
             ['Sindiran di media sosial', 'Perundungan online', 'Ada unggahan sindiran di story yang menyinggung salah satu temanku tanpa menyebut nama.', 'Media sosial', '', 'rendah', 'selesai', ['rendah', 0.81, false], 'rani', 18],
             ['Dikucilkan di kelas', 'Perundungan', 'Beberapa teman tidak mau duduk denganku dan mengabaikan kalau aku bicara selama seminggu.', 'Kelas', '', 'rendah', 'ditolak', ['rendah', 0.62, false], 'anon', 25],
-            ['Ancaman lewat pesan pribadi', 'Ancaman', 'Aku menerima pesan pribadi berisi ancaman dari akun yang tidak kukenal setelah bertengkar di kelas.', 'Media sosial', '', 'sedang', 'diarsipkan', null, 'rani', 33],
+            ['Ancaman lewat pesan pribadi', 'Ancaman', 'Aku menerima pesan pribadi berisi ancaman dari akun yang tidak kukenal setelah bertengkar di kelas.', 'Media sosial', 'Rafi', 'sedang', 'diarsipkan', null, 'rani', 33],
             ['Dicoret-coret bukuku', 'Perundungan', 'Buku catatanku dicoret dan sebagian halamannya disobek oleh Rafi sambil bercanda berlebihan.', 'Kelas', 'Rafi', 'rendah', 'baru', null, 'rani', 0],
+            ['Dipalak di kantin kelas XI', 'Ancaman', 'Intan diminta uang oleh teman sekelasnya setiap hari Jumat di kantin, dan diancam kalau tidak memberi.', 'Kantin', 'Intan', 'sedang', 'baru', ['sedang', 0.70, false], 'anon', 1],
+            ['Dijauhi di kelas XII', 'Perundungan', 'Maya sering dijauhi dan dibicarakan di belakang oleh teman-teman sekelasnya selama sebulan terakhir.', 'Kelas', 'Maya', 'rendah', 'baru', ['rendah', 0.64, false], 'anon', 2],
+            ['Disindir di grup angkatan', 'Perundungan online', 'Putri disindir terus di grup angkatan XI-1 dan diberi komentar yang merendahkan.', 'Media sosial', 'Putri', 'sedang', 'ditinjau', ['sedang', 0.69, false], 'anon', 3],
             ['Teman sering menyendiri dan murung', 'Lainnya', 'Salah satu temanku sering menyendiri dan pernah bilang lelah dengan semuanya. Aku khawatir dan tidak tahu harus bagaimana.', 'Kelas', '', 'sedang', 'ditinjau', ['sedang', 0.59, false], 'anon', 3],
         ];
 

@@ -43,7 +43,7 @@
                     <td><x-status-chip :status="$r->status" /></td>
                     <td class="whitespace-nowrap {{ $new && $r->created_at->lt(now()->subDay()) ? 'font-bold text-warning-dark' : 'text-muted' }}" title="{{ $r->created_at->translatedFormat('d F Y, H:i') }}"><span class="block text-ink">{{ $r->created_at->translatedFormat('d M, H:i') }}</span><span class="text-[11px]">{{ $r->created_at->diffForHumans() }}</span></td>
                     <td class="hidden whitespace-nowrap text-muted 2xl:table-cell">{{ $r->pic?->name ?? '—' }}</td>
-                    <td class="text-right whitespace-nowrap">@if ($r->unread)<x-icon name="message" :size="18" class="mr-2 inline text-primary" aria-label="Pesan baru" />@endif
+                    <td class="text-right whitespace-nowrap">@if ($r->unread && ! $wk)<x-icon name="message" :size="18" class="mr-2 inline text-primary" aria-label="Pesan baru" />@endif
                         <a href="{{ sroute('laporan.show', $r) }}{{ $wk ? '#catatan' : '' }}" class="btn btn-secondary btn-sm">{{ $wk ? 'Beri catatan' : 'Buka' }}</a></td>
                 </tr>
             @empty

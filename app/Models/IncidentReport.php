@@ -86,30 +86,21 @@ class IncidentReport extends Model
         });
     }
 
-    /** Laporan yang melibatkan siswa di kelas tertentu: lewat pihak terlibat (tidak ditolak) atau pelapornya sendiri. */
-    private function classLink(Builder $q, array $classroomIds): Builder
-    {
-        $inClass = fn ($s) => $s->select('user_id')->from('student_profiles')->whereIn('classroom_id', $classroomIds);
-
-        return $q->where(fn ($w) => $w->involvingClassrooms($classroomIds)->orWhereIn('reporter_user_id', $inClass));
-    }
-
     /**
-     * V13-2: Wali Kelas hanya melihat laporan yang terkait siswa kelas naungannya (pihak terlibat atau pelapor).
-     * Tidak ada pengecualian untuk laporan tanpa kelas; laporan seperti itu ditangani BK (lihat scopeVisibleToBk).
+     * Wali Kelas hanya melihat laporan berlabel "Kelas saya": ada pihak terlibat (bukan yang ditolak) dari
+     * siswa kelas naungannya. Kelas pelapor tidak dihitung. Laporan tanpa kelas ditangani BK (scopeVisibleToBk).
      */
     public function scopeVisibleToWk(Builder $q, array $classroomIds): Builder
     {
-        return $classroomIds ? (new static)->classLink($q, $classroomIds) : $q->whereRaw('1 = 0');
+        return $classroomIds ? $q->involvingClassrooms($classroomIds) : $q->whereRaw('1 = 0');
     }
 
-    /** Laporan yang tidak terkait kelas mana pun (pelapor anonim/tanpa pihak bersiswa): tidak terlihat Wali Kelas mana pun. */
+    /** Laporan yang tidak terkait kelas mana pun: tidak terlihat Wali Kelas mana pun. */
     public function scopeWithoutClass(Builder $q): Builder
     {
         $anyClass = fn ($s) => $s->select('user_id')->from('student_profiles')->whereNotNull('classroom_id');
 
-        return $q->whereDoesntHave('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($w) => $w->whereIn('user_id_terkait', $anyClass)->orWhereIn('kandidat_user_id', $anyClass)))
-            ->where(fn ($w) => $w->whereNull('reporter_user_id')->orWhereNotIn('reporter_user_id', $anyClass));
+        return $q->whereDoesntHave('entities', fn ($e) => $e->where('status', '!=', 'ditolak')->where(fn ($w) => $w->whereIn('user_id_terkait', $anyClass)->orWhereIn('kandidat_user_id', $anyClass)));
     }
     public function isVisibleToWk(array $classroomIds): bool
     {

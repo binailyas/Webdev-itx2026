@@ -96,11 +96,11 @@ class ReportService
     {
         $payload = ['report_id' => $report->id, 'ticket' => $report->ticket_code];
 
-        // B2/V13-2: laporan baru ditinjau Wali Kelas kelas terkait (pihak terlibat atau pelapor).
+        // B2/V13-2: laporan baru ditinjau Wali Kelas kelas terkait (berdasarkan pihak terlibat).
         // Bila tidak terkait kelas mana pun, langsung diteruskan ke BK agar tidak ada laporan yang tak terlihat.
         $classIds = $report->entities()->where('status', '!=', 'ditolak')->get()
             ->flatMap(fn ($e) => [$e->candidate?->studentProfile?->classroom_id, $e->student?->studentProfile?->classroom_id])
-            ->push($report->reporterUser?->studentProfile?->classroom_id)->filter()->unique()->values();
+            ->filter()->unique()->values();
         if ($classIds->isNotEmpty()) {
             Notifier::toWaliKelasOf($classIds, 'laporan_baru', $payload + ['pesan' => "Laporan baru {$report->ticket_code} menunggu tinjauan."]);
         } else {

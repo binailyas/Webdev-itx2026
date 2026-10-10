@@ -232,6 +232,7 @@ class SmokeTest extends TestCase
         $cat = \App\Models\IncidentCategory::first();
         $this->post('/siswa/laporan', ['category_id' => $cat->id, 'judul' => 'Dicoret', 'kronologi' => 'Bukuku dicoret-coret teman sekelas.', 'prioritas' => 'sedang']);
         $r = IncidentReport::latest('id')->first();
+        $r->entities()->create(['nama_entitas' => 'Dimas', 'jenis_entitas' => 'terlapor', 'status' => 'saran', 'kandidat_user_id' => User::where('name', 'Dimas Pratama')->value('id')]);   // X-3 (wk1)
         $this->assertSame('baru', $r->status);
         $this->assertFalse($r->risk_flagged);
         auth()->logout();
