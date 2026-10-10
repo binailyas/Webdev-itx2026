@@ -7,9 +7,7 @@ use App\Models\ChatRoom;
 use App\Models\IncidentCategory;
 use App\Models\IncidentReport;
 use App\Models\User;
-use App\Support\Perm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -189,39 +187,5 @@ class EvaluasiV12Test extends TestCase
         $this->post("/wali-kelas/skor/{$student->id}", ['category_id' => $cat->id, 'alasan' => 'Terlambat berulang', 'tanggal' => now()->toDateString()])->assertRedirect();
         $this->assertDatabaseHas('credit_records', ['student_id' => $student->id, 'report_id' => null]);
         $this->get("/wali-kelas/skor/{$student->id}")->assertOk()->assertSee('Tanpa laporan');
-    }
-
-    public function test_role_matrix_covers_all_roles_with_lock_and_gate(): void
-    {
-        $admin = $this->user('admin@sekolah.sch.id');
-        $this->actingAs($admin);
-        $this->get('/admin/role')->assertOk()->assertSee('Kunci');
-
-        $this->assertTrue(Perm::editable('siswa', 'laporan.buat'));
-        $this->assertTrue(Perm::editable('admin', 'akun.impor'));
-        $this->assertFalse(Perm::editable('siswa', 'laporan.baca'));   // tidak berlaku bagi siswa
-
-        // Kunci BK: perubahan ke kolom BK diabaikan.
-        $this->post('/admin/role/kunci', ['role' => 'bk', 'kunci' => 1])->assertRedirect();
-        $this->assertTrue(Perm::locked('bk'));
-        $this->post('/admin/role', ['p' => ['laporan.status' => ['bk' => '0']]]);   // sel tidak dikirim => dicabut jika tidak terkunci
-        Perm::flush();
-        $this->assertSame('y', Perm::value('bk', 'laporan.status'));
-        $this->post('/admin/role/kunci', ['role' => 'bk', 'kunci' => 0])->assertRedirect();
-        $this->assertFalse(Perm::locked('bk'));
-        DB::table('role_permissions')->delete();   // kembali ke default (post di atas mencabut sel peran lain)
-        Perm::flush();
-
-        // Cabut izin siswa membuat laporan: ditegakkan di rute siswa; admin tetap bisa membuka Role dan akses.
-        DB::table('role_permissions')->updateOrInsert(['role' => 'siswa', 'feature' => 'laporan.buat'], ['value' => 'n', 'created_at' => now(), 'updated_at' => now()]);
-        DB::table('role_permissions')->updateOrInsert(['role' => 'admin', 'feature' => 'akun.kelola'], ['value' => 'n', 'created_at' => now(), 'updated_at' => now()]);
-        Perm::flush();
-        $this->get('/admin/role')->assertOk();                      // tidak pernah terkunci
-        $this->get('/admin/siswa')->assertForbidden();              // fitur admin dicabut dari dirinya sendiri
-        auth()->logout();
-
-        $this->actingAs($this->nisUser('Rani Putri'));
-        $this->get('/siswa/laporan/buat')->assertForbidden();
-        $this->get('/siswa/laporan')->assertOk();                   // fitur lain tetap jalan
     }
 }

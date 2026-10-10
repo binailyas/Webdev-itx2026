@@ -72,7 +72,7 @@ class EvaluasiV11Test extends TestCase
         $payload = [];
         foreach (config('permissions.groups') as $features) {
             foreach (array_keys($features) as $feature) {
-                foreach (array_keys(config('permissions.roles')) as $role) {
+                foreach (config('permissions.editable_roles') as $role) {
                     if (Perm::editable($role, $feature) && ! ($role === 'bk' && $feature === 'laporan.baca')) {
                         $payload['p'][$feature][$role] = '1';
                     }
@@ -108,7 +108,7 @@ class EvaluasiV11Test extends TestCase
         // Kirim seluruh sel lain tetap tercentang agar tidak tercabut.
         foreach (config('permissions.groups') as $features) {
             foreach (array_keys($features) as $feature) {
-                foreach (array_keys(config('permissions.roles')) as $role) {
+                foreach (config('permissions.editable_roles') as $role) {
                     if (Perm::editable($role, $feature) && Perm::value($role, $feature) !== 'n') {
                         $payload['p'][$feature][$role] = '1';
                     }

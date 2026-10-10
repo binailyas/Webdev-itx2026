@@ -46,7 +46,7 @@ Route::get('/badges', [Staff\NotificationController::class, 'badges'])->name('ba
 | Siswa & anonim
 |--------------------------------------------------------------------------
 */
-Route::prefix('siswa')->name('siswa.')->middleware(['student', 'feature'])->group(function () {
+Route::prefix('siswa')->name('siswa.')->middleware('student')->group(function () {
     Route::get('/', [Student\HomeController::class, 'index'])->name('beranda');
     Route::get('/informasi', [Student\InfoController::class, 'index'])->name('informasi.index');
     Route::get('/informasi/{slug}', [Student\InfoController::class, 'show'])->name('informasi.show');
@@ -161,7 +161,7 @@ Route::prefix('wali-kelas')->name('wk.')->middleware(['role:wali_kelas', 'featur
 | Admin
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->middleware(['role:admin', 'feature'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/siswa', [Admin\StudentController::class, 'index'])->name('siswa.index');
@@ -195,7 +195,6 @@ Route::prefix('admin')->name('admin.')->middleware(['role:admin', 'feature'])->g
 
     Route::get('/role', [Admin\RoleController::class, 'index'])->name('role.index');
     Route::post('/role', [Admin\RoleController::class, 'update'])->name('role.update');
-    Route::post('/role/kunci', [Admin\RoleController::class, 'lock'])->name('role.kunci');
 
     Route::get('/kategori', [Admin\CategoryController::class, 'index'])->name('kategori.index');
     Route::post('/kategori', [Admin\CategoryController::class, 'store'])->name('kategori.store');

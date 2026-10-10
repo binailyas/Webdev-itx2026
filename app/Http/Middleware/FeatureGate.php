@@ -17,12 +17,8 @@ class FeatureGate
         $name = preg_replace('/^(bk|wk)\./', '', (string) $request->route()?->getName());
         $feature = (config('permissions.routes') ?? [])[$name] ?? null;   // kunci memuat titik: jangan pakai notasi titik config()
 
-        if ($feature) {
-            $user = $request->user();
-            $role = $user?->role?->name ?? (auth('anon')->check() ? 'anonim' : null);
-            if (! $role || ! Perm::allowsRole($role, $feature)) {
-                abort(403, 'Akses ke fitur ini dinonaktifkan oleh admin sekolah.');
-            }
+        if ($feature && ! Perm::allows($request->user(), $feature)) {
+            abort(403, 'Akses ke fitur ini dinonaktifkan oleh admin sekolah.');
         }
 
         return $next($request);
