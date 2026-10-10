@@ -37,6 +37,50 @@ erDiagram
     users
     wali_kelas_assignments
     watchlist_terms
+    incident_reports ||--o{ ai_overrides : "report_id"
+    users ||--o{ ai_overrides : "user_id"
+    users ||--o{ announcements : "user_id"
+    users |o--o{ audit_logs : "user_id"
+    chat_rooms ||--o{ chat_messages : "chat_room_id"
+    anonymous_accounts |o--o{ chat_messages : "sender_anon_id"
+    users |o--o{ chat_messages : "sender_user_id"
+    anonymous_accounts |o--o{ chat_participants : "anon_id"
+    chat_rooms ||--o{ chat_participants : "chat_room_id"
+    users |o--o{ chat_participants : "user_id"
+    users |o--o{ chat_rooms : "career_user_id"
+    users |o--o{ chat_rooms : "created_by"
+    incident_reports |o--o{ chat_rooms : "report_id"
+    credit_categories ||--o{ credit_records : "category_id"
+    incident_reports |o--o{ credit_records : "report_id"
+    users ||--o{ credit_records : "student_id"
+    users ||--o{ credit_records : "user_id_pencatat"
+    users |o--o{ credit_records : "voided_by"
+    ai_model_versions |o--o{ incident_reports : "ai_model_version_id"
+    users |o--o{ incident_reports : "assigned_to"
+    incident_categories ||--o{ incident_reports : "category_id"
+    anonymous_accounts |o--o{ incident_reports : "reporter_anon_id"
+    users |o--o{ incident_reports : "reporter_user_id"
+    users |o--o{ keyword_aliases : "dibuat_oleh"
+    users |o--o{ keyword_aliases : "student_user_id"
+    incident_categories |o--o{ keyword_daily_stats : "category_id"
+    anonymous_accounts |o--o{ notifications : "anon_id"
+    users |o--o{ notifications : "user_id"
+    incident_reports ||--o{ report_attachments : "report_id"
+    users |o--o{ report_entities : "confirmed_by"
+    users |o--o{ report_entities : "kandidat_user_id"
+    incident_reports ||--o{ report_entities : "report_id"
+    users |o--o{ report_entities : "user_id_terkait"
+    incident_reports ||--o{ report_keywords : "report_id"
+    incident_reports ||--o{ report_notes : "report_id"
+    users ||--o{ report_notes : "user_id"
+    incident_reports ||--o{ report_status_histories : "report_id"
+    users |o--o{ report_status_histories : "user_id"
+    classrooms |o--o{ student_profiles : "classroom_id"
+    users ||--o{ student_profiles : "user_id"
+    roles |o--o{ users : "role_id"
+    classrooms ||--o{ wali_kelas_assignments : "classroom_id"
+    users ||--o{ wali_kelas_assignments : "user_id"
+    users ||--o{ watchlist_terms : "user_id"
 ```
 
 ## Domain 1 — Pengguna & Autentikasi
@@ -53,7 +97,7 @@ erDiagram
     }
     users {
         bigint id PK
-        bigint role_id
+        bigint role_id FK
         string name
         string email UK
         timestamp email_verified_at
@@ -67,9 +111,9 @@ erDiagram
     }
     student_profiles {
         bigint id PK
-        bigint user_id UK
+        bigint user_id FK
         string nis UK
-        bigint classroom_id
+        bigint classroom_id FK
         string angkatan
         string tahun_ajaran
         int skor_awal
@@ -86,8 +130,8 @@ erDiagram
     }
     wali_kelas_assignments {
         bigint id PK
-        bigint user_id
-        bigint classroom_id
+        bigint user_id FK
+        bigint classroom_id FK
         string tahun_ajaran
         timestamp created_at
     }
@@ -100,6 +144,11 @@ erDiagram
         timestamp last_activity_at
         timestamp created_at
     }
+    classrooms |o--o{ student_profiles : "classroom_id"
+    users ||--o{ student_profiles : "user_id"
+    roles |o--o{ users : "role_id"
+    classrooms ||--o{ wali_kelas_assignments : "classroom_id"
+    users ||--o{ wali_kelas_assignments : "user_id"
 ```
 
 ## Domain 2 — Laporan Insiden
@@ -119,9 +168,9 @@ erDiagram
         bigint id PK
         string ticket_code UK
         string pin_hash
-        bigint category_id
-        bigint reporter_user_id
-        bigint reporter_anon_id
+        bigint category_id FK
+        bigint reporter_user_id FK
+        bigint reporter_anon_id FK
         string judul
         text kronologi
         date tanggal_kejadian
@@ -130,11 +179,11 @@ erDiagram
         enum prioritas
         tinyint risk_flagged
         enum status
-        bigint assigned_to
+        bigint assigned_to FK
         enum ai_priority_suggestion
         double ai_priority_confidence
         tinyint ai_flagged
-        bigint ai_model_version_id
+        bigint ai_model_version_id FK
         timestamp opened_at
         timestamp selesai_at
         timestamp arsip_notified_at
@@ -144,7 +193,7 @@ erDiagram
     }
     report_attachments {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string file_path
         string file_name
         string mime_type
@@ -154,8 +203,8 @@ erDiagram
     }
     report_status_histories {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         string status_from
         string status_to
         text alasan
@@ -164,8 +213,8 @@ erDiagram
     }
     report_notes {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         text isi
         tinyint penting
         timestamp created_at
@@ -173,7 +222,7 @@ erDiagram
     }
     report_keywords {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string keyword
         tinyint n
         int frekuensi
@@ -183,15 +232,15 @@ erDiagram
     }
     report_entities {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string nama_entitas
         text konteks
         enum jenis_entitas
-        bigint user_id_terkait
-        bigint kandidat_user_id
+        bigint user_id_terkait FK
+        bigint kandidat_user_id FK
         enum status
         tinyint dikonfirmasi
-        bigint confirmed_by
+        bigint confirmed_by FK
         timestamp confirmed_at
         timestamp created_at
         timestamp updated_at
@@ -202,6 +251,20 @@ erDiagram
     anonymous_accounts {
         bigint id PK
     }
+    users |o--o{ incident_reports : "assigned_to"
+    incident_categories ||--o{ incident_reports : "category_id"
+    anonymous_accounts |o--o{ incident_reports : "reporter_anon_id"
+    users |o--o{ incident_reports : "reporter_user_id"
+    incident_reports ||--o{ report_attachments : "report_id"
+    users |o--o{ report_entities : "confirmed_by"
+    users |o--o{ report_entities : "kandidat_user_id"
+    incident_reports ||--o{ report_entities : "report_id"
+    users |o--o{ report_entities : "user_id_terkait"
+    incident_reports ||--o{ report_keywords : "report_id"
+    incident_reports ||--o{ report_notes : "report_id"
+    users ||--o{ report_notes : "user_id"
+    incident_reports ||--o{ report_status_histories : "report_id"
+    users |o--o{ report_status_histories : "user_id"
 ```
 
 ## Domain 3 — AI Klasifikasi Prioritas
@@ -221,8 +284,8 @@ erDiagram
     }
     ai_overrides {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         enum ai_suggestion
         enum priority_set
         text alasan
@@ -235,6 +298,11 @@ erDiagram
     users {
         bigint id PK
     }
+    incident_reports ||--o{ ai_overrides : "report_id"
+    users ||--o{ ai_overrides : "user_id"
+    ai_model_versions |o--o{ incident_reports : "ai_model_version_id"
+    users |o--o{ incident_reports : "assigned_to"
+    users |o--o{ incident_reports : "reporter_user_id"
 ```
 
 ## Domain 4 — Chat
@@ -244,12 +312,12 @@ erDiagram
     chat_rooms {
         bigint id PK
         enum type
-        bigint report_id UK
-        bigint career_user_id
+        bigint report_id FK
+        bigint career_user_id FK
         string topik
         enum status
         text ringkasan
-        bigint created_by
+        bigint created_by FK
         tinyint is_readonly
         tinyint wk_diizinkan
         timestamp closed_at
@@ -258,9 +326,9 @@ erDiagram
     }
     chat_participants {
         bigint id PK
-        bigint chat_room_id
-        bigint user_id
-        bigint anon_id
+        bigint chat_room_id FK
+        bigint user_id FK
+        bigint anon_id FK
         string role
         tinyint can_write
         timestamp created_at
@@ -268,9 +336,9 @@ erDiagram
     }
     chat_messages {
         bigint id PK
-        bigint chat_room_id
-        bigint sender_user_id
-        bigint sender_anon_id
+        bigint chat_room_id FK
+        bigint sender_user_id FK
+        bigint sender_anon_id FK
         text isi
         tinyint is_read
         timestamp created_at
@@ -285,6 +353,18 @@ erDiagram
     anonymous_accounts {
         bigint id PK
     }
+    chat_rooms ||--o{ chat_messages : "chat_room_id"
+    anonymous_accounts |o--o{ chat_messages : "sender_anon_id"
+    users |o--o{ chat_messages : "sender_user_id"
+    anonymous_accounts |o--o{ chat_participants : "anon_id"
+    chat_rooms ||--o{ chat_participants : "chat_room_id"
+    users |o--o{ chat_participants : "user_id"
+    users |o--o{ chat_rooms : "career_user_id"
+    users |o--o{ chat_rooms : "created_by"
+    incident_reports |o--o{ chat_rooms : "report_id"
+    users |o--o{ incident_reports : "assigned_to"
+    anonymous_accounts |o--o{ incident_reports : "reporter_anon_id"
+    users |o--o{ incident_reports : "reporter_user_id"
 ```
 
 ## Domain 5 — Analitik Kata Kunci
@@ -295,8 +375,8 @@ erDiagram
         bigint id PK
         string alias
         string canonical
-        bigint student_user_id
-        bigint dibuat_oleh
+        bigint student_user_id FK
+        bigint dibuat_oleh FK
         timestamp created_at
         timestamp updated_at
     }
@@ -311,7 +391,7 @@ erDiagram
         bigint id PK
         string keyword
         date tanggal
-        bigint category_id
+        bigint category_id FK
         int frekuensi
         timestamp created_at
         timestamp updated_at
@@ -320,7 +400,7 @@ erDiagram
         bigint id PK
         string term
         text catatan
-        bigint user_id
+        bigint user_id FK
         int ambang
         tinyint notifikasi
         timestamp last_alerted_at
@@ -333,6 +413,10 @@ erDiagram
     incident_categories {
         bigint id PK
     }
+    users |o--o{ keyword_aliases : "dibuat_oleh"
+    users |o--o{ keyword_aliases : "student_user_id"
+    incident_categories |o--o{ keyword_daily_stats : "category_id"
+    users ||--o{ watchlist_terms : "user_id"
 ```
 
 ## Domain 6 — Skor Kredit, Konten & Sistem
@@ -349,23 +433,23 @@ erDiagram
     }
     credit_records {
         bigint id PK
-        bigint student_id
-        bigint user_id_pencatat
-        bigint report_id
-        bigint category_id
+        bigint student_id FK
+        bigint user_id_pencatat FK
+        bigint report_id FK
+        bigint category_id FK
         int poin_dikurangi
         text alasan
         date tanggal
         string tahun_ajaran
         timestamp voided_at
-        bigint voided_by
+        bigint voided_by FK
         text void_reason
         timestamp created_at
         timestamp updated_at
     }
     announcements {
         bigint id PK
-        bigint user_id
+        bigint user_id FK
         string judul
         string slug UK
         string kategori
@@ -378,8 +462,8 @@ erDiagram
     }
     notifications {
         bigint id PK
-        bigint user_id
-        bigint anon_id
+        bigint user_id FK
+        bigint anon_id FK
         string type
         json data
         timestamp read_at
@@ -388,7 +472,7 @@ erDiagram
     }
     audit_logs {
         bigint id PK
-        bigint user_id
+        bigint user_id FK
         string action
         string entity_type
         bigint entity_id
@@ -410,6 +494,18 @@ erDiagram
     anonymous_accounts {
         bigint id PK
     }
+    users ||--o{ announcements : "user_id"
+    users |o--o{ audit_logs : "user_id"
+    credit_categories ||--o{ credit_records : "category_id"
+    incident_reports |o--o{ credit_records : "report_id"
+    users ||--o{ credit_records : "student_id"
+    users ||--o{ credit_records : "user_id_pencatat"
+    users |o--o{ credit_records : "voided_by"
+    users |o--o{ incident_reports : "assigned_to"
+    anonymous_accounts |o--o{ incident_reports : "reporter_anon_id"
+    users |o--o{ incident_reports : "reporter_user_id"
+    anonymous_accounts |o--o{ notifications : "anon_id"
+    users |o--o{ notifications : "user_id"
 ```
 
 ## Kamus tabel
@@ -433,8 +529,8 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
-| user_id | bigint |  |  |
+| report_id | bigint | FK |  |
+| user_id | bigint | FK |  |
 | ai_suggestion | enum |  | ya |
 | priority_set | enum |  |  |
 | alasan | text |  | ya |
@@ -446,7 +542,7 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| user_id | bigint |  |  |
+| user_id | bigint | FK |  |
 | judul | string |  |  |
 | slug | string | UK |  |
 | kategori | string |  |  |
@@ -483,7 +579,7 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| user_id | bigint |  | ya |
+| user_id | bigint | FK | ya |
 | action | string |  |  |
 | entity_type | string |  | ya |
 | entity_id | bigint |  | ya |
@@ -495,9 +591,9 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| chat_room_id | bigint |  |  |
-| sender_user_id | bigint |  | ya |
-| sender_anon_id | bigint |  | ya |
+| chat_room_id | bigint | FK |  |
+| sender_user_id | bigint | FK | ya |
+| sender_anon_id | bigint | FK | ya |
 | isi | text |  |  |
 | is_read | tinyint |  |  |
 | created_at | timestamp |  | ya |
@@ -508,9 +604,9 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| chat_room_id | bigint |  |  |
-| user_id | bigint |  | ya |
-| anon_id | bigint |  | ya |
+| chat_room_id | bigint | FK |  |
+| user_id | bigint | FK | ya |
+| anon_id | bigint | FK | ya |
 | role | string |  |  |
 | can_write | tinyint |  |  |
 | created_at | timestamp |  | ya |
@@ -522,12 +618,12 @@ erDiagram
 |---|---|---|---|
 | id | bigint | PK |  |
 | type | enum |  |  |
-| report_id | bigint | UK | ya |
-| career_user_id | bigint |  | ya |
+| report_id | bigint | FK | ya |
+| career_user_id | bigint | FK | ya |
 | topik | string |  | ya |
 | status | enum |  |  |
 | ringkasan | text |  | ya |
-| created_by | bigint |  | ya |
+| created_by | bigint | FK | ya |
 | is_readonly | tinyint |  |  |
 | wk_diizinkan | tinyint |  |  |
 | closed_at | timestamp |  | ya |
@@ -561,16 +657,16 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| student_id | bigint |  |  |
-| user_id_pencatat | bigint |  |  |
-| report_id | bigint |  | ya |
-| category_id | bigint |  |  |
+| student_id | bigint | FK |  |
+| user_id_pencatat | bigint | FK |  |
+| report_id | bigint | FK | ya |
+| category_id | bigint | FK |  |
 | poin_dikurangi | int |  |  |
 | alasan | text |  |  |
 | tanggal | date |  | ya |
 | tahun_ajaran | string |  |  |
 | voided_at | timestamp |  | ya |
-| voided_by | bigint |  | ya |
+| voided_by | bigint | FK | ya |
 | void_reason | text |  | ya |
 | created_at | timestamp |  | ya |
 | updated_at | timestamp |  | ya |
@@ -594,9 +690,9 @@ erDiagram
 | id | bigint | PK |  |
 | ticket_code | string | UK |  |
 | pin_hash | string |  | ya |
-| category_id | bigint |  |  |
-| reporter_user_id | bigint |  | ya |
-| reporter_anon_id | bigint |  | ya |
+| category_id | bigint | FK |  |
+| reporter_user_id | bigint | FK | ya |
+| reporter_anon_id | bigint | FK | ya |
 | judul | string |  |  |
 | kronologi | text |  |  |
 | tanggal_kejadian | date |  | ya |
@@ -605,11 +701,11 @@ erDiagram
 | prioritas | enum |  |  |
 | risk_flagged | tinyint |  |  |
 | status | enum |  |  |
-| assigned_to | bigint |  | ya |
+| assigned_to | bigint | FK | ya |
 | ai_priority_suggestion | enum |  | ya |
 | ai_priority_confidence | double |  | ya |
 | ai_flagged | tinyint |  |  |
-| ai_model_version_id | bigint |  | ya |
+| ai_model_version_id | bigint | FK | ya |
 | opened_at | timestamp |  | ya |
 | selesai_at | timestamp |  | ya |
 | arsip_notified_at | timestamp |  | ya |
@@ -624,8 +720,8 @@ erDiagram
 | id | bigint | PK |  |
 | alias | string |  |  |
 | canonical | string |  |  |
-| student_user_id | bigint |  | ya |
-| dibuat_oleh | bigint |  | ya |
+| student_user_id | bigint | FK | ya |
+| dibuat_oleh | bigint | FK | ya |
 | created_at | timestamp |  | ya |
 | updated_at | timestamp |  | ya |
 
@@ -636,7 +732,7 @@ erDiagram
 | id | bigint | PK |  |
 | keyword | string |  |  |
 | tanggal | date |  |  |
-| category_id | bigint |  | ya |
+| category_id | bigint | FK | ya |
 | frekuensi | int |  |  |
 | created_at | timestamp |  | ya |
 | updated_at | timestamp |  | ya |
@@ -656,8 +752,8 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| user_id | bigint |  | ya |
-| anon_id | bigint |  | ya |
+| user_id | bigint | FK | ya |
+| anon_id | bigint | FK | ya |
 | type | string |  |  |
 | data | json |  | ya |
 | read_at | timestamp |  | ya |
@@ -669,7 +765,7 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
+| report_id | bigint | FK |  |
 | file_path | string |  |  |
 | file_name | string |  |  |
 | mime_type | string |  | ya |
@@ -682,15 +778,15 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
+| report_id | bigint | FK |  |
 | nama_entitas | string |  |  |
 | konteks | text |  | ya |
 | jenis_entitas | enum |  | ya |
-| user_id_terkait | bigint |  | ya |
-| kandidat_user_id | bigint |  | ya |
+| user_id_terkait | bigint | FK | ya |
+| kandidat_user_id | bigint | FK | ya |
 | status | enum |  |  |
 | dikonfirmasi | tinyint |  |  |
-| confirmed_by | bigint |  | ya |
+| confirmed_by | bigint | FK | ya |
 | confirmed_at | timestamp |  | ya |
 | created_at | timestamp |  | ya |
 | updated_at | timestamp |  | ya |
@@ -700,7 +796,7 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
+| report_id | bigint | FK |  |
 | keyword | string |  |  |
 | n | tinyint |  |  |
 | frekuensi | int |  |  |
@@ -713,8 +809,8 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
-| user_id | bigint |  |  |
+| report_id | bigint | FK |  |
+| user_id | bigint | FK |  |
 | isi | text |  |  |
 | penting | tinyint |  |  |
 | created_at | timestamp |  | ya |
@@ -725,8 +821,8 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| report_id | bigint |  |  |
-| user_id | bigint |  | ya |
+| report_id | bigint | FK |  |
+| user_id | bigint | FK | ya |
 | status_from | string |  | ya |
 | status_to | string |  |  |
 | alasan | text |  | ya |
@@ -760,9 +856,9 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| user_id | bigint | UK |  |
+| user_id | bigint | FK |  |
 | nis | string | UK |  |
-| classroom_id | bigint |  | ya |
+| classroom_id | bigint | FK | ya |
 | angkatan | string |  | ya |
 | tahun_ajaran | string |  | ya |
 | skor_awal | int |  |  |
@@ -774,7 +870,7 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| role_id | bigint |  | ya |
+| role_id | bigint | FK | ya |
 | name | string |  |  |
 | email | string | UK |  |
 | email_verified_at | timestamp |  | ya |
@@ -791,8 +887,8 @@ erDiagram
 | Kolom | Tipe | Kunci | Null |
 |---|---|---|---|
 | id | bigint | PK |  |
-| user_id | bigint |  |  |
-| classroom_id | bigint |  |  |
+| user_id | bigint | FK |  |
+| classroom_id | bigint | FK |  |
 | tahun_ajaran | string |  |  |
 | created_at | timestamp |  | ya |
 
@@ -803,7 +899,7 @@ erDiagram
 | id | bigint | PK |  |
 | term | string |  |  |
 | catatan | text |  | ya |
-| user_id | bigint |  |  |
+| user_id | bigint | FK |  |
 | ambang | int |  |  |
 | notifikasi | tinyint |  |  |
 | last_alerted_at | timestamp |  | ya |

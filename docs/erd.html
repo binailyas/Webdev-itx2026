@@ -17,8 +17,8 @@
     }
     ai_overrides {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         enum ai_suggestion
         enum priority_set
         text alasan
@@ -27,7 +27,7 @@
     }
     announcements {
         bigint id PK
-        bigint user_id
+        bigint user_id FK
         string judul
         string slug UK
         string kategori
@@ -55,7 +55,7 @@
     }
     audit_logs {
         bigint id PK
-        bigint user_id
+        bigint user_id FK
         string action
         string entity_type
         bigint entity_id
@@ -64,9 +64,9 @@
     }
     chat_messages {
         bigint id PK
-        bigint chat_room_id
-        bigint sender_user_id
-        bigint sender_anon_id
+        bigint chat_room_id FK
+        bigint sender_user_id FK
+        bigint sender_anon_id FK
         text isi
         tinyint is_read
         timestamp created_at
@@ -74,9 +74,9 @@
     }
     chat_participants {
         bigint id PK
-        bigint chat_room_id
-        bigint user_id
-        bigint anon_id
+        bigint chat_room_id FK
+        bigint user_id FK
+        bigint anon_id FK
         string role
         tinyint can_write
         timestamp created_at
@@ -85,12 +85,12 @@
     chat_rooms {
         bigint id PK
         enum type
-        bigint report_id UK
-        bigint career_user_id
+        bigint report_id FK
+        bigint career_user_id FK
         string topik
         enum status
         text ringkasan
-        bigint created_by
+        bigint created_by FK
         tinyint is_readonly
         tinyint wk_diizinkan
         timestamp closed_at
@@ -115,16 +115,16 @@
     }
     credit_records {
         bigint id PK
-        bigint student_id
-        bigint user_id_pencatat
-        bigint report_id
-        bigint category_id
+        bigint student_id FK
+        bigint user_id_pencatat FK
+        bigint report_id FK
+        bigint category_id FK
         int poin_dikurangi
         text alasan
         date tanggal
         string tahun_ajaran
         timestamp voided_at
-        bigint voided_by
+        bigint voided_by FK
         text void_reason
         timestamp created_at
         timestamp updated_at
@@ -142,9 +142,9 @@
         bigint id PK
         string ticket_code UK
         string pin_hash
-        bigint category_id
-        bigint reporter_user_id
-        bigint reporter_anon_id
+        bigint category_id FK
+        bigint reporter_user_id FK
+        bigint reporter_anon_id FK
         string judul
         text kronologi
         date tanggal_kejadian
@@ -153,11 +153,11 @@
         enum prioritas
         tinyint risk_flagged
         enum status
-        bigint assigned_to
+        bigint assigned_to FK
         enum ai_priority_suggestion
         double ai_priority_confidence
         tinyint ai_flagged
-        bigint ai_model_version_id
+        bigint ai_model_version_id FK
         timestamp opened_at
         timestamp selesai_at
         timestamp arsip_notified_at
@@ -169,8 +169,8 @@
         bigint id PK
         string alias
         string canonical
-        bigint student_user_id
-        bigint dibuat_oleh
+        bigint student_user_id FK
+        bigint dibuat_oleh FK
         timestamp created_at
         timestamp updated_at
     }
@@ -178,7 +178,7 @@
         bigint id PK
         string keyword
         date tanggal
-        bigint category_id
+        bigint category_id FK
         int frekuensi
         timestamp created_at
         timestamp updated_at
@@ -192,8 +192,8 @@
     }
     notifications {
         bigint id PK
-        bigint user_id
-        bigint anon_id
+        bigint user_id FK
+        bigint anon_id FK
         string type
         json data
         timestamp read_at
@@ -202,7 +202,7 @@
     }
     report_attachments {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string file_path
         string file_name
         string mime_type
@@ -212,22 +212,22 @@
     }
     report_entities {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string nama_entitas
         text konteks
         enum jenis_entitas
-        bigint user_id_terkait
-        bigint kandidat_user_id
+        bigint user_id_terkait FK
+        bigint kandidat_user_id FK
         enum status
         tinyint dikonfirmasi
-        bigint confirmed_by
+        bigint confirmed_by FK
         timestamp confirmed_at
         timestamp created_at
         timestamp updated_at
     }
     report_keywords {
         bigint id PK
-        bigint report_id
+        bigint report_id FK
         string keyword
         tinyint n
         int frekuensi
@@ -237,8 +237,8 @@
     }
     report_notes {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         text isi
         tinyint penting
         timestamp created_at
@@ -246,8 +246,8 @@
     }
     report_status_histories {
         bigint id PK
-        bigint report_id
-        bigint user_id
+        bigint report_id FK
+        bigint user_id FK
         string status_from
         string status_to
         text alasan
@@ -272,9 +272,9 @@
     }
     student_profiles {
         bigint id PK
-        bigint user_id UK
+        bigint user_id FK
         string nis UK
-        bigint classroom_id
+        bigint classroom_id FK
         string angkatan
         string tahun_ajaran
         int skor_awal
@@ -283,7 +283,7 @@
     }
     users {
         bigint id PK
-        bigint role_id
+        bigint role_id FK
         string name
         string email UK
         timestamp email_verified_at
@@ -297,8 +297,8 @@
     }
     wali_kelas_assignments {
         bigint id PK
-        bigint user_id
-        bigint classroom_id
+        bigint user_id FK
+        bigint classroom_id FK
         string tahun_ajaran
         timestamp created_at
     }
@@ -306,13 +306,57 @@
         bigint id PK
         string term
         text catatan
-        bigint user_id
+        bigint user_id FK
         int ambang
         tinyint notifikasi
         timestamp last_alerted_at
         timestamp created_at
         timestamp updated_at
     }
+    incident_reports ||--o{ ai_overrides : &quot;report_id&quot;
+    users ||--o{ ai_overrides : &quot;user_id&quot;
+    users ||--o{ announcements : &quot;user_id&quot;
+    users |o--o{ audit_logs : &quot;user_id&quot;
+    chat_rooms ||--o{ chat_messages : &quot;chat_room_id&quot;
+    anonymous_accounts |o--o{ chat_messages : &quot;sender_anon_id&quot;
+    users |o--o{ chat_messages : &quot;sender_user_id&quot;
+    anonymous_accounts |o--o{ chat_participants : &quot;anon_id&quot;
+    chat_rooms ||--o{ chat_participants : &quot;chat_room_id&quot;
+    users |o--o{ chat_participants : &quot;user_id&quot;
+    users |o--o{ chat_rooms : &quot;career_user_id&quot;
+    users |o--o{ chat_rooms : &quot;created_by&quot;
+    incident_reports |o--o{ chat_rooms : &quot;report_id&quot;
+    credit_categories ||--o{ credit_records : &quot;category_id&quot;
+    incident_reports |o--o{ credit_records : &quot;report_id&quot;
+    users ||--o{ credit_records : &quot;student_id&quot;
+    users ||--o{ credit_records : &quot;user_id_pencatat&quot;
+    users |o--o{ credit_records : &quot;voided_by&quot;
+    ai_model_versions |o--o{ incident_reports : &quot;ai_model_version_id&quot;
+    users |o--o{ incident_reports : &quot;assigned_to&quot;
+    incident_categories ||--o{ incident_reports : &quot;category_id&quot;
+    anonymous_accounts |o--o{ incident_reports : &quot;reporter_anon_id&quot;
+    users |o--o{ incident_reports : &quot;reporter_user_id&quot;
+    users |o--o{ keyword_aliases : &quot;dibuat_oleh&quot;
+    users |o--o{ keyword_aliases : &quot;student_user_id&quot;
+    incident_categories |o--o{ keyword_daily_stats : &quot;category_id&quot;
+    anonymous_accounts |o--o{ notifications : &quot;anon_id&quot;
+    users |o--o{ notifications : &quot;user_id&quot;
+    incident_reports ||--o{ report_attachments : &quot;report_id&quot;
+    users |o--o{ report_entities : &quot;confirmed_by&quot;
+    users |o--o{ report_entities : &quot;kandidat_user_id&quot;
+    incident_reports ||--o{ report_entities : &quot;report_id&quot;
+    users |o--o{ report_entities : &quot;user_id_terkait&quot;
+    incident_reports ||--o{ report_keywords : &quot;report_id&quot;
+    incident_reports ||--o{ report_notes : &quot;report_id&quot;
+    users ||--o{ report_notes : &quot;user_id&quot;
+    incident_reports ||--o{ report_status_histories : &quot;report_id&quot;
+    users |o--o{ report_status_histories : &quot;user_id&quot;
+    classrooms |o--o{ student_profiles : &quot;classroom_id&quot;
+    users ||--o{ student_profiles : &quot;user_id&quot;
+    roles |o--o{ users : &quot;role_id&quot;
+    classrooms ||--o{ wali_kelas_assignments : &quot;classroom_id&quot;
+    users ||--o{ wali_kelas_assignments : &quot;user_id&quot;
+    users ||--o{ watchlist_terms : &quot;user_id&quot;
 </pre></main>
 <script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#ECE9FD',primaryBorderColor:'#6A5AE0',lineColor:'#6A5AE0',fontFamily:'system-ui'},er:{useMaxWidth:false}});</script>
 </body></html>

@@ -28,14 +28,15 @@ php artisan migrate --seed      # skema 28 tabel + data demo (hanya env local)
 
 ### Pindah dari database lama `bk_sahabat`
 
-Salin tabel dan data ke `ruang_dengar` (tanpa menghapus yang lama), lalu `php artisan migrate`:
+Cara paling aman (foreign key ikut terbawa): dump lalu impor, kemudian `php artisan migrate`.
 
-```sql
-CREATE DATABASE ruang_dengar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
--- per tabel:  CREATE TABLE ruang_dengar.t LIKE bk_sahabat.t;  INSERT INTO ruang_dengar.t SELECT * FROM bk_sahabat.t;
+```powershell
+mysql -uroot -e "CREATE DATABASE ruang_dengar CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysqldump -uroot bk_sahabat | mysql -uroot ruang_dengar
+php artisan migrate
 ```
 
-Atau `mysqldump bk_sahabat | mysql ruang_dengar`. Setelah yakin berjalan, `bk_sahabat` boleh dihapus.
+Jangan memakai `CREATE TABLE ... LIKE`: itu tidak menyalin foreign key. Setelah yakin berjalan, `bk_sahabat` boleh dihapus.
 
 ### Penjadwal (arsip kasus otomatis)
 
